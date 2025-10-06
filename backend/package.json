@@ -1,0 +1,35 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "URL shortener backend.",
+  "keywords": [
+    "short"
+  ],
+  "homepage": "https://github.com/NabinDevX/URL-Shortener#readme",
+  "bugs": {
+    "url": "https://github.com/NabinDevX/URL-Shortener/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NabinDevX/URL-Shortener.git"
+  },
+  "license": "ISC",
+  "author": "Nabin Bera",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.0",
+    "nanoid": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
