@@ -124,21 +124,23 @@ const userLogout = asyncHandler(async (req, res) => {
   const accessToken =
     req.headers.authorization?.split(" ")[1] || req.cookies.accessToken;
 
-  // Remove refresh token from database
   await User.findByIdAndUpdate(
     req.user._id,
     { $unset: { refreshToken: 1 } },
     { new: true }
   );
 
-  // Add access token to Redis blacklist
-  if (accessToken) {
-    const decoded = jwt.decode(accessToken);
-    const expiresAt = decoded.exp;
-    const ttl = expiresAt - Math.floor(Date.now() / 1000);
+  if (accessToken && redisClient) {
+    try {
+      const decoded = jwt.decode(accessToken);
+      const expiresAt = decoded.exp;
+      const ttl = expiresAt - Math.floor(Date.now() / 1000);
 
-    if (ttl > 0) {
-      await redisClient.setEx(`bl_${accessToken}`, ttl, "blacklisted");
+      if (ttl > 0) {
+        await redisClient.setEx(`bl_${accessToken}`, ttl, "blacklisted");
+      }
+    } catch (error) {
+      console.log("Redis blacklist failed:", error.message);
     }
   }
 
@@ -160,16 +162,22 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const decodedToken = jwt.verify(
       incomingRefreshToken,
-      process.env.USER_REFRESH_ACCESS_TOKEN
+      process.env.USER_SECRET_REFRESH_TOKEN // Fixed: was USER_REFRESH_ACCESS_TOKEN
     );
 
     const user = await User.findById(decodedToken._id);
 
+    // Add explicit check for user existence
     if (!user) {
-      throw new ApiError(401, "Invalid refresh token");
+      throw new ApiError(401, "Invalid refresh token - user not found");
     }
 
-    if (incomingRefreshToken !== user?.refreshToken) {
+    // Add check for deleted users
+    if (user.isDeleted) {
+      throw new ApiError(401, "User account has been deleted");
+    }
+
+    if (incomingRefreshToken !== user.refreshToken) {
       throw new ApiError(401, "Refresh token is expired or used");
     }
 

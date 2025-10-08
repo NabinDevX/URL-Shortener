@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    refreshToken: {
+      type: String,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -44,8 +47,7 @@ userSchema.methods.generateAccessToken = async function () {
     {
       _id: this._id,
       email: this.email,
-      fullname: this.fullname,
-      role: this.role,
+      name: this.name, // Fixed: using 'name' instead of 'fullname'
     },
     process.env.USER_SECRET_ACCESS_TOKEN,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
@@ -56,7 +58,6 @@ userSchema.methods.generateRefreshToken = async function () {
   return jwt.sign(
     {
       _id: this._id,
-      role: this.role,
     },
     process.env.USER_SECRET_REFRESH_TOKEN,
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
