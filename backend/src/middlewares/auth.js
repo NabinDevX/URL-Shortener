@@ -29,7 +29,7 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log(error.massage);
+    console.log(error.message); // Fix: was 'error.massage'
     throw new ApiError(401, "Unauthorized request");
   }
 });
