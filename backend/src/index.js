@@ -1,59 +1,64 @@
 import dotenv from "dotenv";
 
+// Load environment variables
 dotenv.config({ path: "./.env" });
 
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
 import discordClient from "./utils/discordClient.js";
 
-// Load SSL certificate and key (if needed)
-// const sslOptions = {
-//   key: fs.readFileSync("./cert/server.key"),
-//   cert: fs.readFileSync("./cert/server.cert"),
-// };
+const PORT = process.env.PORT || 8000;
 
-// Connect to DB and start servers
+// Graceful shutdown handling
+const gracefulShutdown = () => {
+  console.log('Received shutdown signal, closing server gracefully...');
+  
+  // Close Discord client
+  if (discordClient) {
+    discordClient.shutdown();
+  }
+  
+  // Close server
+  process.exit(0);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+// Unhandled promise rejection
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Promise Rejection:', err);
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
+
+// Uncaught exception
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
 connectDB()
   .then(async () => {
-    // Initialize Discord bot
-    await discordClient.initialize();
-    
-    // Start HTTP server
-    app.listen(process.env.PORT || 8000, () => {
-      console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`⚙️ Server is running at port: ${PORT}`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 
-    // Start HTTPS server (if needed)
-    // https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 8443, () => {
-    //   console.log(`🚀 HTTPS Server running at https://localhost:${process.env.HTTPS_PORT}`);
-    // });
+    // Initialize Discord bot (optional in production)
+    if (process.env.DISCORD_TOKEN) {
+      try {
+        await discordClient.initialize();
+      } catch (error) {
+        console.error("❌ Discord bot failed to initialize:", error.message);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log("⚠️ Continuing without Discord bot...");
+        }
+      }
+    }
   })
   .catch((err) => {
-    console.log("MONGO db connection failed !!! ", err);
+    console.error("❌ MongoDB connection failed:", err);
     process.exit(1);
   });
-
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('\n🛑 Received SIGINT. Graceful shutdown...');
-  
-  try {
-    await discordClient.shutdown();
-    process.exit(0);
-  } catch (error) {
-    console.error('Error during shutdown:', error);
-    process.exit(1);
-  }
-});
-
-process.on('SIGTERM', async () => {
-  console.log('\n🛑 Received SIGTERM. Graceful shutdown...');
-  
-  try {
-    await discordClient.shutdown();
-    process.exit(0);
-  } catch (error) {
-    console.error('Error during shutdown:', error);
-    process.exit(1);
-  }
-});

@@ -20,7 +20,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node src/index.js"
+    "build": "echo 'No build step needed for Node.js'",
+    "test": "echo 'Tests not implemented yet'",
+    "lint": "eslint src/",
+    "prod": "NODE_ENV=production node src/index.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

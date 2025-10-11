@@ -1,0 +1,81 @@
+# Global .dockerignore for URL-Shortener project
+# filepath: d:\Projects\URL-Shortener\.dockerignore
+
+# ==================== DEPENDENCIES ====================
+node_modules/
+npm-debug.log*
+
+# ==================== BUILD OUTPUTS ====================
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# ==================== ENVIRONMENT FILES ====================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+
+# ==================== IDE & EDITOR FILES ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==================== OS FILES ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==================== GIT ====================
+.git/
+.gitignore
+
+# ==================== DOCUMENTATION ====================
+README.md
+*.md
+
+# ==================== LOGS ====================
+logs/
+*.log
+backend/logs/
+
+# ==================== TESTING ====================
+coverage/
+**/*.test.js
+**/*.test.jsx
+**/*.spec.js
+**/*.spec.jsx
+
+# ==================== CACHE DIRECTORIES ====================
+.npm/
+.eslintcache
+.cache/
+
+# ==================== FRONTEND SPECIFIC ====================
+frontend/.vite/
+frontend/eslint.config.js
+
+# ==================== BACKEND SPECIFIC ====================
+backend/uploads/
+
+# ==================== DOCKER ====================
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+
+# ==================== TEMPORARY FILES ====================
+tmp/
+temp/
+
+# ==================== PROJECT SPECIFIC ====================
+# Redis dump files
+dump.rdb
+
+# Application specific logs
+url-shortener.log
+discord-bot.log
