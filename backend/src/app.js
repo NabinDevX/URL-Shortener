@@ -26,4 +26,14 @@ app.use(express.json());
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/url", urlRouter);
 
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 export { app };
