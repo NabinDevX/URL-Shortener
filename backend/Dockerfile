@@ -7,10 +7,9 @@ COPY package*.json ./
 RUN npm ci --only=production && \
     npm cache clean --force
 
-COPY . .
+COPY src ./src
 
-RUN mkdir -p uploads && \
-    adduser -D DevCoder && \
+RUN adduser -D DevCoder && \
     chown -R DevCoder:DevCoder /app
 
 USER DevCoder

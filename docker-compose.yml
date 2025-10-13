@@ -9,7 +9,18 @@ services:
     ports:
       - "3333:8001"
     environment:
-      - NODE_ENV=${secrets.NODE_ENV}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME}
+      REDIS_URL: ${REDIS_URL}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
+      USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
+      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
+      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
     networks:
       - app-network
 
@@ -21,7 +32,18 @@ services:
     ports:
       - "4444:8001"
     environment:
-      - NODE_ENV=${secrets.NODE_ENV}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME}
+      REDIS_URL: ${REDIS_URL}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
+      USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
+      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
+      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
     networks:
       - app-network
 
@@ -33,7 +55,18 @@ services:
     ports:
       - "5555:8001"
     environment:
-      - NODE_ENV=${secrets.NODE_ENV}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME}
+      REDIS_URL: ${REDIS_URL}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
+      USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
+      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
+      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
     networks:
       - app-network
 
@@ -45,7 +78,18 @@ services:
     ports:
       - "6666:8001"
     environment:
-      - NODE_ENV=${secrets.NODE_ENV}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      MONGODB_URI: ${MONGODB_URI}
+      DB_NAME: ${DB_NAME}
+      REDIS_URL: ${REDIS_URL}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
+      USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
+      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
+      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
     networks:
       - app-network
 
@@ -56,6 +100,10 @@ services:
     container_name: frontend
     ports:
       - "5000:5000"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      VITE_API_URL: ${VITE_API_URL}
     depends_on:
       - backend1
       - backend2
