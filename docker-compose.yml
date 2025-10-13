@@ -1,49 +1,68 @@
-# docker-compose.yml at root level
 version: '3.8'
 
 services:
-  backend:
+  backend1:
     build:
-      context: .  # Root context
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_1
     ports:
-      - "8000:8000"
+      - "3333:8001"
     environment:
-      - NODE_ENV=production
-    volumes:
-      - ./backend/uploads:/app/uploads
+      - NODE_ENV=${secrets.NODE_ENV}
+    networks:
+      - app-network
+
+  backend2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_2
+    ports:
+      - "4444:8001"
+    environment:
+      - NODE_ENV=${secrets.NODE_ENV}
+    networks:
+      - app-network
+
+  backend3:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_3
+    ports:
+      - "5555:8001"
+    environment:
+      - NODE_ENV=${secrets.NODE_ENV}
+    networks:
+      - app-network
+
+  backend4:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_4
+    ports:
+      - "6666:8001"
+    environment:
+      - NODE_ENV=${secrets.NODE_ENV}
     networks:
       - app-network
 
   frontend:
     build:
-      context: .  # Root context  
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
     ports:
-      - "80:80"
+      - "5000:5000"
     depends_on:
-      - backend
+      - backend1
+      - backend2
+      - backend3
+      - backend4
     networks:
       - app-network
-
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - app-network
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - app-network
-
-volumes:
-  mongodb_data:
 
 networks:
   app-network:

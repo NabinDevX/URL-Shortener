@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -13,16 +15,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Proxy requests starting with '/api' to your backend
       "/api": {
-        target: "http://localhost:5000", // The URL of your backend server
-        changeOrigin: true, // Needed for virtual hosted sites
-        rewrite: (path) => path.replace(/^\/api/, ""), // Remove '/api' prefix from the request sent to the backend
-      },
-      // You can add more proxy rules for different paths
-      "/uploads": {
-        target: "http://localhost:5000",
+        target: "http://urltinier.app",
         changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },
