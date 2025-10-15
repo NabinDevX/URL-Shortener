@@ -13,7 +13,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  preview: {
+    allowedHosts: ['urlshortner.app', 'localhost'],
+  },
   server: {
+    host: true,
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
     proxy: {
       "/api": {
         target: "http://urltinier.app",
