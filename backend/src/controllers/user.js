@@ -7,7 +7,7 @@ import redisClient from "../utils/redisClient.js";
 
 const options = {
   httpOnly: true,
-  secure: false,
+  secure: process.env.NODE_ENV === "production" ? true : false,
   sameSite: "none",
 };
 
