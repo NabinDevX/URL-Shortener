@@ -107,7 +107,7 @@ jobs:
             docker ps
 
             # Health check (optional)
-            sleep 20
+            sleep 60
             curl -f http://localhost:5000/health || echo "⚠️ Health check failed"
 
             # Cleanup old images
