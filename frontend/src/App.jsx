@@ -2,7 +2,7 @@ import React from 'react'
 
 const App = () => {
   return (
-    <div>The App Frontend is in Development.</div>
+    <div>The App Frontend is Processing...</div>
   )
 }
 
