@@ -1,0 +1,98 @@
+name: CI/CD Deployment (GHCR Pull)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
+
+jobs:
+  # 1️⃣ Build and Push to GHCR
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Login to GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN_GITHUB }}
+
+      # Build and Push Backend
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+
+      # Build and Push Frontend
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+
+  # 2️⃣ Deploy on VM (Pull Images and Run Containers)
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            echo "🚀 Starting deployment on VM..."
+
+            cd /opt/URL-Shortner
+
+            # Login to GHCR on VM
+            echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull latest images from GHCR
+            docker pull ghcr.io/${{ github.repository }}/backend:latest
+            docker pull ghcr.io/${{ github.repository }}/frontend:latest
+
+            # Update and run Docker Compose with env vars (no .env file needed)
+            docker-compose down
+
+            NODE_ENV=${{ secrets.NODE_ENV }} \
+            PORT=${{ secrets.PORT }} \
+            MONGODB_URI=${{ secrets.MONGODB_URI }} \
+            DB_NAME=${{ secrets.DB_NAME }} \
+            REDIS_URL=${{ secrets.REDIS_URL }} \
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }} \
+            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
+            CLIENT_ID=${{ secrets.CLIENT_ID }} \
+            USER_SECRET_ACCESS_TOKEN=${{ secrets.USER_SECRET_ACCESS_TOKEN }} \
+            USER_SECRET_REFRESH_TOKEN=${{ secrets.USER_SECRET_REFRESH_TOKEN }} \
+            ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }} \
+            REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }} \
+            docker-compose up -d
+
+            # Check running containers
+            docker ps
+
+            # Optional: health check
+            sleep 20
+            curl -f http://localhost:5000/health || echo "⚠️ Health check failed"
+
+            # Clean up old images
+            docker image prune -f
+
+            echo "✅ Deployment complete!"
