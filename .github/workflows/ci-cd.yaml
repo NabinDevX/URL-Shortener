@@ -88,17 +88,17 @@ jobs:
             git pull origin main
 
             # Stop old containers safely
-            docker-compose down || true
+            docker-compose down --remove-orphans 2>/dev/null || true
 
             # Start containers
-            docker-compose up -d --remove-orphans
+            docker-compose up -d 2>/dev/null
 
             # Health check (optional)
             sleep 60
 
             # Verify running containers
             docker ps
-            curl -f http://localhost:5000/health || echo "⚠️ Health check failed"
+            curl -s -f http://localhost:5000/health || echo "⚠️ Health check failed"
 
             # Cleanup old images
             docker image prune -f
