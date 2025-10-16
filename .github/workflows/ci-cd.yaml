@@ -95,18 +95,18 @@ jobs:
             docker-compose down || true
 
             # Start containers with injected secrets
-            NODE_ENV=${{ secrets.NODE_ENV }} \
-            PORT=${{ secrets.PORT }} \
-            MONGODB_URI=${{ secrets.MONGODB_URI }} \
-            DB_NAME=${{ secrets.DB_NAME }} \
-            REDIS_URL=${{ secrets.REDIS_URL }} \
-            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }} \
-            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
-            CLIENT_ID=${{ secrets.CLIENT_ID }} \
-            USER_SECRET_ACCESS_TOKEN=${{ secrets.USER_SECRET_ACCESS_TOKEN }} \
-            USER_SECRET_REFRESH_TOKEN=${{ secrets.USER_SECRET_REFRESH_TOKEN }} \
-            ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }} \
-            REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }} \
+            NODE_ENV="${{ secrets.NODE_ENV }}" \
+            PORT="${{ secrets.PORT }}" \
+            MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            DB_NAME="${{ secrets.DB_NAME }}" \
+            REDIS_URL="${{ secrets.REDIS_URL }}" \
+            CORS_ORIGIN="${{ secrets.CORS_ORIGIN }}" \
+            DISCORD_TOKEN="${{ secrets.DISCORD_TOKEN }}" \
+            CLIENT_ID="${{ secrets.CLIENT_ID }}" \
+            USER_SECRET_ACCESS_TOKEN="${{ secrets.USER_SECRET_ACCESS_TOKEN }}" \
+            USER_SECRET_REFRESH_TOKEN="${{ secrets.USER_SECRET_REFRESH_TOKEN }}" \
+            ACCESS_TOKEN_EXPIRY="${{ secrets.ACCESS_TOKEN_EXPIRY }}" \
+            REFRESH_TOKEN_EXPIRY="${{ secrets.REFRESH_TOKEN_EXPIRY }}" \
             docker-compose up -d --remove-orphans
 
             # Verify running containers
