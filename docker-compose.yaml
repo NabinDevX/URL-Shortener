@@ -1,8 +1,6 @@
 services:
   backend1:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/nabindevx/url-shortener/backend:latest
     container_name: backend_1
     ports:
       - "3333:8001"
@@ -23,9 +21,7 @@ services:
       - app-network
 
   backend2:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/nabindevx/url-shortener/backend:latest
     container_name: backend_2
     ports:
       - "4444:8001"
@@ -46,9 +42,7 @@ services:
       - app-network
 
   backend3:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/nabindevx/url-shortener/backend:latest
     container_name: backend_3
     ports:
       - "5555:8001"
@@ -69,9 +63,7 @@ services:
       - app-network
 
   backend4:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/nabindevx/url-shortener/backend:latest
     container_name: backend_4
     ports:
       - "6666:8001"
@@ -92,9 +84,7 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/nabindevx/url-shortener/frontend:latest
     container_name: frontend
     ports:
       - "5000:5173"
