@@ -77,6 +77,9 @@ jobs:
 
             # Move to project directory
             cd /opt/URL-Shortner
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd
 
             # Ensure clean state
             git reset --hard
@@ -90,6 +93,7 @@ jobs:
             # Pull latest images from GHCR (lowercase repo)
             docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
             docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
+            ls -a
 
             # Stop old containers safely
             docker-compose down || true
