@@ -93,11 +93,11 @@ jobs:
             # Start containers
             docker-compose up -d --remove-orphans
 
-            # Verify running containers
-            docker ps
-
             # Health check (optional)
             sleep 60
+
+            # Verify running containers
+            docker ps
             curl -f http://localhost:5000/health || echo "⚠️ Health check failed"
 
             # Cleanup old images
