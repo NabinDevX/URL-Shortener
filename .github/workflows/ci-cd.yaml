@@ -6,8 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
 
 jobs:
   # 1️⃣ Build and Push to GHCR
@@ -16,10 +14,20 @@ jobs:
     permissions:
       contents: read
       packages: write
+
     steps:
       - uses: actions/checkout@v4
 
-      # Login to GHCR
+      # 🧩 Convert repo name to lowercase for GHCR
+      - name: Prepare lowercase image names
+        id: names
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "REPO_LOWER=$REPO_LOWER" >> $GITHUB_ENV
+          echo "BACKEND_IMAGE_NAME=$REPO_LOWER/backend" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE_NAME=$REPO_LOWER/frontend" >> $GITHUB_ENV
+
+      # 🔐 Login to GHCR
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -27,7 +35,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.TOKEN_GITHUB }}
 
-      # Build and Push Backend
+      # 🏗️ Build and Push Backend
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
@@ -35,7 +43,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest
 
-      # Build and Push Frontend
+      # 🏗️ Build and Push Frontend
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
@@ -47,30 +55,40 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
+      # 🧩 Prepare lowercase repo name for deploy too
+      - name: Prepare lowercase repo name
+        id: repo
+        run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # 🚀 Deploy to VM via SSH
       - name: Deploy to VM via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT || 22 }}
           script: |
             echo "🚀 Starting deployment on VM..."
 
+            # Move to project directory
             cd /opt/URL-Shortner
 
             # Login to GHCR on VM
             echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull latest images from GHCR
-            docker pull ghcr.io/${{ github.repository }}/backend:latest
-            docker pull ghcr.io/${{ github.repository }}/frontend:latest
+            # Pull latest images from GHCR (lowercase repo)
+            docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
+            docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
 
-            # Update and run Docker Compose with env vars (no .env file needed)
-            docker-compose down
+            # Stop old containers safely
+            docker-compose down || true
 
+            # Start containers with injected secrets
             NODE_ENV=${{ secrets.NODE_ENV }} \
             PORT=${{ secrets.PORT }} \
             MONGODB_URI=${{ secrets.MONGODB_URI }} \
@@ -83,16 +101,16 @@ jobs:
             USER_SECRET_REFRESH_TOKEN=${{ secrets.USER_SECRET_REFRESH_TOKEN }} \
             ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }} \
             REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }} \
-            docker-compose up -d
+            docker-compose up -d --remove-orphans
 
-            # Check running containers
+            # Verify running containers
             docker ps
 
-            # Optional: health check
+            # Health check (optional)
             sleep 20
             curl -f http://localhost:5000/health || echo "⚠️ Health check failed"
 
-            # Clean up old images
+            # Cleanup old images
             docker image prune -f
 
             echo "✅ Deployment complete!"
