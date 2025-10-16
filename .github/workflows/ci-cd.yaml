@@ -77,15 +77,6 @@ jobs:
 
             # Move to project directory
             cd /opt/URL-Shortner
-            git fetch origin
-            git reset --hard origin/main
-            git clean -fd
-
-            # Ensure clean state
-            git reset --hard
-
-            # Pull latest code (optional, if you want to keep code updated)
-            git pull origin main
 
             # Login to GHCR on VM
             echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -93,7 +84,12 @@ jobs:
             # Pull latest images from GHCR (lowercase repo)
             docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
             docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
-            ls -a
+
+            # Navigate to project directory
+            cd URL-Shortener
+
+            # Pull latest code (optional, if you want to keep code updated)
+            git pull origin main
 
             # Stop old containers safely
             docker-compose down || true
