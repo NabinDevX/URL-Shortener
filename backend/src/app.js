@@ -1,9 +1,11 @@
-// Importing necessary modules
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
 const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", "./src/views");
 
 app.use(
   cors({
@@ -20,11 +22,9 @@ app.use(cookieParser());
 import userRouter from "./routes/user.routes.js";
 import urlRouter from "./routes/url.routes.js";
 
-app.use(express.json());
-
-// Routes
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/url", urlRouter);
+app.get("/", (req, res) => {
+  res.render("home");
+});
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -35,5 +35,9 @@ app.get('/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });
+
+// Routes
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/url", urlRouter);
 
 export { app };
