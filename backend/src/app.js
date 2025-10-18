@@ -1,11 +1,17 @@
 import express from "express";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
 app.set("view engine", "ejs");
-app.set("views", "./src/views");
+app.set("views", join(__dirname, "./views"));
 
 app.use(
   cors({
@@ -16,7 +22,7 @@ app.use(
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(express.static("../public"));
+app.use(express.static(join(__dirname, "../public")));
 app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
