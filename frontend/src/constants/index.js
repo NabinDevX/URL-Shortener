@@ -63,4 +63,37 @@ const problems = [
   },
 ];
 
-export { useCases, problems };
+const benefits = [
+  {
+    icon: "🔒",
+    title: "Complete Privacy",
+    desc: "Original URLs are never exposed publicly",
+  },
+  {
+    icon: "🛡️",
+    title: "Security First",
+    desc: "Protect against link scraping and exploitation",
+  },
+  {
+    icon: "💎",
+    title: "Professional Image",
+    desc: "Clean links build trust and credibility",
+  },
+  {
+    icon: "📈",
+    title: "Track Everything",
+    desc: "Full analytics without revealing parameters",
+  },
+  {
+    icon: "🎨",
+    title: "Custom Branding",
+    desc: "Create memorable branded short links",
+  },
+  {
+    icon: "⚡",
+    title: "Instant Creation",
+    desc: "Generate secure links in seconds",
+  },
+];
+
+export { useCases, problems, benefits };

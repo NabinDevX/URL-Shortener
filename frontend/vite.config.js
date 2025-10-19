@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   
   // ✅ Set defaults if env vars not found
   const apiPrefix = env.VITE_API_PREFIX;
-  const apiBaseUrl = env.NODE_ENV === 'production' ? 'http://localhost:8001' : env.VITE_API_BASE_URL;
+  const apiBaseUrl = env.NODE_ENV === 'production' ? env.VITE_API_BASE_URL : 'http://localhost:8001';
 
   console.log(`🔧 Vite Config [${mode}]:`, {
     apiPrefix,

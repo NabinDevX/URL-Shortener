@@ -19,7 +19,7 @@ const RootComponent = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await axios.get('api/v1/user/current-user', {
+      const response = await axios.get('/api/v1/user/current-user', {
         signal: controller.signal,
       });
 
