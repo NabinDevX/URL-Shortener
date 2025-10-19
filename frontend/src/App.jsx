@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Dashboard from "@/components/Dashboard";
 import Profile from "@/components/Profile";
-import Welcome from "@/auth/welcome";
+import Welcome from "@/auth/Welcome";
 import Signup from "@/auth/Signup";
 import Login from "@/auth/Login";
 import Logout from "@/auth/Logout";
