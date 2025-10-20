@@ -9,45 +9,45 @@ const Dashboard = ({ userData }) => {
   const [error, setError] = useState(null);
   const [selectedUrl, setSelectedUrl] = useState(null);
 
-  const VITE_API_PREFIX = import.meta.env.VITE_API_PREFIX || '/api/';
-
   useEffect(() => {
     fetchUrls();
   }, []);
 
-  // Fetch all URLs
   const fetchUrls = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await axios.get('/api/v1/url/', {
+      const response = await axios.get('/api/v1/url/user/all', {
         withCredentials: true,
         timeout: 10000
       });
 
       console.log('✅ URLs fetched:', response.data);
-      const urlsData = response.data.data || response.data || [];
+      const urlsData = response.data.data?.urls || [];
       setUrls(urlsData);
 
-      // Fetch analytics for each URL
       if (urlsData.length > 0) {
         await fetchAllAnalytics(urlsData);
       }
 
     } catch (err) {
       console.error('❌ Error fetching URLs:', err);
-      setError(err.response?.data?.message || 'Failed to load URLs');
+      
+      if (err.response?.status === 404 || err.response?.data?.data?.urls?.length === 0) {
+        setUrls([]);
+      } else {
+        setError(err.response?.data?.message || 'Failed to load URLs');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch analytics for all URLs
   const fetchAllAnalytics = async (urlsList) => {
     try {
       const analyticsPromises = urlsList.map(url => 
-        axios.get('/api/v1/url/analytics/${url.shortId}', {
+        axios.get(`/api/v1/url/analytics/${url.shortId}`, {
           withCredentials: true
         }).catch(err => {
           console.error(`Failed to fetch analytics for ${url.shortId}:`, err);
@@ -70,15 +70,10 @@ const Dashboard = ({ userData }) => {
     }
   };
 
-  // Calculate total statistics
   const totalUrls = urls.length;
-  const totalClicks = Object.values(analytics).reduce(
-    (sum, data) => sum + (data.totalClicks || 0), 
-    0
-  );
+  const totalClicks = urls.reduce((sum, url) => sum + (url.totalClicks || 0), 0);
   const activeUrls = urls.filter(url => !url.isDeleted).length;
 
-  // Loading State
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -90,7 +85,6 @@ const Dashboard = ({ userData }) => {
     );
   }
 
-  // Error State
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -114,7 +108,6 @@ const Dashboard = ({ userData }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Welcome back, {userData?.name}! 👋
@@ -122,9 +115,7 @@ const Dashboard = ({ userData }) => {
           <p className="text-gray-600">Here's an overview of your shortened URLs</p>
         </div>
 
-        {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Total URLs */}
           <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -139,7 +130,6 @@ const Dashboard = ({ userData }) => {
             </div>
           </div>
 
-          {/* Total Clicks */}
           <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -154,7 +144,6 @@ const Dashboard = ({ userData }) => {
             </div>
           </div>
 
-          {/* Active URLs */}
           <div className="bg-gradient-to-br from-green-500 to-green-700 rounded-xl shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -170,7 +159,6 @@ const Dashboard = ({ userData }) => {
           </div>
         </div>
 
-        {/* URLs List */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600">
             <div className="flex items-center justify-between">
@@ -179,28 +167,39 @@ const Dashboard = ({ userData }) => {
                 to="/urls"
                 className="px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
               >
-                View All URLs
+                Manage URLs
               </Link>
             </div>
           </div>
 
           {urls.length === 0 ? (
-            <div className="p-12 text-center">
-              <span className="text-6xl mb-4 block">🔗</span>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">No URLs Yet</h3>
-              <p className="text-gray-600 mb-6">Create your first shortened URL to get started!</p>
-              <Link
-                to="/urls"
-                className="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-              >
-                Create URL
-              </Link>
+            <div className="p-16 text-center bg-gradient-to-br from-purple-50 to-blue-50">
+              <div className="max-w-md mx-auto">
+                <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <span className="text-5xl">🔗</span>
+                </div>
+                <h3 className="text-3xl font-bold text-gray-800 mb-3">No URLs Yet</h3>
+                <p className="text-gray-600 mb-8 text-lg">
+                  Create your first shortened URL to get started!
+                </p>
+                <Link
+                  to="/urls"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Create Short URL
+                </Link>
+                <p className="text-gray-500 text-sm mt-6">
+                  Shorten, customize, and track your URLs in one place
+                </p>
+              </div>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {urls.slice(0, 5).map((url) => {
-                const urlAnalytics = analytics[url.shortId] || {};
-                const clicks = urlAnalytics.totalClicks || 0;
+                const clicks = url.totalClicks || 0;
 
                 return (
                   <div
@@ -208,17 +207,11 @@ const Dashboard = ({ userData }) => {
                     className="p-6 hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      {/* URL Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="text-lg font-semibold text-gray-800 truncate">
-                            {url.title || url.shortId}
+                            {url.shortId}
                           </h3>
-                          {url.isDeleted && (
-                            <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                              Deleted
-                            </span>
-                          )}
                         </div>
                         
                         <div className="space-y-1">
@@ -237,6 +230,7 @@ const Dashboard = ({ userData }) => {
                                 navigator.clipboard.writeText(`${window.location.origin}/${url.shortId}`);
                               }}
                               className="text-gray-400 hover:text-gray-600"
+                              title="Copy to clipboard"
                             >
                               📋
                             </button>
@@ -245,25 +239,21 @@ const Dashboard = ({ userData }) => {
                           <div className="flex items-center gap-2 text-sm">
                             <span className="text-gray-500">Original:</span>
                             <a
-                              href={url.redirectURL}
+                              href={url.redirectUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-gray-600 hover:text-gray-800 truncate"
                             >
-                              {url.redirectURL}
+                              {url.redirectUrl}
                             </a>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
                           <span>Created: {new Date(url.createdAt).toLocaleDateString()}</span>
-                          {url.expiresAt && (
-                            <span>Expires: {new Date(url.expiresAt).toLocaleDateString()}</span>
-                          )}
                         </div>
                       </div>
 
-                      {/* Analytics */}
                       <div className="flex flex-col items-end gap-2">
                         <div className="text-right">
                           <p className="text-3xl font-bold text-purple-600">{clicks}</p>
@@ -279,36 +269,22 @@ const Dashboard = ({ userData }) => {
                       </div>
                     </div>
 
-                    {/* Detailed Analytics */}
-                    {selectedUrl === url.shortId && (
+                    {selectedUrl === url.shortId && url.visitHistory && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <h4 className="font-semibold text-gray-800 mb-3">Detailed Analytics</h4>
+                        <h4 className="font-semibold text-gray-800 mb-3">Recent Visits</h4>
                         
-                        {urlAnalytics.clicksByDate && urlAnalytics.clicksByDate.length > 0 ? (
+                        {url.visitHistory.length > 0 ? (
                           <div className="space-y-2">
-                            {urlAnalytics.clicksByDate.slice(0, 7).map((item, index) => (
-                              <div key={index} className="flex items-center justify-between text-sm">
+                            {url.visitHistory.slice(-7).reverse().map((visit, index) => (
+                              <div key={index} className="flex items-center justify-between text-sm bg-gray-50 p-2 rounded">
                                 <span className="text-gray-600">
-                                  {new Date(item.date).toLocaleDateString()}
+                                  {new Date(visit.timestamp).toLocaleString()}
                                 </span>
-                                <div className="flex items-center gap-2">
-                                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                                    <div
-                                      className="bg-purple-600 h-2 rounded-full"
-                                      style={{
-                                        width: `${(item.count / Math.max(...urlAnalytics.clicksByDate.map(d => d.count))) * 100}%`
-                                      }}
-                                    ></div>
-                                  </div>
-                                  <span className="font-semibold text-gray-800 w-8 text-right">
-                                    {item.count}
-                                  </span>
-                                </div>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">No analytics data available</p>
+                          <p className="text-gray-500 text-sm">No visits yet</p>
                         )}
                       </div>
                     )}
@@ -330,7 +306,6 @@ const Dashboard = ({ userData }) => {
           )}
         </div>
 
-        {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link
             to="/urls"

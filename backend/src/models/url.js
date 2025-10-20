@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const urlSchema = new mongoose.Schema(
   {
@@ -20,5 +21,7 @@ const urlSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+urlSchema.plugin(mongooseAggregatePaginate);
 
 export const URL = mongoose.model("URL", urlSchema);

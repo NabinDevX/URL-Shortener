@@ -10,10 +10,12 @@ import {
   deleteAccount,
 } from "../controllers/user.js";
 import verifyJWT from "../middlewares/auth.js";
+import { sendOtpToEmail, emailOtpValidation } from "../middlewares/otp.js";
 
 const router = Router();
 
-router.route("/signup").post(userSignup);
+router.route("/send-otp").post(sendOtpToEmail);
+router.route("/signup").post(emailOtpValidation, userSignup);
 router.route("/login").post(userLogin);
 router.route("/refresh-token").post(refreshAccessToken);
 

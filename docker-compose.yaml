@@ -11,8 +11,6 @@ services:
       DB_NAME: ${DB_NAME}
       REDIS_URL: ${REDIS_URL}
       CORS_ORIGIN: ${CORS_ORIGIN}
-      DISCORD_TOKEN: ${DISCORD_TOKEN}
-      CLIENT_ID: ${CLIENT_ID}
       USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
       USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
       ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
@@ -32,8 +30,6 @@ services:
       DB_NAME: ${DB_NAME}
       REDIS_URL: ${REDIS_URL}
       CORS_ORIGIN: ${CORS_ORIGIN}
-      DISCORD_TOKEN: ${DISCORD_TOKEN}
-      CLIENT_ID: ${CLIENT_ID}
       USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
       USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
       ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
@@ -53,29 +49,6 @@ services:
       DB_NAME: ${DB_NAME}
       REDIS_URL: ${REDIS_URL}
       CORS_ORIGIN: ${CORS_ORIGIN}
-      DISCORD_TOKEN: ${DISCORD_TOKEN}
-      CLIENT_ID: ${CLIENT_ID}
-      USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
-      USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
-      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
-      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
-    networks:
-      - app-network
-
-  backend4:
-    image: ghcr.io/nabindevx/url-shortener/backend:latest
-    container_name: backend_4
-    ports:
-      - "6666:8001"
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      PORT: ${PORT}
-      MONGODB_URI: ${MONGODB_URI}
-      DB_NAME: ${DB_NAME}
-      REDIS_URL: ${REDIS_URL}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-      DISCORD_TOKEN: ${DISCORD_TOKEN}
-      CLIENT_ID: ${CLIENT_ID}
       USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
       USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
       ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
@@ -96,7 +69,6 @@ services:
       - backend1
       - backend2
       - backend3
-      - backend4
     networks:
       - app-network
 
