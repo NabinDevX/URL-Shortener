@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
 import Dashboard from "@/components/Dashboard";
+import URLS from "@/components/URLS";
 import Profile from "@/components/Profile";
 import Welcome from "@/auth/Welcome";
 import Signup from "@/auth/Signup";
@@ -13,45 +14,106 @@ import Footer from "@/components/Footer";
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const location = useLocation();
 
+  // 🔹 Initial auth check with 2-second loading
   useEffect(() => {
-    checkAuth();
+    checkAuth(true); // Pass true for initial load
   }, []);
 
-  const checkAuth = async () => {
-    // ⏱️ Minimum loading time of 2 seconds
+  // 🔹 Quick auth check on route changes (no loading screen)
+  useEffect(() => {
+    if (!isInitialLoad) {
+      console.log("🔄 Route changed to:", location.pathname);
+      checkAuth(false); // Pass false for quick check
+    }
+  }, [location.pathname]);
+
+  const checkAuth = async (showLoading = true) => {
     const startTime = Date.now();
 
+    // Only show loading on initial load
+    if (showLoading) {
+      setLoading(true);
+    }
+
     try {
-      const response = await axios.get('/api/v1/user/current-user', {
+      // 🔹 Step 1: Try to get current user
+      const response = await axios.get("/api/v1/user/current-user", {
         timeout: 5000,
-        withCredentials: true
+        withCredentials: true,
       });
 
-      console.log('✅ User authenticated:', response.data.data?.email || response.data.data?.username);
+      console.log(
+        "✅ User authenticated:",
+        response.data.data?.email || response.data.data?.username
+      );
       setIsAuthenticated(true);
-
     } catch (error) {
-      if (error.response) {
-        console.log('❌ User not authenticated:', error.response.status);
-      } else if (error.request) {
-        console.error('🌐 Network error:', error.message);
-      } else {
-        console.error('⚠️ Error:', error.message);
-      }
-      setIsAuthenticated(false);
-    } finally {
-      // ✅ Ensure minimum 2 second loading time
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, 2000 - elapsedTime);
+      console.log("⚠️ Initial auth check failed, attempting token refresh...");
 
-      setTimeout(() => {
-        setLoading(false);
-      }, remainingTime);
+      // 🔹 Step 2: Try to refresh the token
+      try {
+        const refreshResponse = await axios.post(
+          "/api/v1/user/refresh-token",
+          {},
+          {
+            timeout: 5000,
+            withCredentials: true,
+          }
+        );
+
+        console.log("✅ Token refreshed successfully:", refreshResponse.data);
+
+        // 🔹 Step 3: Retry getting current user with refreshed token
+        try {
+          const retryResponse = await axios.get("/api/v1/user/current-user", {
+            timeout: 5000,
+            withCredentials: true,
+          });
+
+          console.log(
+            "✅ User authenticated after refresh:",
+            retryResponse.data.data?.email || retryResponse.data.data?.username
+          );
+          setIsAuthenticated(true);
+        } catch (retryError) {
+          console.error(
+            "❌ Failed to authenticate after token refresh:",
+            retryError.response?.status
+          );
+          setIsAuthenticated(false);
+        }
+      } catch (refreshError) {
+        // 🔹 Token refresh failed - user is not authenticated
+        if (refreshError.response) {
+          console.log("❌ Token refresh failed:", refreshError.response.status);
+        } else if (refreshError.request) {
+          console.error(
+            "🌐 Network error during refresh:",
+            refreshError.message
+          );
+        } else {
+          console.error("⚠️ Error during refresh:", refreshError.message);
+        }
+        setIsAuthenticated(false);
+      }
+    } finally {
+      // ✅ Only apply 2-second minimum on initial load
+      if (showLoading) {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 2000 - elapsedTime);
+
+        setTimeout(() => {
+          setLoading(false);
+          setIsInitialLoad(false);
+        }, remainingTime);
+      }
     }
   };
 
-  // 🔄 Loading Screen
+  // 🔄 Loading Screen (only on initial load)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700">
@@ -124,9 +186,22 @@ const App = () => {
             )
           }
         />
+        <Route
+          path="/urls"
+          element={
+            isAuthenticated ? (
+              <>
+                <Navbar />
+                <URLS />
+              </>
+            ) : (
+              <Navigate to="/welcome" replace />
+            )
+          }
+        />
 
         <Route
-          path="/profile"
+          path="/profile/:username"
           element={
             isAuthenticated ? (
               <>

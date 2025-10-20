@@ -1,17 +1,39 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 
 const Navbar = () => {
   return (
     <div>
       <nav>
-        <NavLink to="/">
+        <NavLink
+          className={(e) => {
+            return e.isActive ? "to-blue-50" : "";
+          }}
+          to="/"
+        >
           <li>Dashboard</li>
         </NavLink>
-        <NavLink to="/profile">
+        <NavLink
+          className={(e) => {
+            return e.isActive ? "to-blue-50" : "";
+          }}
+          to="/urls"
+        >
+          <li>URL's</li>
+        </NavLink>
+        <NavLink
+          className={(e) => {
+            return e.isActive ? "to-blue-50" : "";
+          }}
+          to="/profile"
+        >
           <li>Profile</li>
         </NavLink>
-        <NavLink to="/logout">
+        <NavLink
+          className={(e) => {
+            return e.isActive ? "to-blue-50" : "";
+          }}
+          to="/logout"
+        >
           <li>Logout</li>
         </NavLink>
       </nav>
