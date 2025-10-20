@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 const app = express();
 
 app.set("view engine", "ejs");
-app.set("views", join(__dirname, "./views"));
+app.set("views", join(__dirname, "views"));
 
 app.use(
   cors({
