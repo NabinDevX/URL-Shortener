@@ -41,27 +41,6 @@ services:
     networks:
       - app-network
 
-  backend3:
-    image: ghcr.io/nabindevx/url-shortener/backend:latest
-    container_name: backend_3
-    ports:
-      - "5555:8001"
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      PORT: ${PORT}
-      MONGODB_URI: ${MONGODB_URI}
-      DB_NAME: ${DB_NAME}
-      REDIS_URL: ${REDIS_URL}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-      USER_SECRET_ACCESS_TOKEN: ${USER_SECRET_ACCESS_TOKEN}
-      USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
-      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
-      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
-      BREVO_API_KEY: ${BREVO_API_KEY}
-      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
-    networks:
-      - app-network
-
   frontend:
     image: ghcr.io/nabindevx/url-shortener/frontend:latest
     container_name: frontend
@@ -74,7 +53,6 @@ services:
     depends_on:
       - backend1
       - backend2
-      - backend3
     networks:
       - app-network
 
