@@ -15,6 +15,7 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [userData, setUserData] = useState(null); // 🔹 Store user data
   const location = useLocation();
 
   // 🔹 Initial auth check with 2-second loading
@@ -45,11 +46,12 @@ const App = () => {
         withCredentials: true,
       });
 
-      console.log(
-        "✅ User authenticated:",
-        response.data.data?.email || response.data.data?.username
-      );
+      console.log("✅ User authenticated:", response.data.data?.email || response.data.data?.name);
+      
+      // 🔹 Store user data from response
+      setUserData(response.data.data);
       setIsAuthenticated(true);
+
     } catch (error) {
       console.log("⚠️ Initial auth check failed, attempting token refresh...");
 
@@ -75,15 +77,20 @@ const App = () => {
 
           console.log(
             "✅ User authenticated after refresh:",
-            retryResponse.data.data?.email || retryResponse.data.data?.username
+            retryResponse.data.data?.email || retryResponse.data.data?.name
           );
+          
+          // 🔹 Store user data
+          setUserData(retryResponse.data.data);
           setIsAuthenticated(true);
+
         } catch (retryError) {
           console.error(
             "❌ Failed to authenticate after token refresh:",
             retryError.response?.status
           );
           setIsAuthenticated(false);
+          setUserData(null);
         }
       } catch (refreshError) {
         // 🔹 Token refresh failed - user is not authenticated
@@ -98,6 +105,7 @@ const App = () => {
           console.error("⚠️ Error during refresh:", refreshError.message);
         }
         setIsAuthenticated(false);
+        setUserData(null);
       }
     } finally {
       // ✅ Only apply 2-second minimum on initial load
@@ -135,6 +143,7 @@ const App = () => {
 
   // ✅ Debug log (remove in production)
   console.log("🎨 App rendering with isAuthenticated:", isAuthenticated);
+  console.log("👤 User data:", userData);
 
   return (
     <>
@@ -178,21 +187,22 @@ const App = () => {
           element={
             isAuthenticated ? (
               <>
-                <Navbar />
-                <Dashboard />
+                <Navbar userData={userData} />
+                <Dashboard userData={userData} />
               </>
             ) : (
               <Navigate to="/welcome" replace />
             )
           }
         />
+        
         <Route
           path="/urls"
           element={
             isAuthenticated ? (
               <>
-                <Navbar />
-                <URLS />
+                <Navbar userData={userData} />
+                <URLS userData={userData} />
               </>
             ) : (
               <Navigate to="/welcome" replace />
@@ -200,14 +210,27 @@ const App = () => {
           }
         />
 
+        {/* 🔹 Profile route with _id from response */}
         <Route
-          path="/profile/:username"
+          path="/profile/:userId"
           element={
             isAuthenticated ? (
               <>
-                <Navbar />
-                <Profile />
+                <Navbar userData={userData} />
+                <Profile userData={userData} />
               </>
+            ) : (
+              <Navigate to="/welcome" replace />
+            )
+          }
+        />
+
+        {/* 🔹 Redirect /profile to current user's profile using _id */}
+        <Route
+          path="/profile"
+          element={
+            isAuthenticated && userData?._id ? (
+              <Navigate to={`/profile/${userData._id}`} replace />
             ) : (
               <Navigate to="/welcome" replace />
             )
@@ -219,7 +242,7 @@ const App = () => {
           element={
             isAuthenticated ? (
               <>
-                <Navbar />
+                <Navbar userData={userData} />
                 <Logout />
               </>
             ) : (
