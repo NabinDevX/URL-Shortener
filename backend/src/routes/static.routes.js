@@ -3,7 +3,7 @@ import express from "express";
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  res.render("pages/home");
+  res.render("home");
 });
 
 router.get("/signup", (req, res) => {
@@ -18,16 +18,16 @@ router.get("/dashboard", (req, res) => {
   res.render("pages/dashboard");
 });
 
-router.route('/urls').get((req, res) => {
-    res.render("pages/urls");
+router.route("/urls").get((req, res) => {
+  res.render("pages/urls");
 });
 
-router.route('/profile').get((req, res) => {
-    res.render("pages/profile");
+router.route("/profile").get((req, res) => {
+  res.render("pages/profile");
 });
 
-router.route('/logout').get((req, res) => {
-    res.render("pages/logout");
+router.route("/logout").get((req, res) => {
+  res.render("pages/logout");
 });
 
 export default router;
