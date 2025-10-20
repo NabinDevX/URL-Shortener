@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "@/components/Navbar";
 import Dashboard from "@/components/Dashboard";
 import Profile from "@/components/Profile";
@@ -8,7 +10,67 @@ import Login from "@/auth/Login";
 import Logout from "@/auth/Logout";
 import Footer from "@/components/Footer";
 
-const App = ({ isAuthenticated }) => {
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    // ⏱️ Minimum loading time of 2 seconds
+    const startTime = Date.now();
+
+    try {
+      const response = await axios.get('/api/v1/user/current-user', {
+        timeout: 5000,
+        withCredentials: true
+      });
+
+      console.log('✅ User authenticated:', response.data.data?.email || response.data.data?.username);
+      setIsAuthenticated(true);
+
+    } catch (error) {
+      if (error.response) {
+        console.log('❌ User not authenticated:', error.response.status);
+      } else if (error.request) {
+        console.error('🌐 Network error:', error.message);
+      } else {
+        console.error('⚠️ Error:', error.message);
+      }
+      setIsAuthenticated(false);
+    } finally {
+      // ✅ Ensure minimum 2 second loading time
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 2000 - elapsedTime);
+
+      setTimeout(() => {
+        setLoading(false);
+      }, remainingTime);
+    }
+  };
+
+  // 🔄 Loading Screen
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700">
+        <div className="text-center space-y-4">
+          <div className="relative inline-block">
+            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-white"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-4xl">🔗</span>
+            </div>
+          </div>
+          <div>
+            <p className="text-white text-2xl font-bold">URL Shortener</p>
+            <p className="text-white/80 text-lg mt-2">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ✅ Debug log (remove in production)
   console.log("🎨 App rendering with isAuthenticated:", isAuthenticated);
 
