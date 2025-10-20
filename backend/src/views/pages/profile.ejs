@@ -1,11 +1,214 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
-</html>
+<!-- filepath: d:\Projects\URL-Shortener\backend\src\views\pages\profile.ejs -->
+<% layout('../layout') -%>
+
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar">
+        <span class="avatar-icon">👤</span>
+      </div>
+      <h1 class="profile-title">My Profile</h1>
+    </div>
+
+    <div class="profile-info">
+      <div class="info-row">
+        <span class="info-label">Name:</span>
+        <span class="info-value" id="userName">Loading...</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value" id="userEmail">Loading...</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Member Since:</span>
+        <span class="info-value" id="memberSince">Loading...</span>
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
+        ← Back to Dashboard
+      </button>
+      <button class="btn btn-danger" onclick="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .profile-container {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .profile-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  .avatar-icon {
+    font-size: 3rem;
+    color: white;
+  }
+
+  .profile-title {
+    font-size: 2rem;
+    color: #333;
+    font-weight: 700;
+  }
+
+  .profile-info {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #666;
+  }
+
+  .info-value {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .profile-actions {
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  }
+
+  .btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+  }
+
+  @media (max-width: 768px) {
+    .profile-card {
+      padding: 30px 20px;
+    }
+
+    .profile-title {
+      font-size: 1.5rem;
+    }
+
+    .info-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+  }
+</style>
+
+<script>
+  async function loadUserProfile() {
+    try {
+      const response = await fetch('/api/v1/user/current', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const { data } = await response.json();
+        document.getElementById('userName').textContent = data.name || 'N/A';
+        document.getElementById('userEmail').textContent = data.email || 'N/A';
+        document.getElementById('memberSince').textContent = 
+          new Date(data.createdAt).toLocaleDateString() || 'N/A';
+      } else {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      window.location.href = '/login';
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch('/api/v1/user/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      window.location.href = '/';
+    }
+  }
+
+  loadUserProfile();
+</script>

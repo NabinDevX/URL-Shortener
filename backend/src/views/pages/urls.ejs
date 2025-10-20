@@ -6,6 +6,348 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <% layout('../layout') -%>
+
+    <div class="urls-container">
+      <div class="urls-card">
+        <h1 class="urls-title">Create Short URL</h1>
+        <p class="urls-subtitle">Shorten your long URLs and track their performance</p>
+  
+        <form id="urlForm" class="url-form">
+          <div class="form-group">
+            <label for="url">Original URL</label>
+            <input 
+              type="url" 
+              id="url" 
+              name="url" 
+              placeholder="https://example.com/very/long/url" 
+              required
+            />
+          </div>
+  
+          <div class="form-group">
+            <label for="customShortId">Custom Short ID (Optional)</label>
+            <input 
+              type="text" 
+              id="customShortId" 
+              name="customShortId" 
+              placeholder="my-custom-link" 
+              pattern="[a-zA-Z0-9_-]+"
+              minlength="3"
+              maxlength="20"
+            />
+            <small class="hint">3-20 characters, letters, numbers, hyphens, and underscores only</small>
+          </div>
+  
+          <div class="form-group">
+            <label for="idLength">ID Length (if no custom ID)</label>
+            <input 
+              type="number" 
+              id="idLength" 
+              name="idLength" 
+              placeholder="8" 
+              min="4" 
+              max="15"
+            />
+            <small class="hint">Default: 8 characters (range: 4-15)</small>
+          </div>
+  
+          <button type="submit" class="btn btn-primary">
+            Generate Short URL
+          </button>
+  
+          <div id="message" class="message"></div>
+        </form>
+  
+        <div id="resultSection" class="result-section" style="display: none;">
+          <h3>Your Short URL:</h3>
+          <div class="short-url-display">
+            <input type="text" id="shortUrlInput" readonly />
+            <button onclick="copyShortUrl()" class="btn-copy">📋 Copy</button>
+          </div>
+          <div class="url-details">
+            <p><strong>Short ID:</strong> <span id="shortIdDisplay"></span></p>
+            <p><strong>Original URL:</strong> <span id="originalUrlDisplay"></span></p>
+          </div>
+        </div>
+  
+        <div class="back-button">
+          <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+            ← Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+  
+      .urls-container {
+        width: 100%;
+        max-width: 600px;
+      }
+  
+      .urls-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+  
+      .urls-title {
+        font-size: 2.5rem;
+        color: #333;
+        margin-bottom: 10px;
+        text-align: center;
+        font-weight: 700;
+      }
+  
+      .urls-subtitle {
+        font-size: 1rem;
+        color: #666;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+  
+      .url-form {
+        width: 100%;
+      }
+  
+      .form-group {
+        margin-bottom: 25px;
+      }
+  
+      .form-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+      }
+  
+      .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        transition: border-color 0.3s ease;
+      }
+  
+      .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+  
+      .hint {
+        display: block;
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 5px;
+      }
+  
+      .btn {
+        width: 100%;
+        padding: 15px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+  
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+  
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      }
+  
+      .btn-secondary {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+  
+      .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+      }
+  
+      .message {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-align: center;
+        display: none;
+      }
+  
+      .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+  
+      .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+  
+      .result-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 2px solid #667eea;
+      }
+  
+      .result-section h3 {
+        color: #333;
+        margin-bottom: 15px;
+      }
+  
+      .short-url-display {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+  
+      .short-url-display input {
+        flex: 1;
+        padding: 12px 15px;
+        font-size: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        background: white;
+      }
+  
+      .btn-copy {
+        padding: 12px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s ease;
+      }
+  
+      .btn-copy:hover {
+        background: #5568d3;
+      }
+  
+      .url-details {
+        font-size: 0.9rem;
+        color: #666;
+      }
+  
+      .url-details p {
+        margin: 5px 0;
+        word-break: break-all;
+      }
+  
+      .back-button {
+        margin-top: 30px;
+      }
+  
+      @media (max-width: 768px) {
+        .urls-title {
+          font-size: 2rem;
+        }
+  
+        .urls-card {
+          padding: 30px 20px;
+        }
+  
+        .short-url-display {
+          flex-direction: column;
+        }
+      }
+    </style>
+  
+    <script>
+      document.getElementById('urlForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+  
+        const formData = {
+          url: document.getElementById('url').value,
+          customShortId: document.getElementById('customShortId').value || undefined,
+          idLength: document.getElementById('idLength').value || undefined
+        };
+  
+        try {
+          const response = await fetch('/api/v1/url/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(formData)
+          });
+  
+          const data = await response.json();
+  
+          if (response.ok) {
+            showMessage('Short URL created successfully!', 'success');
+            displayResult(data.data);
+          } else {
+            showMessage(data.message || 'Failed to create short URL', 'error');
+          }
+        } catch (error) {
+          showMessage('Network error. Please try again.', 'error');
+        }
+      });
+  
+      function displayResult(data) {
+        const resultSection = document.getElementById('resultSection');
+        const shortUrlInput = document.getElementById('shortUrlInput');
+        const shortIdDisplay = document.getElementById('shortIdDisplay');
+        const originalUrlDisplay = document.getElementById('originalUrlDisplay');
+  
+        shortUrlInput.value = data.fullShortUrl || `${window.location.origin}/${data.shortId}`;
+        shortIdDisplay.textContent = data.shortId;
+        originalUrlDisplay.textContent = data.redirectUrl;
+  
+        resultSection.style.display = 'block';
+      }
+  
+      function copyShortUrl() {
+        const shortUrlInput = document.getElementById('shortUrlInput');
+        shortUrlInput.select();
+        document.execCommand('copy');
+        
+        const copyBtn = event.target;
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '✓ Copied!';
+        
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      }
+  
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+      }
+    </script>
 </body>
 </html>
