@@ -21,16 +21,14 @@ app.use(
 );
 
 app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static(join(__dirname, "../public")));
 app.use(cookieParser());
 
+import staticRouter from "./routes/static.routes.js";
 import userRouter from "./routes/user.routes.js";
 import urlRouter from "./routes/url.routes.js";
-
-app.get("/", (req, res) => {
-  res.render("home");
-});
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -43,6 +41,7 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
+app.use("/", staticRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/url", urlRouter);
 
