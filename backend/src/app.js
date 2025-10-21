@@ -1,17 +1,14 @@
 import express from "express";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+import expressLayouts from "express-ejs-layouts";
 
-// Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-
-app.set("view engine", "ejs");
-app.set("views", join(__dirname, "views"));
 
 app.use(
   cors({
@@ -21,28 +18,22 @@ app.use(
 );
 
 app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: false }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(express.static(join(__dirname, "../public")));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
-import staticRouter from "./routes/static.routes.js";
-import userRouter from "./routes/user.routes.js";
-import urlRouter from "./routes/url.routes.js";
-
-// Health check route
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+app.use(expressLayouts);
+app.set("layout", "layout");
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // Routes
-app.use("/", staticRouter);
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/url", urlRouter);
+import staticRoutes from "./routes/static.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import urlRoutes from "./routes/url.routes.js";
+
+app.use("/", staticRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/url", urlRoutes);
 
 export { app };
