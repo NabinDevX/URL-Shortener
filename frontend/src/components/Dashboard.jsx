@@ -227,7 +227,7 @@ const Dashboard = ({ userData }) => {
                           <div className="flex items-center gap-2 text-sm">
                             <span className="text-gray-500 font-semibold">Short URL:</span>
                             <a
-                              href={`${window.location.origin}/${url.shortId}`}
+                              href={`https://urltinier.app/${url.shortId}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[#667eea] hover:text-[#764ba2] font-medium truncate transition-colors"
@@ -236,7 +236,7 @@ const Dashboard = ({ userData }) => {
                             </a>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText(`${window.location.origin}/${url.shortId}`);
+                                navigator.clipboard.writeText(`https://urltinier.app/${url.shortId}`);
                               }}
                               className="text-gray-400 hover:text-[#667eea] transition-colors text-lg"
                               title="Copy to clipboard"
