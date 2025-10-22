@@ -19,12 +19,10 @@ router.route("/signup").post(emailOtpValidation, userSignup);
 router.route("/login").post(userLogin);
 router.route("/refresh-token").post(refreshAccessToken);
 
-router.use(verifyJWT);
-
-router.route("/logout").post(userLogout);
-router.route("/change-password").post(changeCurrentPassword);
-router.route("/current-user").get(getCurrentUser);
-router.route("/update-account").patch(emailOtpValidation, updateAccountDetails);
-router.route("/delete-account").delete(deleteAccount);
+router.route("/logout").post(verifyJWT, userLogout);
+router.route("/change-password").post(verifyJWT, changeCurrentPassword);
+router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/update-account").patch(verifyJWT, emailOtpValidation, updateAccountDetails);
+router.route("/delete-account").delete(verifyJWT, deleteAccount);
 
 export default router;
