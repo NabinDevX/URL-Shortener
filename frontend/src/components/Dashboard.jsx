@@ -232,7 +232,7 @@ const Dashboard = ({ userData }) => {
                               rel="noopener noreferrer"
                               className="text-[#667eea] hover:text-[#764ba2] font-medium truncate transition-colors"
                             >
-                              {window.location.origin}/{url.shortId}
+                              https://urltinier.app/{url.shortId}
                             </a>
                             <button
                               onClick={() => {
