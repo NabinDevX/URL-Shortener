@@ -1,15 +1,12 @@
 import express from "express";
 import { 
   generateShortURL, 
-  getAnalytics, 
-  getOriginalURL,
+  getAnalytics,
   getAllUrlsDetails 
 } from "../controllers/url.js";
 import verifyJWT from "../middlewares/auth.js";
 
 const router = express.Router();
-
-router.route('/:shortId').get(getOriginalURL);
 
 router.use(verifyJWT);
 

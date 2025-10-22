@@ -76,10 +76,10 @@ const Dashboard = ({ userData }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading Dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg font-semibold">Loading Dashboard...</p>
         </div>
       </div>
     );
@@ -87,15 +87,15 @@ const Dashboard = ({ userData }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
           <div className="text-center">
             <span className="text-6xl mb-4 block">⚠️</span>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={fetchUrls}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
               Retry
             </button>
@@ -106,66 +106,72 @@ const Dashboard = ({ userData }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+        {/* Header */}
+        <div className="mb-8 text-center text-white">
+          <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">
             Welcome back, {userData?.name}! 👋
           </h1>
-          <p className="text-gray-600">Here's an overview of your shortened URLs</p>
+          <p className="text-xl text-white/90">Here's an overview of your shortened URLs</p>
         </div>
 
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl shadow-lg p-6 text-white">
+          {/* Total URLs */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-purple-100 text-sm font-medium mb-1">Total URLs</p>
-                <p className="text-4xl font-bold">{totalUrls}</p>
+                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">Total URLs</p>
+                <p className="text-5xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
+                  {totalUrls}
+                </p>
               </div>
-              <div className="bg-white/20 p-4 rounded-full">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
+              <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl shadow-lg">
+                <span className="text-4xl">🔗</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg p-6 text-white">
+          {/* Total Clicks */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm font-medium mb-1">Total Clicks</p>
-                <p className="text-4xl font-bold">{totalClicks}</p>
+                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">Total Clicks</p>
+                <p className="text-5xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
+                  {totalClicks}
+                </p>
               </div>
-              <div className="bg-white/20 p-4 rounded-full">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                </svg>
+              <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl shadow-lg">
+                <span className="text-4xl">📊</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-500 to-green-700 rounded-xl shadow-lg p-6 text-white">
+          {/* Active URLs */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm font-medium mb-1">Active URLs</p>
-                <p className="text-4xl font-bold">{activeUrls}</p>
+                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">Active URLs</p>
+                <p className="text-5xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
+                  {activeUrls}
+                </p>
               </div>
-              <div className="bg-white/20 p-4 rounded-full">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl shadow-lg">
+                <span className="text-4xl">✨</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600">
+        {/* URLs Section */}
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="px-8 py-6 bg-gradient-to-r from-[#667eea] to-[#764ba2]">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white">Your URLs</h2>
+              <h2 className="text-3xl font-bold text-white">Your URLs</h2>
               <Link
                 to="/urls"
-                className="px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-white text-[#667eea] rounded-full font-bold hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 Manage URLs
               </Link>
@@ -173,10 +179,10 @@ const Dashboard = ({ userData }) => {
           </div>
 
           {urls.length === 0 ? (
-            <div className="p-16 text-center bg-gradient-to-br from-purple-50 to-blue-50">
+            <div className="p-16 text-center">
               <div className="max-w-md mx-auto">
-                <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <span className="text-5xl">🔗</span>
+                <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                  <span className="text-6xl">🔗</span>
                 </div>
                 <h3 className="text-3xl font-bold text-gray-800 mb-3">No URLs Yet</h3>
                 <p className="text-gray-600 mb-8 text-lg">
@@ -184,7 +190,7 @@ const Dashboard = ({ userData }) => {
                 </p>
                 <Link
                   to="/urls"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -204,24 +210,27 @@ const Dashboard = ({ userData }) => {
                 return (
                   <div
                     key={url._id || url.shortId}
-                    className="p-6 hover:bg-gray-50 transition-colors"
+                    className="p-8 hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-800 truncate">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] p-2 rounded-lg">
+                            <span className="text-2xl">🔗</span>
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-800 truncate">
                             {url.shortId}
                           </h3>
                         </div>
                         
-                        <div className="space-y-1">
+                        <div className="space-y-2 ml-12">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-500">Short URL:</span>
+                            <span className="text-gray-500 font-semibold">Short URL:</span>
                             <a
                               href={`${window.location.origin}/${url.shortId}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-purple-600 hover:text-purple-800 font-medium truncate"
+                              className="text-[#667eea] hover:text-[#764ba2] font-medium truncate transition-colors"
                             >
                               {window.location.origin}/{url.shortId}
                             </a>
@@ -229,7 +238,7 @@ const Dashboard = ({ userData }) => {
                               onClick={() => {
                                 navigator.clipboard.writeText(`${window.location.origin}/${url.shortId}`);
                               }}
-                              className="text-gray-400 hover:text-gray-600"
+                              className="text-gray-400 hover:text-[#667eea] transition-colors text-lg"
                               title="Copy to clipboard"
                             >
                               📋
@@ -237,32 +246,36 @@ const Dashboard = ({ userData }) => {
                           </div>
                           
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-500">Original:</span>
+                            <span className="text-gray-500 font-semibold">Original:</span>
                             <a
                               href={url.redirectUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-gray-600 hover:text-gray-800 truncate"
+                              className="text-gray-600 hover:text-gray-800 truncate transition-colors"
                             >
                               {url.redirectUrl}
                             </a>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                          <span>Created: {new Date(url.createdAt).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-4 mt-4 ml-12 text-xs text-gray-500">
+                          <span className="bg-gray-100 px-3 py-1 rounded-full">
+                            Created: {new Date(url.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="text-right">
-                          <p className="text-3xl font-bold text-purple-600">{clicks}</p>
-                          <p className="text-sm text-gray-500">clicks</p>
+                      <div className="flex flex-col items-end gap-3">
+                        <div className="text-right bg-gradient-to-br from-[#667eea]/10 to-[#764ba2]/10 rounded-2xl p-4">
+                          <p className="text-4xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
+                            {clicks}
+                          </p>
+                          <p className="text-sm text-gray-500 font-semibold">clicks</p>
                         </div>
                         
                         <button
                           onClick={() => setSelectedUrl(selectedUrl === url.shortId ? null : url.shortId)}
-                          className="px-3 py-1 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                          className="px-4 py-2 text-sm bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105 font-semibold"
                         >
                           {selectedUrl === url.shortId ? 'Hide' : 'View'} Details
                         </button>
@@ -270,21 +283,24 @@ const Dashboard = ({ userData }) => {
                     </div>
 
                     {selectedUrl === url.shortId && url.visitHistory && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <h4 className="font-semibold text-gray-800 mb-3">Recent Visits</h4>
+                      <div className="mt-6 pt-6 border-t border-gray-200 ml-12">
+                        <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                          <span className="text-xl">📈</span>
+                          Recent Visits
+                        </h4>
                         
                         {url.visitHistory.length > 0 ? (
                           <div className="space-y-2">
                             {url.visitHistory.slice(-7).reverse().map((visit, index) => (
-                              <div key={index} className="flex items-center justify-between text-sm bg-gray-50 p-2 rounded">
-                                <span className="text-gray-600">
+                              <div key={index} className="flex items-center justify-between text-sm bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg hover:shadow-md transition-shadow">
+                                <span className="text-gray-600 font-medium">
                                   {new Date(visit.timestamp).toLocaleString()}
                                 </span>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">No visits yet</p>
+                          <p className="text-gray-500 text-sm italic">No visits yet</p>
                         )}
                       </div>
                     )}
@@ -295,30 +311,32 @@ const Dashboard = ({ userData }) => {
           )}
 
           {urls.length > 5 && (
-            <div className="px-6 py-4 bg-gray-50 text-center">
+            <div className="px-8 py-6 bg-gray-50 text-center border-t border-gray-200">
               <Link
                 to="/urls"
-                className="text-purple-600 hover:text-purple-800 font-semibold"
+                className="text-[#667eea] hover:text-[#764ba2] font-bold text-lg transition-colors inline-flex items-center gap-2"
               >
-                View All {urls.length} URLs →
+                View All {urls.length} URLs 
+                <span className="text-xl">→</span>
               </Link>
             </div>
           )}
         </div>
 
+        {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link
             to="/urls"
-            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow group"
+            className="bg-white rounded-2xl shadow-2xl p-8 hover:shadow-3xl transition-all duration-300 hover:scale-105 group"
           >
             <div className="flex items-center gap-4">
-              <div className="bg-purple-100 p-4 rounded-full group-hover:bg-purple-200 transition-colors">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">Create New URL</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-1">Create New URL</h3>
                 <p className="text-sm text-gray-600">Shorten a new link</p>
               </div>
             </div>
@@ -326,16 +344,16 @@ const Dashboard = ({ userData }) => {
 
           <Link
             to="/profile"
-            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow group"
+            className="bg-white rounded-2xl shadow-2xl p-8 hover:shadow-3xl transition-all duration-300 hover:scale-105 group"
           >
             <div className="flex items-center gap-4">
-              <div className="bg-blue-100 p-4 rounded-full group-hover:bg-blue-200 transition-colors">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">View Profile</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-1">View Profile</h3>
                 <p className="text-sm text-gray-600">Manage your account</p>
               </div>
             </div>
