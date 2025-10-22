@@ -6,10 +6,39 @@ const Logout = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState('loading'); // loading, success, error
   const [message, setMessage] = useState('Logging you out safely...');
+  const [countdown, setCountdown] = useState(30);
 
   useEffect(() => {
     performLogout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Start countdown only after successful logout
+    if (status === 'success' && countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            navigate('/');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+
+    // For error state, redirect after 30 seconds
+    if (status === 'error') {
+      const errorTimer = setTimeout(() => {
+        navigate('/');
+      }, 30000);
+
+      return () => clearTimeout(errorTimer);
+    }
+  }, [status, countdown, navigate]);
 
   const performLogout = async () => {
     try {
@@ -24,21 +53,11 @@ const Logout = () => {
       if (response.data.success) {
         setStatus('success');
         setMessage('Successfully logged out! 👋');
-        
-        // Auto redirect after 2 seconds
-        setTimeout(() => {
-          navigate('/');
-        }, 2000);
       }
     } catch (error) {
       console.error('Logout error:', error);
       setStatus('error');
       setMessage(error.response?.data?.message || 'Logout failed, but you can still go home');
-      
-      // Even on error, redirect after 3 seconds
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
     }
   };
 
@@ -86,14 +105,45 @@ const Logout = () => {
             </div>
           )}
 
-          {/* Success Animation */}
-          {status === 'success' && (
+          {/* Countdown Display */}
+          {status === 'success' && countdown > 0 && (
             <div className="mb-6">
-              <div className="inline-flex items-center gap-2 text-green-600 font-semibold">
-                <svg className="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-                Redirecting to home page...
+              <div className="inline-flex flex-col items-center gap-3">
+                {/* Circular Countdown */}
+                <div className="relative w-20 h-20">
+                  <svg className="w-20 h-20 transform -rotate-90">
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="36"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="36"
+                      stroke="#667eea"
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 36}`}
+                      strokeDashoffset={`${2 * Math.PI * 36 * (1 - countdown / 30)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-1000 ease-linear"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-[#667eea]">{countdown}</span>
+                  </div>
+                </div>
+                
+                <div className="text-green-600 font-semibold flex items-center gap-2">
+                  <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Redirecting in {countdown} seconds...
+                </div>
               </div>
             </div>
           )}
@@ -112,7 +162,7 @@ const Logout = () => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              Go to Home Page
+              {status === 'success' ? 'Go to Home Page Now' : 'Go to Home Page'}
             </button>
 
             {status === 'error' && (

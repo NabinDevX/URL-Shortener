@@ -52,7 +52,7 @@ const Profile = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get('/api/v1/user/current', {
+      const response = await axios.get('/api/v1/user/current-user', {
         withCredentials: true
       });
 
