@@ -239,9 +239,44 @@ const getAllUrlsDetails = asyncHandler(async (req, res) => {
   );
 });
 
+const deleteURL = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  
+  if (!shortId) {
+    throw new ApiError(400, "Short ID is required");
+  }
+
+  if (!req.user || !req.user._id) {
+    throw new ApiError(401, "Authentication required");
+  }
+
+  // Find the URL and verify ownership
+  const url = await URL.findOne({ shortId, userId: req.user._id });
+
+  if (!url) {
+    throw new ApiError(404, "Short URL not found or you don't have permission to delete it");
+  }
+
+  // Toggle the isDeleted field
+  url.isDeleted = !url.isDeleted;
+  await url.save({ validateBeforeSave: false });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        shortId: url.shortId,
+        isDeleted: url.isDeleted,
+      },
+      url.isDeleted ? "URL deleted successfully" : "URL restored successfully"
+    )
+  );
+});
+
 export {
   generateShortURL,
   getOriginalURL,
   getAnalytics,
-  getAllUrlsDetails
+  getAllUrlsDetails,
+  deleteURL
 };

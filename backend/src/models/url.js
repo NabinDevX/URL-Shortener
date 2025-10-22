@@ -17,6 +17,10 @@ const urlSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     visitHistory: [{ timestamp: { type: Date } }],
   },
   { timestamps: true }
