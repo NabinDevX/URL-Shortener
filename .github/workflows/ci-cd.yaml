@@ -98,7 +98,8 @@ jobs:
 
             # Verify running containers
             docker ps
-            curl -s -f http://localhost:5000/health || echo "⚠️ Health check failed"
+            curl -s -f http://localhost:3333/health || echo "⚠️ Health check failed"
+            curl -s -f http://localhost:3333/health || echo "⚠️ Health check failed"
 
             # Cleanup old images
             docker image prune -f

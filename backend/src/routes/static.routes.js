@@ -2,6 +2,16 @@ import express from "express";
 
 const router = express.Router();
 
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    PID: process.pid,
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 router.get("/", (req, res) => {
   res.render("pages/home");
 });
