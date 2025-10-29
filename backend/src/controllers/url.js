@@ -124,6 +124,61 @@ const getOriginalURL = asyncHandler(async (req, res) => {
   return res.redirect(entry.redirectUrl);
 });
 
+const updateShortURL = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  const { qrCode } = req.body;
+
+  if (!shortId || !qrCode) {
+    throw new ApiError(400, "Short ID and QR Code are required");
+  }
+
+  if (typeof qrCode !== 'string') {
+    throw new ApiError(400, "QR Code must be a string");
+  }
+
+  if (qrCode.trim() === '') {
+    throw new ApiError(400, "QR Code cannot be empty");
+  }
+
+  const url = await URL.findOne({ shortId, userId: req.user._id });
+
+  if (!url) {
+    throw new ApiError(404, "Short URL not found or you don't have permission to update it");
+  }
+
+  if (url.isDeleted) {
+    throw new ApiError(400, "Cannot update a deleted URL. Please restore it first");
+  }
+
+  if (url.qrCode !== qrCode) {
+    const existingQrCode = await URL.findOne({ 
+      qrCode, 
+      shortId: { $ne: shortId } 
+    });
+
+    if (existingQrCode) {
+      throw new ApiError(409, "This QR Code is already in use by another URL");
+    }
+  }
+
+  url.qrCode = qrCode.trim();
+  await url.save({ validateBeforeSave: false });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        shortId: url.shortId,
+        redirectUrl: url.redirectUrl,
+        qrCode: url.qrCode,
+        fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : 'http://localhost:8001'}/${url.shortId}`,
+        updatedAt: url.updatedAt,
+      },
+      "QR Code updated successfully"
+    )
+  );
+});
+
 const getAnalytics = asyncHandler(async (req, res) => {
   const { shortId } = req.params;
   if (!shortId) throw new ApiError(400, "Short ID is required");
@@ -273,10 +328,12 @@ const deleteURL = asyncHandler(async (req, res) => {
   );
 });
 
+// Export the function
 export {
   generateShortURL,
   getOriginalURL,
+  updateShortURL,
   getAnalytics,
   getAllUrlsDetails,
-  deleteURL
+  deleteURL,
 };

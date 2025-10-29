@@ -13,6 +13,10 @@ const urlSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    qrCode: {
+      type: String,
+      unique: true,
+    },
     redirectUrl: {
       type: String,
       required: true,

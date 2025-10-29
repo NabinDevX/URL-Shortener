@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import Welcome from "@/sections/auth/Welcome";
+import Signup from "@/sections/auth/Signup";
+import Login from "@/sections/auth/Login";
+import Logout from "@/sections/auth/Logout";
 import Navbar from "@/components/Navbar";
-import Dashboard from "@/components/Dashboard";
-import URLS from "@/components/URLS";
-import Profile from "@/components/Profile";
-import Welcome from "@/auth/Welcome";
-import Signup from "@/auth/Signup";
-import Login from "@/auth/Login";
-import Logout from "@/auth/Logout";
+import Dashboard from "@/sections/Dashboard";
+import URLS from "@/sections/URLS";
+import Profile from "@/sections/Profile";
 import Footer from "@/components/Footer";
 
 const App = () => {
