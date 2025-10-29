@@ -42,29 +42,55 @@
       .main-content {
         flex: 1;
         width: 100%;
-        padding: 20px;
+        padding: 40px 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
       }
 
+      /* ✅ Fixed Footer Styling */
       .site-footer {
         margin-top: auto;
         width: 100%;
-        padding: 20px;
+        padding: 24px 20px;
         text-align: center;
-        background: rgba(0, 0, 0, 0.1);
+        background: rgba(11, 18, 32, 0.85); /* Dark semi-transparent background */
+        backdrop-filter: blur(10px); /* Glass effect */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .site-footer p {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0;
+        letter-spacing: 0.3px;
+      }
+
+      .site-footer a {
+        color: #a5b4fc;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .site-footer a:hover {
         color: #fff;
+        text-decoration: underline;
       }
 
       @media (max-width: 768px) {
         .main-content {
-          padding: 15px;
+          padding: 20px 15px;
         }
         
         .site-footer {
-          padding: 15px;
+          padding: 18px 15px;
+        }
+
+        .site-footer p {
+          font-size: 12px;
         }
       }
     </style>

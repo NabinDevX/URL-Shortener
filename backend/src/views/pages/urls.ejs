@@ -1,75 +1,114 @@
 <div class="urls-container">
   <div class="urls-card">
-    <h1 class="urls-title">Create Short URL</h1>
-    <p class="urls-subtitle">Shorten your long URLs and track their performance</p>
-
-    <form id="urlForm" class="url-form">
-      <div class="form-group">
-        <label for="url">Original URL</label>
-        <input 
-          type="url" 
-          id="url" 
-          name="url" 
-          placeholder="https://example.com/very/long/url" 
-          required
-        />
+    <div class="header-section">
+      <div>
+        <h1 class="urls-title">Manage URLs</h1>
+        <p class="urls-subtitle">Create, view analytics, and manage your short URLs</p>
       </div>
-
-      <div class="form-group">
-        <label for="customShortId">Custom Short ID (Optional)</label>
-        <input 
-          type="text" 
-          id="customShortId" 
-          name="customShortId" 
-          placeholder="my-custom-link" 
-          pattern="[a-zA-Z0-9_-]+"
-          minlength="3"
-          maxlength="20"
-        />
-        <small class="hint">3-20 characters, letters, numbers, hyphens, and underscores only</small>
-      </div>
-
-      <div class="form-group">
-        <label for="idLength">ID Length (if no custom ID)</label>
-        <input 
-          type="number" 
-          id="idLength" 
-          name="idLength" 
-          placeholder="8" 
-          min="4" 
-          max="15"
-        />
-        <small class="hint">Default: 8 characters (range: 4-15)</small>
-      </div>
-
-      <button type="submit" class="btn btn-primary">
-        Generate Short URL
+      <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+        ← Dashboard
       </button>
+    </div>
 
-      <div id="message" class="message"></div>
-    </form>
+    <!-- Create URL Form -->
+    <div class="create-section">
+      <h2>Create New Short URL</h2>
+      <form id="urlForm" class="url-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="url">Original URL *</label>
+            <input 
+              type="url" 
+              id="url" 
+              name="url" 
+              placeholder="https://example.com/very/long/url" 
+              required
+            />
+          </div>
+        </div>
 
-    <div id="resultSection" class="result-section" style="display: none;">
-      <h3>Your Short URL:</h3>
-      <div class="short-url-display">
-        <input type="text" id="shortUrlInput" readonly />
-        <button onclick="copyShortUrl()" class="btn-copy">📋 Copy</button>
-      </div>
-      <div class="url-details">
-        <p><strong>Short ID:</strong> <span id="shortIdDisplay"></span></p>
-        <p><strong>Original URL:</strong> <span id="originalUrlDisplay"></span></p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="customShortId">Custom Short ID (Optional)</label>
+            <input 
+              type="text" 
+              id="customShortId" 
+              name="customShortId" 
+              placeholder="my-custom-link" 
+              pattern="[a-zA-Z0-9_-]+"
+              minlength="3"
+              maxlength="20"
+            />
+            <small class="hint">3-20 characters, letters, numbers, hyphens, underscores</small>
+          </div>
+
+          <div class="form-group">
+            <label for="idLength">Random ID Length</label>
+            <input 
+              type="number" 
+              id="idLength" 
+              name="idLength" 
+              value="8"
+              min="4" 
+              max="15"
+            />
+            <small class="hint">Used only if no custom ID (4-15 chars)</small>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <span class="btn-text">Generate Short URL</span>
+        </button>
+
+        <div id="message" class="message"></div>
+      </form>
+
+      <div id="resultSection" class="result-section" style="display: none;">
+        <h3>✓ Short URL Created!</h3>
+        <div class="short-url-display">
+          <input type="text" id="shortUrlInput" readonly />
+          <button onclick="copyShortUrl()" class="btn-copy">📋 Copy</button>
+        </div>
+        <div class="url-details">
+          <p><strong>Short ID:</strong> <span id="shortIdDisplay"></span></p>
+          <p><strong>Redirects to:</strong> <span id="originalUrlDisplay"></span></p>
+        </div>
       </div>
     </div>
 
-    <div class="back-button">
-      <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
-        ← Back to Dashboard
-      </button>
+    <!-- URLs List Section -->
+    <div class="list-section">
+      <div class="list-header">
+        <h2>Your URLs</h2>
+        <button class="btn-refresh" onclick="loadUrls()">🔄 Refresh</button>
+      </div>
+
+      <div id="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading your URLs...</p>
+      </div>
+
+      <div id="error" class="error-state" style="display: none;">
+        <p id="error-text"></p>
+        <button class="btn btn-secondary" onclick="loadUrls()">Retry</button>
+      </div>
+
+      <div id="urlsList" class="urls-list"></div>
+
+      <div id="noUrls" class="no-urls" style="display: none;">
+        <span class="empty-icon">📭</span>
+        <h3>No URLs yet</h3>
+        <p>Create your first short URL using the form above!</p>
+      </div>
     </div>
   </div>
 </div>
 
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -82,7 +121,9 @@
 
   .urls-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
   }
 
   .urls-card {
@@ -92,31 +133,62 @@
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
 
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
   .urls-title {
     font-size: 2.5rem;
     color: #333;
-    margin-bottom: 10px;
-    text-align: center;
+    margin: 0 0 5px 0;
     font-weight: 700;
   }
 
   .urls-subtitle {
     font-size: 1rem;
     color: #666;
-    text-align: center;
-    margin-bottom: 30px;
+    margin: 0;
+  }
+
+  .create-section {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 40px;
+  }
+
+  .create-section h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.5rem;
   }
 
   .url-form {
     width: 100%;
   }
 
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-row:has(.form-group:nth-child(2)) {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .form-group {
-    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
   }
 
   .form-group label {
-    display: block;
     font-size: 0.9rem;
     font-weight: 600;
     color: #333;
@@ -124,7 +196,6 @@
   }
 
   .form-group input {
-    width: 100%;
     padding: 12px 15px;
     font-size: 1rem;
     border: 2px solid #e0e0e0;
@@ -138,15 +209,13 @@
   }
 
   .hint {
-    display: block;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #999;
     margin-top: 5px;
   }
 
   .btn {
-    width: 100%;
-    padding: 15px;
+    padding: 15px 30px;
     font-size: 1rem;
     font-weight: 600;
     border: none;
@@ -154,18 +223,24 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
 
   .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    width: 100%;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
   }
 
-  .btn-primary:hover {
+  .btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .btn-secondary {
@@ -177,7 +252,22 @@
   .btn-secondary:hover {
     background: #667eea;
     color: white;
-    transform: translateY(-2px);
+  }
+
+  .btn-refresh {
+    padding: 10px 20px;
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-refresh:hover {
+    background: #667eea;
+    color: white;
   }
 
   .message {
@@ -204,16 +294,17 @@
   }
 
   .result-section {
-    margin-top: 30px;
+    margin-top: 25px;
     padding: 20px;
-    background: #f8f9fa;
+    background: white;
     border-radius: 10px;
-    border: 2px solid #667eea;
+    border: 2px solid #28a745;
   }
 
   .result-section h3 {
-    color: #333;
-    margin-bottom: 15px;
+    color: #28a745;
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
   }
 
   .short-url-display {
@@ -228,7 +319,8 @@
     font-size: 1rem;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
-    background: white;
+    background: #f8f9fa;
+    font-weight: 600;
   }
 
   .btn-copy {
@@ -239,7 +331,8 @@
     border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    white-space: nowrap;
   }
 
   .btn-copy:hover {
@@ -252,38 +345,316 @@
   }
 
   .url-details p {
-    margin: 5px 0;
+    margin: 8px 0;
     word-break: break-all;
   }
 
-  .back-button {
-    margin-top: 30px;
+  .list-section {
+    margin-top: 40px;
+  }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .list-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.8rem;
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 20px;
+    border: 4px solid rgba(102, 126, 234, 0.2);
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .error-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: #fee;
+    border-radius: 15px;
+  }
+
+  .error-state p {
+    color: #c33;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .urls-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .url-item {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    border-left: 5px solid #667eea;
+    transition: all 0.3s ease;
+  }
+
+  .url-item:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transform: translateX(5px);
+  }
+
+  .url-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 15px;
+  }
+
+  .url-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .url-short {
+    font-weight: 700;
+    color: #667eea;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    word-break: break-all;
+  }
+
+  .url-original {
+    color: #666;
+    font-size: 0.9rem;
+    word-break: break-all;
+    margin-bottom: 12px;
+  }
+
+  .url-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 15px;
+  }
+
+  .url-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-active {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status-deleted {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .url-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .btn-action-copy {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-action-copy:hover {
+    background: #5568d3;
+  }
+
+  .btn-action-delete {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-action-delete:hover {
+    background: #c82333;
+  }
+
+  .btn-action-restore {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-action-restore:hover {
+    background: #218838;
+  }
+
+  .analytics-section {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    border: 2px solid #e9ecef;
+  }
+
+  .analytics-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 15px 0;
+  }
+
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .analytics-stat {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+  }
+
+  .analytics-stat-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .analytics-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  .no-urls {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 15px;
+  }
+
+  .no-urls h3 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  .no-urls p {
+    color: #666;
+    margin-bottom: 25px;
   }
 
   @media (max-width: 768px) {
+    .urls-card {
+      padding: 25px 20px;
+    }
+
     .urls-title {
       font-size: 2rem;
     }
 
-    .urls-card {
-      padding: 30px 20px;
+    .header-section {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .form-row:has(.form-group:nth-child(2)) {
+      grid-template-columns: 1fr;
     }
 
     .short-url-display {
       flex-direction: column;
     }
+
+    .url-header {
+      flex-direction: column;
+    }
+
+    .url-actions {
+      width: 100%;
+    }
+
+    .analytics-grid {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 </style>
 
 <script>
+  // Load URLs on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    loadUrls();
+  });
+
+  // Form submission
   document.getElementById('urlForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const originalText = btnText.textContent;
+
     const formData = {
-      url: document.getElementById('url').value,
-      customShortId: document.getElementById('customShortId').value || undefined,
-      idLength: document.getElementById('idLength').value || undefined
+      url: document.getElementById('url').value.trim(),
     };
+
+    const customId = document.getElementById('customShortId').value.trim();
+    const idLength = document.getElementById('idLength').value;
+
+    if (customId) {
+      formData.customShortId = customId;
+    } else if (idLength) {
+      formData.idLength = parseInt(idLength);
+    }
+
+    submitBtn.disabled = true;
+    btnText.textContent = 'Creating...';
 
     try {
       const response = await fetch('/api/v1/url/', {
@@ -296,13 +667,24 @@
       const data = await response.json();
 
       if (response.ok) {
-        showMessage('Short URL created successfully!', 'success');
+        showMessage('Short URL created successfully! 🎉', 'success');
         displayResult(data.data);
+        document.getElementById('urlForm').reset();
+        document.getElementById('idLength').value = '8';
+        
+        // Reload URLs list
+        setTimeout(() => {
+          loadUrls();
+        }, 1000);
       } else {
         showMessage(data.message || 'Failed to create short URL', 'error');
       }
     } catch (error) {
+      console.error('Error:', error);
       showMessage('Network error. Please try again.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      btnText.textContent = originalText;
     }
   });
 
@@ -312,30 +694,213 @@
     const shortIdDisplay = document.getElementById('shortIdDisplay');
     const originalUrlDisplay = document.getElementById('originalUrlDisplay');
 
-    shortUrlInput.value = data.fullShortUrl || `${window.location.origin}/${data.shortId}`;
+    const fullUrl = data.fullShortUrl || `https://urltinier.app/${data.shortId}`;
+    shortUrlInput.value = fullUrl;
     shortIdDisplay.textContent = data.shortId;
     originalUrlDisplay.textContent = data.redirectUrl;
 
     resultSection.style.display = 'block';
+    resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function copyShortUrl() {
     const shortUrlInput = document.getElementById('shortUrlInput');
     shortUrlInput.select();
-    document.execCommand('copy');
-    
-    const copyBtn = event.target;
-    const originalText = copyBtn.textContent;
-    copyBtn.textContent = '✓ Copied!';
-    
-    setTimeout(() => {
-      copyBtn.textContent = originalText;
-    }, 2000);
+    navigator.clipboard.writeText(shortUrlInput.value).then(() => {
+      const copyBtn = event.target;
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = '✓ Copied!';
+      copyBtn.style.background = '#28a745';
+      
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.style.background = '';
+      }, 2000);
+    }).catch(() => {
+      document.execCommand('copy');
+    });
   }
 
   function showMessage(text, type) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = text;
     messageDiv.className = `message ${type}`;
+    
+    setTimeout(() => {
+      messageDiv.className = 'message';
+    }, 5000);
+  }
+
+  // Load all URLs
+  async function loadUrls() {
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const urlsList = document.getElementById('urlsList');
+    const noUrls = document.getElementById('noUrls');
+
+    loading.style.display = 'block';
+    error.style.display = 'none';
+    urlsList.innerHTML = '';
+    noUrls.style.display = 'none';
+
+    try {
+      const response = await fetch('/api/v1/url/user/all', {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error('Failed to fetch URLs');
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to load URLs');
+      }
+
+      const urls = data.data.urls || [];
+
+      loading.style.display = 'none';
+
+      if (urls.length === 0) {
+        noUrls.style.display = 'block';
+      } else {
+        displayUrls(urls);
+      }
+
+    } catch (err) {
+      console.error('Error loading URLs:', err);
+      loading.style.display = 'none';
+      error.style.display = 'block';
+      document.getElementById('error-text').textContent = err.message || 'Failed to load URLs';
+    }
+  }
+
+  function displayUrls(urls) {
+    const urlsList = document.getElementById('urlsList');
+    urlsList.innerHTML = '';
+
+    urls.forEach(url => {
+      const urlItem = createUrlItem(url);
+      urlsList.appendChild(urlItem);
+    });
+  }
+
+  function createUrlItem(url) {
+    const shortUrl = `https://urltinier.app/${url.shortId}`;
+    const clicks = url.totalClicks || (url.visitHistory ? url.visitHistory.length : 0);
+    const createdDate = new Date(url.createdAt).toLocaleDateString();
+    const isDeleted = url.isDeleted;
+
+    const div = document.createElement('div');
+    div.className = 'url-item';
+    div.innerHTML = `
+      <div class="url-header">
+        <div class="url-info">
+          <div class="url-short">${shortUrl}</div>
+          <div class="url-original">${url.redirectUrl}</div>
+          <div class="url-meta">
+            <span>📊 <strong>${clicks}</strong> clicks</span>
+            <span>📅 Created ${createdDate}</span>
+            <span class="status-badge ${isDeleted ? 'status-deleted' : 'status-active'}">
+              ${isDeleted ? 'Deleted' : 'Active'}
+            </span>
+          </div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-small btn-action-copy" onclick="copyUrlToClipboard('${shortUrl}', this)">
+            📋 Copy
+          </button>
+          <button class="btn-small ${isDeleted ? 'btn-action-restore' : 'btn-action-delete'}" 
+                  onclick="toggleDeleteUrl('${url.shortId}', ${isDeleted})">
+            ${isDeleted ? '♻️ Restore' : '🗑️ Delete'}
+          </button>
+        </div>
+      </div>
+      <div class="analytics-section">
+        <div class="analytics-title">📈 Analytics</div>
+        <div class="analytics-grid">
+          <div class="analytics-stat">
+            <div class="analytics-stat-label">Total Clicks</div>
+            <div class="analytics-stat-value">${clicks}</div>
+          </div>
+          <div class="analytics-stat">
+            <div class="analytics-stat-label">Status</div>
+            <div class="analytics-stat-value" style="font-size: 1.2rem;">
+              ${isDeleted ? '🔴' : '🟢'}
+            </div>
+          </div>
+          <div class="analytics-stat">
+            <div class="analytics-stat-label">Created</div>
+            <div class="analytics-stat-value" style="font-size: 0.9rem;">
+              ${createdDate}
+            </div>
+          </div>
+          <div class="analytics-stat">
+            <div class="analytics-stat-label">Last Visit</div>
+            <div class="analytics-stat-value" style="font-size: 0.9rem;">
+              ${url.visitHistory && url.visitHistory.length > 0 
+                ? new Date(url.visitHistory[url.visitHistory.length - 1].timestamp).toLocaleDateString()
+                : 'Never'
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  function copyUrlToClipboard(url, button) {
+    navigator.clipboard.writeText(url).then(() => {
+      const originalText = button.innerHTML;
+      button.innerHTML = '✓ Copied!';
+      button.style.background = '#28a745';
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.style.background = '';
+      }, 2000);
+    }).catch(() => {
+      alert('Failed to copy URL');
+    });
+  }
+
+  async function toggleDeleteUrl(shortId, isDeleted) {
+    const action = isDeleted ? 'restore' : 'delete';
+    const confirmMsg = isDeleted 
+      ? 'Are you sure you want to restore this URL?' 
+      : 'Are you sure you want to delete this URL?';
+
+    if (!confirm(confirmMsg)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/url/${shortId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showMessage(
+          isDeleted ? 'URL restored successfully! ♻️' : 'URL deleted successfully! 🗑️', 
+          'success'
+        );
+        loadUrls(); // Reload the list
+      } else {
+        showMessage(data.message || `Failed to ${action} URL`, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showMessage(`Network error. Failed to ${action} URL.`, 'error');
+    }
   }
 </script>

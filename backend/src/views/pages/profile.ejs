@@ -175,7 +175,7 @@
 <script>
   async function loadUserProfile() {
     try {
-      const response = await fetch('/api/v1/user/current', {
+      const response = await fetch('/api/v1/user/current-user', {
         credentials: 'include'
       });
 
@@ -203,7 +203,7 @@
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
-      window.location.href = '/';
+      window.location.href = '/profile';
     }
   }
 

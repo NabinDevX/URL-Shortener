@@ -148,17 +148,32 @@ const getAllUrlsDetails = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Authentication required");
   }
 
-  const { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query;
+  const { 
+    page = 1, 
+    limit = 10, 
+    sortBy = "createdAt", 
+    sortOrder = "desc",
+    includeDeleted = "false" // New parameter to optionally show deleted URLs
+  } = req.query;
 
   const pageNum = parseInt(page);
   const limitNum = parseInt(limit);
   const sortDirection = sortOrder === "asc" ? 1 : -1;
+  const showDeleted = includeDeleted === "true";
+
+  // Build match stage
+  const matchStage = {
+    userId: req.user._id,
+  };
+
+  // Filter out deleted URLs by default
+  if (!showDeleted) {
+    matchStage.isDeleted = false;
+  }
 
   const aggregate = URL.aggregate([
     {
-      $match: {
-        userId: req.user._id,
-      },
+      $match: matchStage,
     },
     {
       $addFields: {
@@ -177,6 +192,7 @@ const getAllUrlsDetails = asyncHandler(async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
         visitHistory: 1,
+        isDeleted: 1, // Include isDeleted field in response
       },
     },
     {
