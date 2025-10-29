@@ -27,7 +27,6 @@ const URLS = () => {
 
   // QR Code states
   const [generatingQR, setGeneratingQR] = useState({});
-  const [showQRCode, setShowQRCode] = useState({});
   const qrGeneratorRefs = useRef({}); // Refs for QRCodeGeneration components
 
   // Message state
@@ -57,15 +56,6 @@ const URLS = () => {
       if (response.data.success) {
         const urlsData = response.data.data?.urls || [];
         setUrls(urlsData);
-        
-        // Initialize showQRCode state for URLs that already have QR codes
-        const qrStates = {};
-        urlsData.forEach(url => {
-          if (url.qrCode) {
-            qrStates[url.shortId] = true;
-          }
-        });
-        setShowQRCode(qrStates);
         
         // Fetch analytics for all URLs
         if (urlsData.length > 0) {
@@ -110,33 +100,34 @@ const URLS = () => {
     }
   };
 
-  // Generate QR Code - Now uses QRCodeGeneration component's method
+  // Generate QR Code and save to database
   const handleGenerateQRCode = async (shortId) => {
     setGeneratingQR(prev => ({ ...prev, [shortId]: true }));
     
     try {
       // Wait for component to render
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
       
-      // Use the component's generateQRCode method
+      // Get the QRCodeGeneration component reference
       const qrGenerator = qrGeneratorRefs.current[shortId];
       if (!qrGenerator) {
         throw new Error('QR Code generator not found');
       }
 
+      // Generate QR code (returns base64 data URL)
       const qrCodeDataUrl = qrGenerator.generateQRCode();
 
-      // Save QR code to backend
+      // Save QR code to database using the update endpoint
       const response = await axios.put(
-        `/api/v1/url/${shortId}`,
+        `/api/v1/url/update/${shortId}`,
         { qrCode: qrCodeDataUrl },
         { withCredentials: true }
       );
 
       if (response.data.success) {
-        showMessage('QR Code generated successfully! 🎉', 'success');
+        showMessage('QR Code generated and saved successfully! 🎉', 'success');
         
-        // Update local state
+        // Update local state with the saved QR code
         setUrls(prevUrls => 
           prevUrls.map(url => 
             url.shortId === shortId 
@@ -144,9 +135,6 @@ const URLS = () => {
               : url
           )
         );
-        
-        // Show QR code section
-        setShowQRCode(prev => ({ ...prev, [shortId]: true }));
       }
     } catch (error) {
       console.error('Error generating QR code:', error);
@@ -339,7 +327,7 @@ const URLS = () => {
           </button>
         </div>
 
-        {/* Create URL Form */}
+        {/* Create URL Form - keeping your existing form */}
         {showCreateForm && (
           <div className="max-w-4xl mx-auto mb-8 bg-white rounded-2xl shadow-2xl p-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
@@ -531,14 +519,15 @@ const URLS = () => {
                 const analytics = selectedUrlAnalytics[url.shortId] || {};
                 const isLoadingAnalytics = loadingAnalytics[url.shortId];
                 const fullShortUrl = `https://urltinier.app/${url.shortId}`;
-                const hasQRCode = showQRCode[url.shortId];
+                const hasQRCode = !!url.qrCode; // Check if QR code exists in database
                 const isGenerating = generatingQR[url.shortId];
 
                 return (
                   <div key={url._id} className="bg-white rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300">
-                    {/* URL Header */}
+                    {/* URL Header with QR Code Section */}
                     <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] p-6">
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-6">
+                        {/* Left Side - URL Information */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="bg-white p-2 rounded-lg shadow-lg">
@@ -595,6 +584,75 @@ const URLS = () => {
                           </div>
                         </div>
 
+                        {/* Right Side - QR Code Section */}
+                        <div className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 min-w-[200px]">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-2xl">📱</span>
+                            <h5 className="font-bold text-white text-sm">QR Code</h5>
+                          </div>
+
+                          {/* Hidden QRCodeGeneration component for generation */}
+                          <QRCodeGeneration
+                            ref={el => qrGeneratorRefs.current[url.shortId] = el}
+                            url={fullShortUrl}
+                            size={256}
+                          />
+
+                          {!hasQRCode ? (
+                            // Show Generate Button if no QR code exists
+                            <button
+                              onClick={() => handleGenerateQRCode(url.shortId)}
+                              disabled={isGenerating}
+                              className="bg-white text-[#667eea] px-4 py-2 rounded-lg font-bold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                            >
+                              {isGenerating ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#667eea]"></div>
+                                  <span>Generating...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                  </svg>
+                                  <span>Generate</span>
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            // Show QR Code and Download Button if QR code exists
+                            <div className="flex flex-col items-center gap-3">
+                              {/* Use ShowQR component to display saved QR code */}
+                              <div className="bg-white p-2 rounded-lg">
+                                <ShowQR 
+                                  qrCodeDataUrl={url.qrCode}
+                                  shortUrl={fullShortUrl}
+                                  size={120}
+                                />
+                              </div>
+                              
+                              {/* Download Button */}
+                              <button
+                                onClick={() => {
+                                  const downloadLink = document.createElement('a');
+                                  downloadLink.href = url.qrCode;
+                                  downloadLink.download = `qr-code-${url.shortId}.png`;
+                                  document.body.appendChild(downloadLink);
+                                  downloadLink.click();
+                                  document.body.removeChild(downloadLink);
+                                  handleDownloadSuccess(url.shortId);
+                                }}
+                                className="bg-white text-green-600 px-4 py-2 rounded-lg font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
                         {/* Delete Button */}
                         <button
                           onClick={() => handleDeleteUrl(url.shortId)}
@@ -608,7 +666,7 @@ const URLS = () => {
                       </div>
                     </div>
 
-                    {/* Analytics Section */}
+                    {/* Analytics Section - keeping your existing code */}
                     <div className="p-6">
                       <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <span className="text-2xl">📈</span>
@@ -643,61 +701,6 @@ const URLS = () => {
                           </div>
                         </div>
                       )}
-
-                      {/* QR Code Section */}
-                      <div className="mt-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border-2 border-indigo-200">
-                        <h5 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                          <span className="text-2xl">📱</span>
-                          QR Code
-                        </h5>
-
-                        {!hasQRCode ? (
-                          <div className="text-center">
-                            {/* QRCodeGeneration Component with ref */}
-                            <QRCodeGeneration
-                              ref={el => qrGeneratorRefs.current[url.shortId] = el}
-                              url={fullShortUrl}
-                              size={256}
-                            />
-
-                            <button
-                              onClick={() => handleGenerateQRCode(url.shortId)}
-                              disabled={isGenerating}
-                              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
-                            >
-                              {isGenerating ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                                  Generating...
-                                </>
-                              ) : (
-                                <>
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                  </svg>
-                                  Generate QR Code
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center space-y-4">
-                            {/* ShowQR Component */}
-                            <ShowQR 
-                              qrCodeDataUrl={url.qrCode}
-                              shortUrl={fullShortUrl}
-                              size={192}
-                            />
-                            
-                            {/* DownloadBtn Component */}
-                            <DownloadBtn
-                              qrCodeDataUrl={url.qrCode}
-                              shortId={url.shortId}
-                              onDownloadSuccess={() => handleDownloadSuccess(url.shortId)}
-                            />
-                          </div>
-                        )}
-                      </div>
 
                       {/* Recent Visits */}
                       {url.visitHistory && url.visitHistory.length > 0 && (

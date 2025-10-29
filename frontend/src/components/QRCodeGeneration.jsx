@@ -17,7 +17,17 @@ const QRCodeGeneration = forwardRef(({ url, size = 256 }, ref) => {
   }));
 
   return (
-    <div ref={canvasRef} style={{ display: 'none' }}>
+    // Changed: position absolute with visibility hidden instead of display none
+    // This allows canvas to render but keeps it invisible
+    <div 
+      ref={canvasRef} 
+      style={{ 
+        position: 'absolute', 
+        left: '-9999px',
+        visibility: 'hidden',
+        pointerEvents: 'none'
+      }}
+    >
       <QRCodeCanvas
         value={url}
         size={size}
