@@ -28,7 +28,7 @@ app.set("views", path.join(__dirname, "src", "views"));
 import staticRoutes from "./routes/static.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import urlRoutes from "./routes/url.routes.js";
-import { getOriginalURL } from "../src/controllers/url.js";
+import { getOriginalURL } from "./controllers/url.js";
 
 app.use("/", staticRoutes);
 app.get('/:shortId', getOriginalURL);
