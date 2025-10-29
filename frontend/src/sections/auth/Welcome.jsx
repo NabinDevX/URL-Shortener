@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { problems, useCases } from "@/constants";
-import { benefits } from "../constants";
+import { benefits } from "../../constants";
 
 const Welcome = () => {
   const navigate = useNavigate();
