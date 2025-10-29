@@ -1,8 +1,23 @@
 import { QRCodeCanvas } from "qrcode.react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 
-const QRCodeGenerator = ({ url, size = 200 }) => {
+const QRCodeGeneration = forwardRef(({ url, size = 256 }, ref) => {
+  const canvasRef = useRef(null);
+
+  // Expose generateQRCode method to parent component
+  useImperativeHandle(ref, () => ({
+    generateQRCode: () => {
+      const canvas = canvasRef.current?.querySelector('canvas');
+      if (!canvas) {
+        throw new Error('QR Code canvas not found');
+      }
+      // Convert canvas to base64 data URL
+      return canvas.toDataURL('image/png');
+    }
+  }));
+
   return (
-    <div className="flex flex-col items-center space-y-3">
+    <div ref={canvasRef} style={{ display: 'none' }}>
       <QRCodeCanvas
         value={url}
         size={size}
@@ -10,11 +25,11 @@ const QRCodeGenerator = ({ url, size = 200 }) => {
         fgColor={"#000000"}
         level={"H"}
         includeMargin={true}
-        className="bg-white p-2 rounded-lg shadow-lg"
       />
-      <p className="text-sm text-gray-600 font-medium">{url}</p>
     </div>
   );
-};
+});
 
-export default QRCodeGenerator;
+QRCodeGeneration.displayName = 'QRCodeGeneration';
+
+export default QRCodeGeneration;

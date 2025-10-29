@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { QRCodeCanvas } from 'qrcode.react';
-import QRCodeGenerator from '../components/QRCodeGeneration';
-import DownloadableQRCode from '../components/DownloadBtn';
+import QRCodeGeneration from '../components/QRCodeGeneration';
+import ShowQR from '../components/ShowQR';
+import DownloadBtn from '../components/DownloadBtn';
 
 const URLS = () => {
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ const URLS = () => {
   // QR Code states
   const [generatingQR, setGeneratingQR] = useState({});
   const [showQRCode, setShowQRCode] = useState({});
-  const qrGeneratorRefs = useRef({}); // For hidden QR code generation
+  const qrGeneratorRefs = useRef({}); // Refs for QRCodeGeneration components
 
   // Message state
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -110,21 +110,21 @@ const URLS = () => {
     }
   };
 
-  // Generate QR Code
-  const generateQRCode = async (shortId) => {
+  // Generate QR Code - Now uses QRCodeGeneration component's method
+  const handleGenerateQRCode = async (shortId) => {
     setGeneratingQR(prev => ({ ...prev, [shortId]: true }));
     
     try {
-      // Wait a bit for canvas to render
+      // Wait for component to render
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      const canvas = qrGeneratorRefs.current[shortId]?.querySelector('canvas');
-      if (!canvas) {
-        throw new Error('QR Code canvas not found');
+      // Use the component's generateQRCode method
+      const qrGenerator = qrGeneratorRefs.current[shortId];
+      if (!qrGenerator) {
+        throw new Error('QR Code generator not found');
       }
 
-      // Convert canvas to base64 string
-      const qrCodeDataUrl = canvas.toDataURL('image/png');
+      const qrCodeDataUrl = qrGenerator.generateQRCode();
 
       // Save QR code to backend
       const response = await axios.put(
@@ -644,7 +644,7 @@ const URLS = () => {
                         </div>
                       )}
 
-                      {/* QR Code Section - USING COMPONENTS */}
+                      {/* QR Code Section */}
                       <div className="mt-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border-2 border-indigo-200">
                         <h5 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                           <span className="text-2xl">📱</span>
@@ -653,21 +653,15 @@ const URLS = () => {
 
                         {!hasQRCode ? (
                           <div className="text-center">
-                            {/* Hidden canvas for QR generation using QRCodeCanvas directly */}
-                            <div 
+                            {/* QRCodeGeneration Component with ref */}
+                            <QRCodeGeneration
                               ref={el => qrGeneratorRefs.current[url.shortId] = el}
-                              style={{ display: 'none' }}
-                            >
-                              <QRCodeCanvas
-                                value={fullShortUrl}
-                                size={256}
-                                level="H"
-                                includeMargin={true}
-                              />
-                            </div>
+                              url={fullShortUrl}
+                              size={256}
+                            />
 
                             <button
-                              onClick={() => generateQRCode(url.shortId)}
+                              onClick={() => handleGenerateQRCode(url.shortId)}
                               disabled={isGenerating}
                               className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
                             >
@@ -687,39 +681,21 @@ const URLS = () => {
                             </button>
                           </div>
                         ) : (
-                          <>
-                            {/* Display saved QR code OR use DownloadableQRCode component */}
-                            {url.qrCode ? (
-                              // If QR code is saved, show it with download button
-                              <div className="flex flex-col items-center space-y-4">
-                                <QRCodeGenerator url={fullShortUrl} size={192} />
-                                <button
-                                  onClick={() => {
-                                    const downloadLink = document.createElement('a');
-                                    downloadLink.href = url.qrCode;
-                                    downloadLink.download = `qr-code-${url.shortId}.png`;
-                                    document.body.appendChild(downloadLink);
-                                    downloadLink.click();
-                                    document.body.removeChild(downloadLink);
-                                    handleDownloadSuccess(url.shortId);
-                                  }}
-                                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                                >
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                  </svg>
-                                  Download QR Code
-                                </button>
-                              </div>
-                            ) : (
-                              // Use DownloadableQRCode component
-                              <DownloadableQRCode 
-                                url={fullShortUrl} 
-                                shortId={url.shortId}
-                                onDownloadSuccess={() => handleDownloadSuccess(url.shortId)}
-                              />
-                            )}
-                          </>
+                          <div className="flex flex-col items-center space-y-4">
+                            {/* ShowQR Component */}
+                            <ShowQR 
+                              qrCodeDataUrl={url.qrCode}
+                              shortUrl={fullShortUrl}
+                              size={192}
+                            />
+                            
+                            {/* DownloadBtn Component */}
+                            <DownloadBtn
+                              qrCodeDataUrl={url.qrCode}
+                              shortId={url.shortId}
+                              onDownloadSuccess={() => handleDownloadSuccess(url.shortId)}
+                            />
+                          </div>
                         )}
                       </div>
 
