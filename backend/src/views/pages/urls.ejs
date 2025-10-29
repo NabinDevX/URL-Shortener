@@ -744,7 +744,8 @@
     noUrls.style.display = 'none';
 
     try {
-      const response = await fetch('/api/v1/url/user/all', {
+      // Fetch ALL URLs including deleted ones
+      const response = await fetch('/api/v1/url/user/all?includeDeleted=true', {
         method: 'GET',
         credentials: 'include'
       });
@@ -771,6 +772,7 @@
         noUrls.style.display = 'block';
       } else {
         displayUrls(urls);
+        updateStats(urls); // Add stats display
       }
 
     } catch (err) {
@@ -781,10 +783,28 @@
     }
   }
 
+  function updateStats(urls) {
+    const totalUrls = urls.length;
+    const activeUrls = urls.filter(url => !url.isDeleted).length;
+    const totalClicks = urls.reduce((sum, url) => {
+      return sum + (url.totalClicks || (url.visitHistory ? url.visitHistory.length : 0));
+    }, 0);
+
+    // Update stats in header
+    const listHeader = document.querySelector('.list-header h2');
+    listHeader.innerHTML = `
+      Your URLs 
+      <span style="font-size: 1rem; color: #666; font-weight: 400;">
+        (${totalUrls} total, ${activeUrls} active, ${totalClicks} clicks)
+      </span>
+    `;
+  }
+
   function displayUrls(urls) {
     const urlsList = document.getElementById('urlsList');
     urlsList.innerHTML = '';
 
+    // Show ALL URLs (including deleted)
     urls.forEach(url => {
       const urlItem = createUrlItem(url);
       urlsList.appendChild(urlItem);

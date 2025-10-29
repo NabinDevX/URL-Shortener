@@ -22,18 +22,21 @@
         <span class="stat-icon">🔗</span>
         <h3>Total URLs</h3>
         <p class="stat-number" id="total-urls">0</p>
+        <small style="opacity: 0.8; font-size: 0.9rem;">All time created</small>
       </div>
       
       <div class="stat-card">
         <span class="stat-icon">📊</span>
         <h3>Total Clicks</h3>
         <p class="stat-number" id="total-clicks">0</p>
+        <small style="opacity: 0.8; font-size: 0.9rem;">Across all links</small>
       </div>
       
       <div class="stat-card">
         <span class="stat-icon">✨</span>
         <h3>Active Links</h3>
         <p class="stat-number" id="active-links">0</p>
+        <small style="opacity: 0.8; font-size: 0.9rem;">Currently active</small>
       </div>
     </div>
 
@@ -50,7 +53,7 @@
     <!-- URLs List Section -->
     <div id="urls-section" class="urls-section" style="display: none;">
       <div class="section-header">
-        <h2>Your URLs</h2>
+        <h2>Active URLs</h2>
         <button class="btn-view-all" onclick="window.location.href='/urls'">View All</button>
       </div>
       
@@ -60,7 +63,7 @@
 
       <div id="no-urls" class="no-urls" style="display: none;">
         <span class="empty-icon">📭</span>
-        <h3>No URLs yet</h3>
+        <h3>No Active URLs</h3>
         <p>Create your first short URL to get started!</p>
         <button class="btn btn-primary" onclick="window.location.href='/urls'">Create Now</button>
       </div>
@@ -468,37 +471,40 @@
     urlsSection.style.display = 'none';
 
     try {
-      // Fetch all URLs
-      const response = await fetch('/api/v1/url/user/all', {
+      // Fetch all URLs (includeDeleted=true to get total count)
+      const responseAll = await fetch('/api/v1/url/user/all?includeDeleted=true', {
         method: 'GET',
         credentials: 'include'
       });
 
-      if (!response.ok) {
-        if (response.status === 401) {
+      if (!responseAll.ok) {
+        if (responseAll.status === 401) {
           window.location.href = '/login';
           return;
         }
         throw new Error('Failed to fetch URLs');
       }
 
-      const data = await response.json();
+      const dataAll = await responseAll.json();
 
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to load data');
+      if (!dataAll.success) {
+        throw new Error(dataAll.message || 'Failed to load data');
       }
 
-      const urls = data.data.urls || [];
-      const totalClicks = data.data.totalClicks || 0;
+      const allUrls = dataAll.data.urls || [];
+      const totalClicks = dataAll.data.totalClicks || 0;
+
+      // Filter only active URLs (isDeleted = false)
+      const activeUrls = allUrls.filter(url => !url.isDeleted);
 
       // Calculate stats
-      const totalUrls = urls.length;
-      const activeUrls = urls.filter(url => !url.isDeleted).length;
+      const totalUrls = allUrls.length; // Total count (including deleted)
+      const activeCount = activeUrls.length; // Only non-deleted
 
       // Update stats
       document.getElementById('total-urls').textContent = totalUrls;
       document.getElementById('total-clicks').textContent = totalClicks.toLocaleString();
-      document.getElementById('active-links').textContent = activeUrls;
+      document.getElementById('active-links').textContent = activeCount;
 
       // Show stats and buttons
       loading.style.display = 'none';
@@ -506,9 +512,9 @@
       actionButtons.style.display = 'flex';
       urlsSection.style.display = 'block';
 
-      // Display URLs list
-      if (urls.length > 0) {
-        displayUrls(urls.slice(0, 5)); // Show only first 5 URLs
+      // Display only active URLs list (first 5)
+      if (activeUrls.length > 0) {
+        displayUrls(activeUrls.slice(0, 5)); // Show only first 5 ACTIVE URLs
         document.getElementById('no-urls').style.display = 'none';
       } else {
         document.getElementById('urls-list').innerHTML = '';
@@ -527,11 +533,13 @@
     const urlsList = document.getElementById('urls-list');
     urlsList.innerHTML = '';
 
-    urls.forEach(url => {
+    // Only display URLs where isDeleted is false
+    const activeUrls = urls.filter(url => !url.isDeleted);
+
+    activeUrls.forEach(url => {
       const shortUrl = `https://urltinier.app/${url.shortId}`;
       const clicks = url.totalClicks || (url.visitHistory ? url.visitHistory.length : 0);
       const createdDate = new Date(url.createdAt).toLocaleDateString();
-      const isDeleted = url.isDeleted;
 
       const urlItem = document.createElement('div');
       urlItem.className = 'url-item';
@@ -542,9 +550,7 @@
           <div class="url-meta">
             <span>📊 ${clicks} clicks</span>
             <span>📅 ${createdDate}</span>
-            <span class="status-badge ${isDeleted ? 'status-deleted' : 'status-active'}">
-              ${isDeleted ? 'Deleted' : 'Active'}
-            </span>
+            <span class="status-badge status-active">Active</span>
           </div>
         </div>
         <div class="url-actions">
