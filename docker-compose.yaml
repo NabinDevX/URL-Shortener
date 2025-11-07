@@ -1,18 +1,4 @@
 services:
-  frontend:
-    image: ghcr.io/nabindevx/url-shortener/frontend:latest
-    container_name: frontend
-    volumes:
-      - shared-data:/app/packages/extension/dist
-    ports:
-      - "5000:5173"
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      VITE_API_PREFIX: ${VITE_API_PREFIX}
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-    networks:
-      - app-network
-
   backend1:
     image: ghcr.io/nabindevx/url-shortener/backend:latest
     container_name: backend_1
@@ -33,8 +19,22 @@ services:
       REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
       BREVO_API_KEY: ${BREVO_API_KEY}
       BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+    networks:
+      - app-network
+
+  frontend:
+    image: ghcr.io/nabindevx/url-shortener/frontend:latest
+    container_name: frontend
+    volumes:
+      - shared-data:/app/packages/extension/dist
+    ports:
+      - "5000:5173"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      VITE_API_PREFIX: ${VITE_API_PREFIX}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     depends_on:
-      - frontend
+      - backend1
     networks:
       - app-network
 
