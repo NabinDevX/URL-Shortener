@@ -2,7 +2,8 @@ name: CI/CD Deployment (GHCR Pull)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -16,7 +17,8 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # 🧩 Convert repo name to lowercase for GHCR
       - name: Prepare lowercase image names
@@ -57,51 +59,116 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # 🧩 Prepare lowercase repo name for deploy too
       - name: Prepare lowercase repo name
-        id: repo
         run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      # 🚀 Deploy to VM via SSH
-      - name: Deploy to VM via SSH
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          NODE_ENV=${{ secrets.NODE_ENV }}
+          PORT=${{ secrets.PORT }}
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          REDIS_URL=${{ secrets.REDIS_URL }}
+          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+          USER_SECRET_ACCESS_TOKEN=${{ secrets.USER_SECRET_ACCESS_TOKEN }}
+          USER_SECRET_REFRESH_TOKEN=${{ secrets.USER_SECRET_REFRESH_TOKEN }}
+          ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }}
+          REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}
+          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+          VITE_API_PREFIX=${{ secrets.VITE_API_PREFIX }}
+          VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+          EOF
+      - name: Ensure target directory exists on VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: mkdir -p ~/URL-Shortener
+
+      - name: Copy .env file to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: ".env"
+          target: "~/URL-Shortener/"
+
+      - name: Copy docker-compose.yml to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/URL-Shortener/"
+
+      - name: Login to GHCR on VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull latest images
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            echo "🚀 Starting deployment on VM..."
-
-            # Login to GHCR on VM
-            echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Pull latest images from GHCR (lowercase repo)
+            cd ~/URL-Shortener
             docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
             docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
+        env:
+          REPO_LOWER: ${{ env.REPO_LOWER }}
 
-            # Navigate to project directory
-            cd URL-Shortener
+      - name: Stop old containers
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/URL-Shortener
+            docker-compose down --remove-orphans || true
 
-            # Pull latest code (optional, if you want to keep code updated)
-            git pull origin main
+      - name: Start new containers
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/URL-Shortener
+            docker-compose up -d
 
-            # Stop old containers safely
-            docker-compose down --remove-orphans 2>/dev/null || true
-
-            # Start containers
-            docker-compose up -d 2>/dev/null
-
-            # Health check (optional)
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
             sleep 60
-
-            # Verify running containers
             docker ps
-            curl -s -f http://localhost:3333/health || echo "⚠️ Health check failed"
-            curl -s -f http://localhost:3333/health || echo "⚠️ Health check failed"
+            curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
+            curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
 
-            # Cleanup old images
-            docker image prune -f
+      - name: Cleanup old images
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: docker image prune -f
 
-            echo "✅ Deployment complete!"
+      - name: Deployment complete
+        run: echo "✅ Deployment complete!"

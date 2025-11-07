@@ -7,25 +7,24 @@ const QRCodeGeneration = forwardRef(({ url, size = 256 }, ref) => {
   // Expose generateQRCode method to parent component
   useImperativeHandle(ref, () => ({
     generateQRCode: () => {
-      const canvas = canvasRef.current?.querySelector('canvas');
+      const canvas = canvasRef.current?.querySelector("canvas");
       if (!canvas) {
-        throw new Error('QR Code canvas not found');
+        throw new Error("QR Code canvas not found");
       }
-      // Convert canvas to base64 data URL
-      return canvas.toDataURL('image/png');
-    }
+      // ✅ Already converts to base64 string
+      // Returns: "data:image/png;base64,iVBORw0KG..."
+      return canvas.toDataURL("image/png");
+    },
   }));
 
   return (
-    // Changed: position absolute with visibility hidden instead of display none
-    // This allows canvas to render but keeps it invisible
-    <div 
-      ref={canvasRef} 
-      style={{ 
-        position: 'absolute', 
-        left: '-9999px',
-        visibility: 'hidden',
-        pointerEvents: 'none'
+    <div
+      ref={canvasRef}
+      style={{
+        position: "absolute",
+        left: "-9999px",
+        visibility: "hidden",
+        pointerEvents: "none",
       }}
     >
       <QRCodeCanvas
@@ -40,6 +39,6 @@ const QRCodeGeneration = forwardRef(({ url, size = 256 }, ref) => {
   );
 });
 
-QRCodeGeneration.displayName = 'QRCodeGeneration';
+QRCodeGeneration.displayName = "QRCodeGeneration";
 
 export default QRCodeGeneration;

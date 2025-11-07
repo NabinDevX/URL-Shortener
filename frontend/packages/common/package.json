@@ -1,0 +1,18 @@
+{
+  "name": "@myorg/common",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./components/*": "./src/components/*.jsx"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "qrcode.react": "^4.0.0"
+  },
+  "devDependencies": {
+    "react": "^19.1.1",
+    "qrcode.react": "^4.2.0"
+  }
+}

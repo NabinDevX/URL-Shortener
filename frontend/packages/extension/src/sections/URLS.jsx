@@ -1,9 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import QRCodeGeneration from '../components/QRCodeGeneration';
-import ShowQR from '../components/ShowQR';
-import DownloadBtn from '../components/DownloadBtn';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { QRCodeGeneration, ShowQR } from "@myorg/common";
 
 const URLS = () => {
   const navigate = useNavigate();
@@ -16,9 +14,9 @@ const URLS = () => {
 
   // Create URL form
   const [newUrl, setNewUrl] = useState({
-    url: '',
-    customShortId: '',
-    idLength: 8
+    url: "",
+    customShortId: "",
+    idLength: 8,
   });
 
   // Analytics state
@@ -30,10 +28,10 @@ const URLS = () => {
   const qrGeneratorRefs = useRef({}); // Refs for QRCodeGeneration components
 
   // Message state
-  const [message, setMessage] = useState({ text: '', type: '' });
+  const [message, setMessage] = useState({ text: "", type: "" });
 
   // Copy notification
-  const [copiedUrl, setCopiedUrl] = useState('');
+  const [copiedUrl, setCopiedUrl] = useState("");
 
   useEffect(() => {
     fetchAllUrls();
@@ -42,37 +40,43 @@ const URLS = () => {
 
   const showMessage = (text, type) => {
     setMessage({ text, type });
-    setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+    setTimeout(() => setMessage({ text: "", type: "" }), 5000);
   };
 
   // Fetch all URLs
   const fetchAllUrls = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/v1/url/user/all?includeDeleted=true', {
-        withCredentials: true
-      });
+      const response = await axios.get(
+        "/api/v1/url/user/all?includeDeleted=true",
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.data.success) {
         const urlsData = response.data.data?.urls || [];
         setUrls(urlsData);
-        
+
         // Fetch analytics for all URLs
         if (urlsData.length > 0) {
-          urlsData.forEach(url => {
+          urlsData.forEach((url) => {
             fetchUrlAnalytics(url.shortId);
           });
         }
       }
     } catch (error) {
-      console.error('Error fetching URLs:', error);
+      console.error("Error fetching URLs:", error);
       if (error.response?.status === 401) {
-        navigate('/login');
+        navigate("/login");
       }
       if (error.response?.status === 404) {
         setUrls([]);
       } else {
-        showMessage(error.response?.data?.message || 'Failed to load URLs', 'error');
+        showMessage(
+          error.response?.data?.message || "Failed to load URLs",
+          "error"
+        );
       }
     } finally {
       setLoading(false);
@@ -81,41 +85,42 @@ const URLS = () => {
 
   // Fetch analytics for a specific URL
   const fetchUrlAnalytics = async (shortId) => {
-    setLoadingAnalytics(prev => ({ ...prev, [shortId]: true }));
+    setLoadingAnalytics((prev) => ({ ...prev, [shortId]: true }));
     try {
       const response = await axios.get(`/api/v1/url/analytics/${shortId}`, {
-        withCredentials: true
+        withCredentials: true,
       });
 
       if (response.data.success) {
-        setSelectedUrlAnalytics(prev => ({
+        setSelectedUrlAnalytics((prev) => ({
           ...prev,
-          [shortId]: response.data.data
+          [shortId]: response.data.data,
         }));
       }
     } catch (error) {
       console.error(`Error fetching analytics for ${shortId}:`, error);
     } finally {
-      setLoadingAnalytics(prev => ({ ...prev, [shortId]: false }));
+      setLoadingAnalytics((prev) => ({ ...prev, [shortId]: false }));
     }
   };
 
   // Generate QR Code and save to database
   const handleGenerateQRCode = async (shortId) => {
-    setGeneratingQR(prev => ({ ...prev, [shortId]: true }));
-    
+    setGeneratingQR((prev) => ({ ...prev, [shortId]: true }));
+
     try {
       // Wait for component to render
-      await new Promise(resolve => setTimeout(resolve, 150));
-      
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
       // Get the QRCodeGeneration component reference
       const qrGenerator = qrGeneratorRefs.current[shortId];
       if (!qrGenerator) {
-        throw new Error('QR Code generator not found');
+        throw new Error("QR Code generator not found");
       }
 
       // Generate QR code (returns base64 data URL)
       const qrCodeDataUrl = qrGenerator.generateQRCode();
+      // Returns: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
 
       // Save QR code to database using the update endpoint
       const response = await axios.put(
@@ -125,28 +130,26 @@ const URLS = () => {
       );
 
       if (response.data.success) {
-        showMessage('QR Code generated and saved successfully! 🎉', 'success');
-        
+        showMessage("QR Code generated and saved! 🎉", "success");
+
         // Update local state with the saved QR code
-        setUrls(prevUrls => 
-          prevUrls.map(url => 
-            url.shortId === shortId 
-              ? { ...url, qrCode: qrCodeDataUrl }
-              : url
+        setUrls((prevUrls) =>
+          prevUrls.map((url) =>
+            url.shortId === shortId ? { ...url, qrCode: qrCodeDataUrl } : url
           )
         );
       }
     } catch (error) {
-      console.error('Error generating QR code:', error);
-      showMessage(error.response?.data?.message || 'Failed to generate QR code', 'error');
+      console.error("Error generating QR code:", error);
+      showMessage("Failed to generate QR code", "error");
     } finally {
-      setGeneratingQR(prev => ({ ...prev, [shortId]: false }));
+      setGeneratingQR((prev) => ({ ...prev, [shortId]: false }));
     }
   };
 
   // Handle successful download
   const handleDownloadSuccess = (shortId) => {
-    showMessage('QR Code downloaded! 📥', 'success');
+    showMessage("QR Code downloaded! 📥", "success");
   };
 
   // Create new short URL
@@ -154,39 +157,45 @@ const URLS = () => {
     e.preventDefault();
 
     if (!newUrl.url) {
-      showMessage('Please enter a URL', 'error');
+      showMessage("Please enter a URL", "error");
       return;
     }
 
     // Validate URL format
     try {
       const parsedUrl = new URL(newUrl.url);
-      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-        showMessage('URL must start with http:// or https://', 'error');
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        showMessage("URL must start with http:// or https://", "error");
         return;
       }
     } catch {
-      showMessage('Please enter a valid URL (include http:// or https://)', 'error');
+      showMessage(
+        "Please enter a valid URL (include http:// or https://)",
+        "error"
+      );
       return;
     }
 
     // Validate custom short ID if provided
     if (newUrl.customShortId) {
       const customId = newUrl.customShortId.trim();
-      
+
       if (customId.length < 3) {
-        showMessage('Custom short ID must be at least 3 characters', 'error');
+        showMessage("Custom short ID must be at least 3 characters", "error");
         return;
       }
 
       if (customId.length > 20) {
-        showMessage('Custom short ID must not exceed 20 characters', 'error');
+        showMessage("Custom short ID must not exceed 20 characters", "error");
         return;
       }
 
       const validShortIdRegex = /^[a-zA-Z0-9_-]+$/;
       if (!validShortIdRegex.test(customId)) {
-        showMessage('Custom short ID can only contain letters, numbers, hyphens, and underscores', 'error');
+        showMessage(
+          "Custom short ID can only contain letters, numbers, hyphens, and underscores",
+          "error"
+        );
         return;
       }
     }
@@ -195,7 +204,7 @@ const URLS = () => {
     if (!newUrl.customShortId && newUrl.idLength) {
       const length = parseInt(newUrl.idLength);
       if (isNaN(length) || length < 4 || length > 15) {
-        showMessage('ID length must be between 4 and 15 characters', 'error');
+        showMessage("ID length must be between 4 and 15 characters", "error");
         return;
       }
     }
@@ -203,7 +212,7 @@ const URLS = () => {
     setCreating(true);
     try {
       const payload = {
-        url: newUrl.url
+        url: newUrl.url,
       };
 
       // Add custom short ID if provided
@@ -216,29 +225,36 @@ const URLS = () => {
         payload.idLength = parseInt(newUrl.idLength);
       }
 
-      const response = await axios.post('/api/v1/url/', payload, {
-        withCredentials: true
+      const response = await axios.post("/api/v1/url/", payload, {
+        withCredentials: true,
       });
 
       if (response.data.success) {
         const responseData = response.data.data;
-        
+
         if (responseData.isExisting) {
-          showMessage(`This URL already exists! Short ID: ${responseData.shortId}`, 'success');
+          showMessage(
+            `This URL already exists! Short ID: ${responseData.shortId}`,
+            "success"
+          );
         } else if (responseData.isCustom) {
-          showMessage(`Custom short URL created: ${responseData.shortId} 🎉`, 'success');
+          showMessage(
+            `Custom short URL created: ${responseData.shortId} 🎉`,
+            "success"
+          );
         } else {
-          showMessage('Short URL created successfully! 🎉', 'success');
+          showMessage("Short URL created successfully! 🎉", "success");
         }
-        
-        setNewUrl({ url: '', customShortId: '', idLength: 8 });
+
+        setNewUrl({ url: "", customShortId: "", idLength: 8 });
         setShowCreateForm(false);
         fetchAllUrls(); // Refresh the list
       }
     } catch (error) {
-      console.error('Error creating URL:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to create short URL';
-      showMessage(errorMessage, 'error');
+      console.error("Error creating URL:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to create short URL";
+      showMessage(errorMessage, "error");
     } finally {
       setCreating(false);
     }
@@ -249,31 +265,34 @@ const URLS = () => {
     const fullUrl = `https://urltinier.app/${shortId}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedUrl(shortId);
-    showMessage('Link copied to clipboard! 📋', 'success');
-    
+    showMessage("Link copied to clipboard! 📋", "success");
+
     setTimeout(() => {
-      setCopiedUrl('');
+      setCopiedUrl("");
     }, 2000);
   };
 
   // Delete URL
   const handleDeleteUrl = async (shortId) => {
-    if (!window.confirm('Are you sure you want to delete this URL?')) {
+    if (!window.confirm("Are you sure you want to delete this URL?")) {
       return;
     }
 
     try {
       const response = await axios.delete(`/api/v1/url/${shortId}`, {
-        withCredentials: true
+        withCredentials: true,
       });
 
       if (response.data.success) {
-        showMessage('URL deleted successfully', 'success');
+        showMessage("URL deleted successfully", "success");
         fetchAllUrls();
       }
     } catch (error) {
-      console.error('Error deleting URL:', error);
-      showMessage(error.response?.data?.message || 'Failed to delete URL', 'error');
+      console.error("Error deleting URL:", error);
+      showMessage(
+        error.response?.data?.message || "Failed to delete URL",
+        "error"
+      );
     }
   };
 
@@ -296,19 +315,25 @@ const URLS = () => {
           <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full mb-4 shadow-2xl">
             <span className="text-5xl">🔗</span>
           </div>
-          <h1 className="text-5xl font-bold mb-2 drop-shadow-lg">Manage URLs</h1>
-          <p className="text-xl text-white/90">Create and track your shortened links</p>
+          <h1 className="text-5xl font-bold mb-2 drop-shadow-lg">
+            Manage URLs
+          </h1>
+          <p className="text-xl text-white/90">
+            Create and track your shortened links
+          </p>
         </div>
 
         {/* Message Alert */}
         {message.text && (
-          <div className={`mb-6 p-4 rounded-xl shadow-lg max-w-4xl mx-auto ${
-            message.type === 'success' 
-              ? 'bg-green-100 text-green-800 border-2 border-green-300' 
-              : 'bg-red-100 text-red-800 border-2 border-red-300'
-          }`}>
+          <div
+            className={`mb-6 p-4 rounded-xl shadow-lg max-w-4xl mx-auto ${
+              message.type === "success"
+                ? "bg-green-100 text-green-800 border-2 border-green-300"
+                : "bg-red-100 text-red-800 border-2 border-red-300"
+            }`}
+          >
             <p className="font-semibold flex items-center gap-2">
-              <span>{message.type === 'success' ? '✅' : '❌'}</span>
+              <span>{message.type === "success" ? "✅" : "❌"}</span>
               {message.text}
             </p>
           </div>
@@ -320,10 +345,20 @@ const URLS = () => {
             onClick={() => setShowCreateForm(!showCreateForm)}
             className="w-full py-4 px-6 bg-white text-[#667eea] rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 group"
           >
-            <svg className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <svg
+              className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
-            {showCreateForm ? 'Hide Form' : 'Create New Short URL'}
+            {showCreateForm ? "Hide Form" : "Create New Short URL"}
           </button>
         </div>
 
@@ -344,12 +379,16 @@ const URLS = () => {
                 <input
                   type="url"
                   value={newUrl.url}
-                  onChange={(e) => setNewUrl({ ...newUrl, url: e.target.value })}
+                  onChange={(e) =>
+                    setNewUrl({ ...newUrl, url: e.target.value })
+                  }
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#667eea] focus:outline-none transition-colors"
                   placeholder="https://example.com/your-long-url"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Must start with http:// or https://</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Must start with http:// or https://
+                </p>
               </div>
 
               {/* Info Box */}
@@ -359,8 +398,14 @@ const URLS = () => {
                   Choose one option below:
                 </p>
                 <ul className="text-xs text-blue-700 mt-2 ml-6 space-y-1">
-                  <li>• Create a <strong>custom short ID</strong> (e.g., "my-link")</li>
-                  <li>• Or let the system generate a random ID with your <strong>preferred length</strong></li>
+                  <li>
+                    • Create a <strong>custom short ID</strong> (e.g.,
+                    "my-link")
+                  </li>
+                  <li>
+                    • Or let the system generate a random ID with your{" "}
+                    <strong>preferred length</strong>
+                  </li>
                 </ul>
               </div>
 
@@ -376,7 +421,7 @@ const URLS = () => {
                     onChange={(e) => {
                       const value = e.target.value;
                       // Only allow valid characters
-                      if (value === '' || /^[a-zA-Z0-9_-]*$/.test(value)) {
+                      if (value === "" || /^[a-zA-Z0-9_-]*$/.test(value)) {
                         setNewUrl({ ...newUrl, customShortId: value });
                       }
                     }}
@@ -391,7 +436,10 @@ const URLS = () => {
                   {newUrl.customShortId && (
                     <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
                       <p className="text-xs text-green-700 font-semibold">
-                        Preview: https://urltinier.app/<span className="font-bold">{newUrl.customShortId}</span>
+                        Preview: https://urltinier.app/
+                        <span className="font-bold">
+                          {newUrl.customShortId}
+                        </span>
                       </p>
                     </div>
                   )}
@@ -406,7 +454,9 @@ const URLS = () => {
                     <input
                       type="number"
                       value={newUrl.idLength}
-                      onChange={(e) => setNewUrl({ ...newUrl, idLength: e.target.value })}
+                      onChange={(e) =>
+                        setNewUrl({ ...newUrl, idLength: e.target.value })
+                      }
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#667eea] focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                       min="4"
                       max="15"
@@ -414,28 +464,31 @@ const URLS = () => {
                     />
                     {newUrl.customShortId && (
                       <div className="absolute inset-0 flex items-center justify-center bg-gray-50/80 rounded-xl">
-                        <span className="text-xs text-gray-500 font-semibold">Disabled (using custom ID)</span>
+                        <span className="text-xs text-gray-500 font-semibold">
+                          Disabled (using custom ID)
+                        </span>
                       </div>
                     )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    {newUrl.customShortId 
-                      ? 'Only used when no custom ID is provided'
-                      : `Range: 4-15 characters • Current: ${newUrl.idLength} chars`
-                    }
+                    {newUrl.customShortId
+                      ? "Only used when no custom ID is provided"
+                      : `Range: 4-15 characters • Current: ${newUrl.idLength} chars`}
                   </p>
                   {!newUrl.customShortId && (
                     <div className="mt-2">
                       <div className="flex gap-2">
-                        {[4, 6, 8, 10, 12].map(len => (
+                        {[4, 6, 8, 10, 12].map((len) => (
                           <button
                             key={len}
                             type="button"
-                            onClick={() => setNewUrl({ ...newUrl, idLength: len })}
+                            onClick={() =>
+                              setNewUrl({ ...newUrl, idLength: len })
+                            }
                             className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                               parseInt(newUrl.idLength) === len
-                                ? 'bg-[#667eea] text-white shadow-lg'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                ? "bg-[#667eea] text-white shadow-lg"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                             }`}
                           >
                             {len}
@@ -461,10 +514,22 @@ const URLS = () => {
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 10V3L4 14h7v7l9-11h-7z"
+                        />
                       </svg>
-                      {newUrl.customShortId ? 'Create Custom URL' : 'Create Random URL'}
+                      {newUrl.customShortId
+                        ? "Create Custom URL"
+                        : "Create Random URL"}
                     </span>
                   )}
                 </button>
@@ -472,7 +537,7 @@ const URLS = () => {
                   type="button"
                   onClick={() => {
                     setShowCreateForm(false);
-                    setNewUrl({ url: '', customShortId: '', idLength: 8 });
+                    setNewUrl({ url: "", customShortId: "", idLength: 8 });
                   }}
                   className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-colors"
                 >
@@ -491,7 +556,9 @@ const URLS = () => {
                 <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-6xl">🔗</span>
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800 mb-3">No URLs Yet</h3>
+                <h3 className="text-3xl font-bold text-gray-800 mb-3">
+                  No URLs Yet
+                </h3>
                 <p className="text-gray-600 mb-8 text-lg">
                   Create your first shortened URL to get started!
                 </p>
@@ -499,8 +566,18 @@ const URLS = () => {
                   onClick={() => setShowCreateForm(true)}
                   className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Create Your First URL
                 </button>
@@ -519,11 +596,13 @@ const URLS = () => {
                 const analytics = selectedUrlAnalytics[url.shortId] || {};
                 const isLoadingAnalytics = loadingAnalytics[url.shortId];
                 const fullShortUrl = `https://urltinier.app/${url.shortId}`;
-                const hasQRCode = !!url.qrCode; // Check if QR code exists in database
-                const isGenerating = generatingQR[url.shortId];
+                const hasQRCode = !!url.qrCode; // Check if base64 string exists
 
                 return (
-                  <div key={url._id} className="bg-white rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300">
+                  <div
+                    key={url._id}
+                    className="bg-white rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300"
+                  >
                     {/* URL Header with QR Code Section */}
                     <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] p-6">
                       <div className="flex items-start justify-between gap-6">
@@ -537,10 +616,12 @@ const URLS = () => {
                               {url.shortId}
                             </h3>
                           </div>
-                          
+
                           {/* Short URL */}
                           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-3">
-                            <p className="text-xs text-white/70 font-semibold mb-2">SHORT URL</p>
+                            <p className="text-xs text-white/70 font-semibold mb-2">
+                              SHORT URL
+                            </p>
                             <div className="flex items-center gap-3 flex-wrap">
                               <a
                                 href={fullShortUrl}
@@ -571,7 +652,9 @@ const URLS = () => {
 
                           {/* Original URL */}
                           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                            <p className="text-xs text-white/70 font-semibold mb-2">REDIRECTS TO</p>
+                            <p className="text-xs text-white/70 font-semibold mb-2">
+                              REDIRECTS TO
+                            </p>
                             <a
                               href={url.redirectUrl}
                               target="_blank"
@@ -588,13 +671,17 @@ const URLS = () => {
                         <div className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 min-w-[200px]">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">📱</span>
-                            <h5 className="font-bold text-white text-sm">QR Code</h5>
+                            <h5 className="font-bold text-white text-sm">
+                              QR Code
+                            </h5>
                           </div>
 
                           {/* Hidden QRCodeGeneration component for generation */}
                           <QRCodeGeneration
-                            ref={el => qrGeneratorRefs.current[url.shortId] = el}
-                            url={fullShortUrl}
+                            ref={(el) =>
+                              (qrGeneratorRefs.current[url.shortId] = el)
+                            }
+                            url={`https://urltinier.app/${url.shortId}`}
                             size={256}
                           />
 
@@ -612,8 +699,18 @@ const URLS = () => {
                                 </>
                               ) : (
                                 <>
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 4v16m8-8H4"
+                                    />
                                   </svg>
                                   <span>Generate</span>
                                 </>
@@ -624,17 +721,18 @@ const URLS = () => {
                             <div className="flex flex-col items-center gap-3">
                               {/* Use ShowQR component to display saved QR code */}
                               <div className="bg-white p-2 rounded-lg">
-                                <ShowQR 
+                                <ShowQR
                                   qrCodeDataUrl={url.qrCode}
-                                  shortUrl={fullShortUrl}
+                                  shortUrl={`https://urltinier.app/${url.shortId}`}
                                   size={120}
                                 />
                               </div>
-                              
+
                               {/* Download Button */}
                               <button
                                 onClick={() => {
-                                  const downloadLink = document.createElement('a');
+                                  const downloadLink =
+                                    document.createElement("a");
                                   downloadLink.href = url.qrCode;
                                   downloadLink.download = `qr-code-${url.shortId}.png`;
                                   document.body.appendChild(downloadLink);
@@ -644,8 +742,18 @@ const URLS = () => {
                                 }}
                                 className="bg-white text-green-600 px-4 py-2 rounded-lg font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                  />
                                 </svg>
                                 Download
                               </button>
@@ -659,8 +767,18 @@ const URLS = () => {
                           className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 flex-shrink-0"
                           title="Delete URL"
                         >
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -680,23 +798,29 @@ const URLS = () => {
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
-                            <p className="text-sm text-blue-600 font-semibold mb-1">Total Clicks</p>
+                            <p className="text-sm text-blue-600 font-semibold mb-1">
+                              Total Clicks
+                            </p>
                             <p className="text-3xl font-bold text-blue-700">
                               {analytics.totalClicks || url.totalClicks || 0}
                             </p>
                           </div>
 
                           <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border-2 border-green-200">
-                            <p className="text-sm text-green-600 font-semibold mb-1">Created On</p>
+                            <p className="text-sm text-green-600 font-semibold mb-1">
+                              Created On
+                            </p>
                             <p className="text-lg font-bold text-green-700">
                               {new Date(url.createdAt).toLocaleDateString()}
                             </p>
                           </div>
 
                           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
-                            <p className="text-sm text-purple-600 font-semibold mb-1">Status</p>
+                            <p className="text-sm text-purple-600 font-semibold mb-1">
+                              Status
+                            </p>
                             <p className="text-lg font-bold text-purple-700">
-                              {url.isDeleted ? '🔴 Deleted' : '🟢 Active'}
+                              {url.isDeleted ? "🔴 Deleted" : "🟢 Active"}
                             </p>
                           </div>
                         </div>
@@ -707,22 +831,26 @@ const URLS = () => {
                         <div className="mt-6">
                           <h5 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                             <span className="text-xl">🕒</span>
-                            Recent Visits (Last {Math.min(url.visitHistory.length, 5)})
+                            Recent Visits (Last{" "}
+                            {Math.min(url.visitHistory.length, 5)})
                           </h5>
                           <div className="space-y-2">
-                            {url.visitHistory.slice(-5).reverse().map((visit, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
-                              >
-                                <span className="text-sm text-gray-700 font-medium">
-                                  {new Date(visit.timestamp).toLocaleString()}
-                                </span>
-                                <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full">
-                                  Visit #{url.visitHistory.length - index}
-                                </span>
-                              </div>
-                            ))}
+                            {url.visitHistory
+                              .slice(-5)
+                              .reverse()
+                              .map((visit, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                  <span className="text-sm text-gray-700 font-medium">
+                                    {new Date(visit.timestamp).toLocaleString()}
+                                  </span>
+                                  <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full">
+                                    Visit #{url.visitHistory.length - index}
+                                  </span>
+                                </div>
+                              ))}
                           </div>
                         </div>
                       )}
