@@ -138,7 +138,7 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd ~/URL-Shortener
-            sudo docker-compose down --remove-orphans || true
+            sudo docker compose down --remove-orphans || true
 
       - name: Start new containers
         uses: appleboy/ssh-action@v1.0.0
@@ -148,7 +148,7 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd ~/URL-Shortener
-            sudo docker-compose up -d
+            sudo docker compose up -d
 
       - name: Health check
         uses: appleboy/ssh-action@v1.0.0
