@@ -115,7 +115,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          script: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          script: echo "${{ secrets.TOKEN_GITHUB }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Pull latest images
         uses: appleboy/ssh-action@v1.0.0
