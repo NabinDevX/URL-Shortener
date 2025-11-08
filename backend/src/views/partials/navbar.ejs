@@ -1,0 +1,289 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <a href="/dashboard" class="navbar-brand">
+      <span class="brand-icon">🔗</span>
+      <span class="brand-text">URL Shortener</span>
+    </a>
+
+    <ul class="navbar-menu" id="navbarMenu">
+      <li class="nav-item">
+        <a href="/dashboard" class="nav-link <%= locals.currentPage === 'dashboard' ? 'active' : '' %>">
+          <span class="nav-icon">📊</span>
+          Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/urls" class="nav-link <%= locals.currentPage === 'urls' ? 'active' : '' %>">
+          <span class="nav-icon">🔗</span>
+          My URLs
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/profile" class="nav-link <%= locals.currentPage === 'profile' ? 'active' : '' %>">
+          <span class="nav-icon">👤</span>
+          Profile
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/logout" class="nav-link nav-link-logout">
+          <span class="nav-icon">🚪</span>
+          Logout
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle menu">
+      <span class="toggle-icon"></span>
+      <span class="toggle-icon"></span>
+      <span class="toggle-icon"></span>
+    </button>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    width: 100%;
+    padding: 12px 0;
+    position: relative;
+  }
+
+  .navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    transition: opacity 0.2s ease;
+    z-index: 1001;
+  }
+
+  .navbar-brand:hover {
+    opacity: 0.85;
+  }
+
+  .brand-icon {
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .brand-text {
+    display: inline-block;
+  }
+
+  .navbar-menu {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+  }
+
+  .nav-item {
+    margin: 0;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nav-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .nav-link.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-link-logout {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fecaca;
+  }
+
+  .nav-link-logout:hover {
+    background: rgba(239, 68, 68, 0.35);
+    color: white;
+  }
+
+  /* Mobile Toggle Button */
+  .navbar-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1001;
+  }
+
+  .toggle-icon {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-toggle.active .toggle-icon:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+  }
+
+  .navbar-toggle.active .toggle-icon:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar-toggle.active .toggle-icon:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    .brand-text {
+      font-size: 18px;
+    }
+
+    .navbar-toggle {
+      display: flex;
+    }
+
+    .navbar-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 280px;
+      max-width: 85vw;
+      height: 100vh;
+      background: linear-gradient(180deg, rgba(102, 126, 234, 0.98) 0%, rgba(118, 75, 162, 0.98) 100%);
+      backdrop-filter: blur(10px);
+      flex-direction: column;
+      padding: 100px 20px 30px;
+      gap: 8px;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -4px 0 30px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .navbar-menu.active {
+      right: 0;
+    }
+
+    .nav-link {
+      padding: 16px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* Overlay */
+    .navbar-menu.active::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: -100vw;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .navbar-container {
+      padding: 0 16px;
+    }
+
+    .brand-text {
+      display: none;
+    }
+
+    .brand-icon {
+      font-size: 28px;
+    }
+  }
+</style>
+
+<script>
+  // Mobile menu toggle
+  (function() {
+    const navbarToggle = document.getElementById('navbarToggle');
+    const navbarMenu = document.getElementById('navbarMenu');
+
+    if (navbarToggle && navbarMenu) {
+      navbarToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        navbarToggle.classList.toggle('active');
+        navbarMenu.classList.toggle('active');
+        document.body.style.overflow = navbarMenu.classList.contains('active') ? 'hidden' : '';
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (navbarMenu.classList.contains('active') &&
+          !navbarToggle.contains(e.target) &&
+          !navbarMenu.contains(e.target)) {
+          navbarToggle.classList.remove('active');
+          navbarMenu.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Close menu when clicking a link
+      const navLinks = navbarMenu.querySelectorAll('.nav-link');
+      navLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          navbarToggle.classList.remove('active');
+          navbarMenu.classList.remove('active');
+          document.body.style.overflow = '';
+        });
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && navbarMenu.classList.contains('active')) {
+          navbarToggle.classList.remove('active');
+          navbarMenu.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    }
+  })();
+</script>
