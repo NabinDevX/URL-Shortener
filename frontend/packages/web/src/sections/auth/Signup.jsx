@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: Form, 2: OTP Verification
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6-digit OTP
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]); // 6-digit OTP
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,15 +20,15 @@ const Signup = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -48,20 +48,20 @@ const Signup = () => {
 
     // Clear error when user types
     if (errors.otp) {
-      setErrors(prev => ({ ...prev, otp: '' }));
+      setErrors((prev) => ({ ...prev, otp: "" }));
     }
   };
 
   const handleOtpKeyDown = (index, e) => {
     // Handle backspace
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
   const handleOtpPaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
     if (!/^\d+$/.test(pastedData)) return;
 
     const newOtp = [...otp];
@@ -76,32 +76,33 @@ const Signup = () => {
 
     // Username validation
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
+      newErrors.username = "Username must be at least 3 characters";
     }
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = "Invalid email format";
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+      newErrors.password =
+        "Password must contain uppercase, lowercase, and number";
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -134,47 +135,47 @@ const Signup = () => {
     try {
       // Step 1: Send OTP to email
       const response = await axios.post(
-        '/api/v1/user/send-otp',
+        "/api/v1/user/send-otp",
         {
           email: formData.email,
-          name: formData.username
+          name: formData.username,
         },
         {
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
-          withCredentials: true
+          withCredentials: true,
         }
       );
 
-      console.log('✅ OTP sent successfully:', response.data);
+      console.log("✅ OTP sent successfully:", response.data);
 
       // Move to OTP verification step
       setStep(2);
       startResendTimer();
-
     } catch (error) {
-      console.error('❌ Send OTP error:', error);
+      console.error("❌ Send OTP error:", error);
 
       if (error.response) {
-        const errorMessage = error.response.data?.message || 'Failed to send OTP';
-        
+        const errorMessage =
+          error.response.data?.message || "Failed to send OTP";
+
         if (error.response.status === 409) {
-          setErrors({ 
-            email: 'Email already registered'
+          setErrors({
+            email: "Email already registered",
           });
         } else {
-          setErrors({ 
-            general: errorMessage 
+          setErrors({
+            general: errorMessage,
           });
         }
       } else if (error.request) {
-        setErrors({ 
-          general: 'Network error. Please check your connection.' 
+        setErrors({
+          general: "Network error. Please check your connection.",
         });
       } else {
-        setErrors({ 
-          general: 'An unexpected error occurred. Please try again.' 
+        setErrors({
+          general: "An unexpected error occurred. Please try again.",
         });
       }
     } finally {
@@ -185,10 +186,10 @@ const Signup = () => {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
 
-    const otpValue = otp.join('');
-    
+    const otpValue = otp.join("");
+
     if (otpValue.length !== 6) {
-      setErrors({ otp: 'Please enter complete OTP' });
+      setErrors({ otp: "Please enter complete OTP" });
       return;
     }
 
@@ -198,48 +199,47 @@ const Signup = () => {
     try {
       // Step 2: Verify OTP and Create Account
       const response = await axios.post(
-        '/api/v1/user/signup',
+        "/api/v1/user/signup",
         {
           name: formData.username,
           email: formData.email,
           password: formData.password,
-          otp: otpValue
+          otp: otpValue,
         },
         {
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
-          withCredentials: true
+          withCredentials: true,
         }
       );
 
-      console.log('✅ Signup successful:', response.data);
+      console.log("✅ Signup successful:", response.data);
 
       // Redirect to dashboard or login
-      navigate('/', { replace: true });
-
+      navigate("/", { replace: true });
     } catch (error) {
-      console.error('❌ Verify OTP error:', error);
+      console.error("❌ Verify OTP error:", error);
 
       if (error.response) {
-        const errorMessage = error.response.data?.message || 'Invalid OTP';
-        
+        const errorMessage = error.response.data?.message || "Invalid OTP";
+
         if (error.response.status === 400) {
-          setErrors({ 
-            otp: 'Invalid or expired OTP. Please try again.' 
+          setErrors({
+            otp: "Invalid or expired OTP. Please try again.",
           });
         } else {
-          setErrors({ 
-            general: errorMessage 
+          setErrors({
+            general: errorMessage,
           });
         }
       } else if (error.request) {
-        setErrors({ 
-          general: 'Network error. Please check your connection.' 
+        setErrors({
+          general: "Network error. Please check your connection.",
         });
       } else {
-        setErrors({ 
-          general: 'An unexpected error occurred. Please try again.' 
+        setErrors({
+          general: "An unexpected error occurred. Please try again.",
         });
       }
     } finally {
@@ -252,35 +252,34 @@ const Signup = () => {
 
     setLoading(true);
     setErrors({});
-    setOtp(['', '', '', '', '', '']);
+    setOtp(["", "", "", "", "", ""]);
 
     try {
       const response = await axios.post(
-        '/api/v1/user/send-otp',
+        "/api/v1/user/send-otp",
         {
           email: formData.email,
-          name: formData.username
+          name: formData.username,
         },
         {
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
-          withCredentials: true
+          withCredentials: true,
         }
       );
 
-      console.log('✅ OTP resent successfully:', response.data);
+      console.log("✅ OTP resent successfully:", response.data);
       startResendTimer();
 
       // Show success message
-      setErrors({ 
-        success: 'OTP sent successfully! Check your email.' 
+      setErrors({
+        success: "OTP sent successfully! Check your email.",
       });
-
     } catch (error) {
-      console.error('❌ Resend OTP error:', error);
-      setErrors({ 
-        general: error.response?.data?.message || 'Failed to resend OTP' 
+      console.error("❌ Resend OTP error:", error);
+      setErrors({
+        general: error.response?.data?.message || "Failed to resend OTP",
       });
     } finally {
       setLoading(false);
@@ -297,26 +296,38 @@ const Signup = () => {
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-4xl">🔗</span>
               <h1 className="text-3xl font-bold text-white">
-                {step === 1 ? 'Sign Up' : 'Verify Email'}
+                {step === 1 ? "Sign Up" : "Verify Email"}
               </h1>
             </div>
             <p className="text-center text-purple-100">
-              {step === 1 ? 'Create your account' : 'Enter the OTP sent to your email'}
+              {step === 1
+                ? "Create your account"
+                : "Enter the OTP sent to your email"}
             </p>
           </div>
 
           {/* Progress Indicator */}
           <div className="px-8 pt-6">
             <div className="flex items-center justify-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                step === 1 ? 'bg-purple-600 text-white' : 'bg-green-500 text-white'
-              }`}>
-                {step === 1 ? '1' : '✓'}
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                  step === 1
+                    ? "bg-purple-600 text-white"
+                    : "bg-green-500 text-white"
+                }`}
+              >
+                {step === 1 ? "1" : "✓"}
               </div>
-              <div className={`w-16 h-1 ${step === 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                step === 2 ? 'bg-purple-600 text-white' : 'bg-gray-300 text-gray-600'
-              }`}>
+              <div
+                className={`w-16 h-1 ${step === 2 ? "bg-purple-600" : "bg-gray-300"}`}
+              ></div>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                  step === 2
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-300 text-gray-600"
+                }`}
+              >
                 2
               </div>
             </div>
@@ -353,7 +364,10 @@ const Signup = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Username Field */}
                 <div>
-                  <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Username
                   </label>
                   <input
@@ -363,7 +377,7 @@ const Signup = () => {
                     value={formData.username}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${
-                      errors.username ? 'border-red-500' : 'border-gray-300'
+                      errors.username ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                     placeholder="Enter your username"
                     disabled={loading}
@@ -377,7 +391,10 @@ const Signup = () => {
 
                 {/* Email Field */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Email Address
                   </label>
                   <input
@@ -387,7 +404,7 @@ const Signup = () => {
                     value={formData.email}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
+                      errors.email ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                     placeholder="Enter your email"
                     disabled={loading}
@@ -401,18 +418,21 @@ const Signup = () => {
 
                 {/* Password Field */}
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Password
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 border ${
-                        errors.password ? 'border-red-500' : 'border-gray-300'
+                        errors.password ? "border-red-500" : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                       placeholder="Enter your password"
                       disabled={loading}
@@ -422,7 +442,7 @@ const Signup = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showPassword ? '👁️' : '👁️‍🗨️'}
+                      {showPassword ? "👁️" : "👁️‍🗨️"}
                     </button>
                   </div>
                   {errors.password && (
@@ -432,35 +452,43 @@ const Signup = () => {
                   )}
                   {!errors.password && formData.password && (
                     <p className="text-gray-500 text-xs mt-1">
-                      Must be 8+ characters with uppercase, lowercase, and number
+                      Must be 8+ characters with uppercase, lowercase, and
+                      number
                     </p>
                   )}
                 </div>
 
                 {/* Confirm Password Field */}
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Confirm Password
                   </label>
                   <div className="relative">
                     <input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       id="confirmPassword"
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       className={`w-full px-4 py-3 border ${
-                        errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                        errors.confirmPassword
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                       placeholder="Confirm your password"
                       disabled={loading}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                      {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
                     </button>
                   </div>
                   {errors.confirmPassword && (
@@ -476,8 +504,8 @@ const Signup = () => {
                   disabled={loading}
                   className={`w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
                     loading
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105'
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
                   }`}
                 >
                   {loading ? (
@@ -501,7 +529,7 @@ const Signup = () => {
                       Sending OTP...
                     </span>
                   ) : (
-                    'Continue'
+                    "Continue"
                   )}
                 </button>
               </form>
@@ -514,7 +542,9 @@ const Signup = () => {
                   <p className="text-gray-600 text-sm">
                     We've sent a 6-digit code to
                   </p>
-                  <p className="text-purple-600 font-semibold">{formData.email}</p>
+                  <p className="text-purple-600 font-semibold">
+                    {formData.email}
+                  </p>
                   <button
                     type="button"
                     onClick={() => setStep(1)}
@@ -541,7 +571,7 @@ const Signup = () => {
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         onPaste={handleOtpPaste}
                         className={`w-12 h-14 text-center text-2xl font-bold border ${
-                          errors.otp ? 'border-red-500' : 'border-gray-300'
+                          errors.otp ? "border-red-500" : "border-gray-300"
                         } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                         disabled={loading}
                       />
@@ -561,7 +591,10 @@ const Signup = () => {
                   </p>
                   {resendTimer > 0 ? (
                     <p className="text-sm text-gray-500">
-                      Resend in <span className="font-semibold text-purple-600">{resendTimer}s</span>
+                      Resend in{" "}
+                      <span className="font-semibold text-purple-600">
+                        {resendTimer}s
+                      </span>
                     </p>
                   ) : (
                     <button
@@ -578,11 +611,11 @@ const Signup = () => {
                 {/* Verify Button */}
                 <button
                   type="submit"
-                  disabled={loading || otp.join('').length !== 6}
+                  disabled={loading || otp.join("").length !== 6}
                   className={`w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
-                    loading || otp.join('').length !== 6
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105'
+                    loading || otp.join("").length !== 6
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
                   }`}
                 >
                   {loading ? (
@@ -606,7 +639,7 @@ const Signup = () => {
                       Verifying...
                     </span>
                   ) : (
-                    'Verify & Create Account'
+                    "Verify & Create Account"
                   )}
                 </button>
               </form>
@@ -615,7 +648,7 @@ const Signup = () => {
             {/* Sign In Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link
                   to="/login"
                   className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
@@ -647,11 +680,11 @@ const Signup = () => {
 
         {/* Terms */}
         <p className="text-center text-white text-xs mt-6">
-          By signing up, you agree to our{' '}
+          By signing up, you agree to our{" "}
           <a href="#terms" className="underline hover:text-blue-200">
             Terms of Service
-          </a>{' '}
-          and{' '}
+          </a>{" "}
+          and{" "}
           <a href="#privacy" className="underline hover:text-blue-200">
             Privacy Policy
           </a>

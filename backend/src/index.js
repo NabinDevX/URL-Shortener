@@ -50,14 +50,15 @@ if (cluster.isPrimary) {
   }
 
   cluster.on("exit", (worker, code, signal) => {
-    console.log(`⚠️ Worker ${worker.process.pid} died (${signal || code}). Restarting...`);
+    console.log(
+      `⚠️ Worker ${worker.process.pid} died (${signal || code}). Restarting...`
+    );
     cluster.fork();
   });
 
   cluster.on("online", (worker) => {
     console.log(`✅ Worker ${worker.process.pid} is online`);
   });
-
 } else {
   // ✅ WORKER PROCESS - Handle HTTP requests
   connectDB()

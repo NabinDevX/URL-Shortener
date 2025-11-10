@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 const Dashboard = ({ userData }) => {
   const [urls, setUrls] = useState([]);
@@ -16,28 +16,30 @@ const Dashboard = ({ userData }) => {
   const fetchUrls = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await axios.get('/api/v1/url/user/all', {
+      const response = await axios.get("/api/v1/url/user/all", {
         withCredentials: true,
-        timeout: 10000
+        timeout: 10000,
       });
 
-      console.log('✅ URLs fetched:', response.data);
+      console.log("✅ URLs fetched:", response.data);
       const urlsData = response.data.data?.urls || [];
       setUrls(urlsData);
 
       if (urlsData.length > 0) {
         await fetchAllAnalytics(urlsData);
       }
-
     } catch (err) {
-      console.error('❌ Error fetching URLs:', err);
-      
-      if (err.response?.status === 404 || err.response?.data?.data?.urls?.length === 0) {
+      console.error("❌ Error fetching URLs:", err);
+
+      if (
+        err.response?.status === 404 ||
+        err.response?.data?.data?.urls?.length === 0
+      ) {
         setUrls([]);
       } else {
-        setError(err.response?.data?.message || 'Failed to load URLs');
+        setError(err.response?.data?.message || "Failed to load URLs");
       }
     } finally {
       setLoading(false);
@@ -46,40 +48,46 @@ const Dashboard = ({ userData }) => {
 
   const fetchAllAnalytics = async (urlsList) => {
     try {
-      const analyticsPromises = urlsList.map(url => 
-        axios.get(`/api/v1/url/analytics/${url.shortId}`, {
-          withCredentials: true
-        }).catch(err => {
-          console.error(`Failed to fetch analytics for ${url.shortId}:`, err);
-          return { data: { data: { totalClicks: 0, clicksByDate: [] } } };
-        })
+      const analyticsPromises = urlsList.map((url) =>
+        axios
+          .get(`/api/v1/url/analytics/${url.shortId}`, {
+            withCredentials: true,
+          })
+          .catch((err) => {
+            console.error(`Failed to fetch analytics for ${url.shortId}:`, err);
+            return { data: { data: { totalClicks: 0, clicksByDate: [] } } };
+          })
       );
 
       const analyticsResults = await Promise.all(analyticsPromises);
-      
+
       const analyticsMap = {};
       urlsList.forEach((url, index) => {
         analyticsMap[url.shortId] = analyticsResults[index].data.data || {};
       });
 
       setAnalytics(analyticsMap);
-      console.log('✅ Analytics fetched:', analyticsMap);
-
+      console.log("✅ Analytics fetched:", analyticsMap);
     } catch (err) {
-      console.error('❌ Error fetching analytics:', err);
+      console.error("❌ Error fetching analytics:", err);
     }
   };
 
   const totalUrls = urls.length;
-  const totalClicks = urls.reduce((sum, url) => sum + (url.totalClicks || 0), 0);
-  const activeUrls = urls.filter(url => !url.isDeleted).length;
+  const totalClicks = urls.reduce(
+    (sum, url) => sum + (url.totalClicks || 0),
+    0
+  );
+  const activeUrls = urls.filter((url) => !url.isDeleted).length;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
         <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">Loading Dashboard...</p>
+          <p className="text-gray-600 text-lg font-semibold">
+            Loading Dashboard...
+          </p>
         </div>
       </div>
     );
@@ -113,7 +121,9 @@ const Dashboard = ({ userData }) => {
           <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">
             Welcome back, {userData?.name}! 👋
           </h1>
-          <p className="text-xl text-white/90">Here's an overview of your shortened URLs</p>
+          <p className="text-xl text-white/90">
+            Here's an overview of your shortened URLs
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -122,7 +132,9 @@ const Dashboard = ({ userData }) => {
           <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">Total URLs</p>
+                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">
+                  Total URLs
+                </p>
                 <p className="text-5xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
                   {totalUrls}
                 </p>
@@ -137,7 +149,9 @@ const Dashboard = ({ userData }) => {
           <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">Total Clicks</p>
+                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">
+                  Total Clicks
+                </p>
                 <p className="text-5xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
                   {totalClicks}
                 </p>
@@ -152,7 +166,9 @@ const Dashboard = ({ userData }) => {
           <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">Active URLs</p>
+                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">
+                  Active URLs
+                </p>
                 <p className="text-5xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
                   {activeUrls}
                 </p>
@@ -184,7 +200,9 @@ const Dashboard = ({ userData }) => {
                 <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6 shadow-2xl">
                   <span className="text-6xl">🔗</span>
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800 mb-3">No URLs Yet</h3>
+                <h3 className="text-3xl font-bold text-gray-800 mb-3">
+                  No URLs Yet
+                </h3>
                 <p className="text-gray-600 mb-8 text-lg">
                   Create your first shortened URL to get started!
                 </p>
@@ -192,8 +210,18 @@ const Dashboard = ({ userData }) => {
                   to="/urls"
                   className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Create Short URL
                 </Link>
@@ -222,10 +250,12 @@ const Dashboard = ({ userData }) => {
                             {url.shortId}
                           </h3>
                         </div>
-                        
+
                         <div className="space-y-2 ml-12">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-500 font-semibold">Short URL:</span>
+                            <span className="text-gray-500 font-semibold">
+                              Short URL:
+                            </span>
                             <a
                               href={`https://urltinier.app/${url.shortId}`}
                               target="_blank"
@@ -236,7 +266,9 @@ const Dashboard = ({ userData }) => {
                             </a>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText(`https://urltinier.app/${url.shortId}`);
+                                navigator.clipboard.writeText(
+                                  `https://urltinier.app/${url.shortId}`
+                                );
                               }}
                               className="text-gray-400 hover:text-[#667eea] transition-colors text-lg"
                               title="Copy to clipboard"
@@ -244,9 +276,11 @@ const Dashboard = ({ userData }) => {
                               📋
                             </button>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-500 font-semibold">Original:</span>
+                            <span className="text-gray-500 font-semibold">
+                              Original:
+                            </span>
                             <a
                               href={url.redirectUrl}
                               target="_blank"
@@ -260,7 +294,8 @@ const Dashboard = ({ userData }) => {
 
                         <div className="flex items-center gap-4 mt-4 ml-12 text-xs text-gray-500">
                           <span className="bg-gray-100 px-3 py-1 rounded-full">
-                            Created: {new Date(url.createdAt).toLocaleDateString()}
+                            Created:{" "}
+                            {new Date(url.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
@@ -270,14 +305,21 @@ const Dashboard = ({ userData }) => {
                           <p className="text-4xl font-bold bg-gradient-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
                             {clicks}
                           </p>
-                          <p className="text-sm text-gray-500 font-semibold">clicks</p>
+                          <p className="text-sm text-gray-500 font-semibold">
+                            clicks
+                          </p>
                         </div>
-                        
+
                         <button
-                          onClick={() => setSelectedUrl(selectedUrl === url.shortId ? null : url.shortId)}
+                          onClick={() =>
+                            setSelectedUrl(
+                              selectedUrl === url.shortId ? null : url.shortId
+                            )
+                          }
                           className="px-4 py-2 text-sm bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105 font-semibold"
                         >
-                          {selectedUrl === url.shortId ? 'Hide' : 'View'} Details
+                          {selectedUrl === url.shortId ? "Hide" : "View"}{" "}
+                          Details
                         </button>
                       </div>
                     </div>
@@ -288,19 +330,27 @@ const Dashboard = ({ userData }) => {
                           <span className="text-xl">📈</span>
                           Recent Visits
                         </h4>
-                        
+
                         {url.visitHistory.length > 0 ? (
                           <div className="space-y-2">
-                            {url.visitHistory.slice(-7).reverse().map((visit, index) => (
-                              <div key={index} className="flex items-center justify-between text-sm bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg hover:shadow-md transition-shadow">
-                                <span className="text-gray-600 font-medium">
-                                  {new Date(visit.timestamp).toLocaleString()}
-                                </span>
-                              </div>
-                            ))}
+                            {url.visitHistory
+                              .slice(-7)
+                              .reverse()
+                              .map((visit, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between text-sm bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg hover:shadow-md transition-shadow"
+                                >
+                                  <span className="text-gray-600 font-medium">
+                                    {new Date(visit.timestamp).toLocaleString()}
+                                  </span>
+                                </div>
+                              ))}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm italic">No visits yet</p>
+                          <p className="text-gray-500 text-sm italic">
+                            No visits yet
+                          </p>
                         )}
                       </div>
                     )}
@@ -316,7 +366,7 @@ const Dashboard = ({ userData }) => {
                 to="/urls"
                 className="text-[#667eea] hover:text-[#764ba2] font-bold text-lg transition-colors inline-flex items-center gap-2"
               >
-                View All {urls.length} URLs 
+                View All {urls.length} URLs
                 <span className="text-xl">→</span>
               </Link>
             </div>
@@ -331,12 +381,24 @@ const Dashboard = ({ userData }) => {
           >
             <div className="flex items-center gap-4">
               <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-1">Create New URL</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-1">
+                  Create New URL
+                </h3>
                 <p className="text-sm text-gray-600">Shorten a new link</p>
               </div>
             </div>
@@ -348,12 +410,24 @@ const Dashboard = ({ userData }) => {
           >
             <div className="flex items-center gap-4">
               <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-1">View Profile</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-1">
+                  View Profile
+                </h3>
                 <p className="text-sm text-gray-600">Manage your account</p>
               </div>
             </div>

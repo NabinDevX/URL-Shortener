@@ -31,7 +31,7 @@ import urlRoutes from "./routes/url.routes.js";
 import { getOriginalURL } from "./controllers/url.js";
 
 app.use("/", staticRoutes);
-app.get('/:shortId', getOriginalURL);
+app.get("/:shortId", getOriginalURL);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/url", urlRoutes);
 

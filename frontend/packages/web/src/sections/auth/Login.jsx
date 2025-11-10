@@ -1,30 +1,32 @@
-import { useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
+  const [successMessage, setSuccessMessage] = useState(
+    location.state?.message || ""
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -34,16 +36,16 @@ const Login = () => {
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = "Invalid email format";
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     setErrors(newErrors);
@@ -59,63 +61,62 @@ const Login = () => {
 
     setLoading(true);
     setErrors({});
-    setSuccessMessage('');
+    setSuccessMessage("");
 
     try {
       const response = await axios.post(
-        '/api/v1/user/login',
+        "/api/v1/user/login",
         {
           email: formData.email,
-          password: formData.password
+          password: formData.password,
         },
         {
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
-          withCredentials: true
+          withCredentials: true,
         }
       );
 
-      console.log('✅ Login successful:', response.data);
+      console.log("✅ Login successful:", response.data);
 
       // Redirect to dashboard
-      navigate('/dashboard');
-
+      navigate("/dashboard");
     } catch (error) {
-      console.error('❌ Login error:', error);
+      console.error("❌ Login error:", error);
 
       if (error.response) {
         // Server responded with error
-        const errorMessage = error.response.data?.message || 'Login failed';
-        
+        const errorMessage = error.response.data?.message || "Login failed";
+
         if (error.response.status === 401) {
           // Invalid credentials
-          setErrors({ 
-            general: 'Invalid email or password' 
+          setErrors({
+            general: "Invalid email or password",
           });
         } else if (error.response.status === 404) {
           // User not found
-          setErrors({ 
-            general: 'No account found with this email' 
+          setErrors({
+            general: "No account found with this email",
           });
         } else if (error.response.status === 400) {
           // Validation error
-          setErrors({ 
-            general: errorMessage 
+          setErrors({
+            general: errorMessage,
           });
         } else {
-          setErrors({ 
-            general: errorMessage 
+          setErrors({
+            general: errorMessage,
           });
         }
       } else if (error.request) {
         // Network error
-        setErrors({ 
-          general: 'Network error. Please check your connection.' 
+        setErrors({
+          general: "Network error. Please check your connection.",
         });
       } else {
-        setErrors({ 
-          general: 'An unexpected error occurred. Please try again.' 
+        setErrors({
+          general: "An unexpected error occurred. Please try again.",
         });
       }
     } finally {
@@ -134,7 +135,9 @@ const Login = () => {
               <span className="text-4xl">🔗</span>
               <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
             </div>
-            <p className="text-center text-purple-100">Sign in to your account</p>
+            <p className="text-center text-purple-100">
+              Sign in to your account
+            </p>
           </div>
 
           {/* Form */}
@@ -162,7 +165,10 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
                   Email Address
                 </label>
                 <input
@@ -172,7 +178,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={`w-full px-4 py-3 border ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
+                    errors.email ? "border-red-500" : "border-gray-300"
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                   placeholder="Enter your email"
                   disabled={loading}
@@ -187,18 +193,21 @@ const Login = () => {
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${
-                      errors.password ? 'border-red-500' : 'border-gray-300'
+                      errors.password ? "border-red-500" : "border-gray-300"
                     } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
                     placeholder="Enter your password"
                     disabled={loading}
@@ -209,7 +218,7 @@ const Login = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
                 </div>
                 {errors.password && (
@@ -228,7 +237,10 @@ const Login = () => {
                   />
                   <span className="text-sm text-gray-600">Remember me</span>
                 </label>
-                <a href="#forgot" className="text-sm text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+                <a
+                  href="#forgot"
+                  className="text-sm text-purple-600 hover:text-purple-800 font-semibold transition-colors"
+                >
                   Forgot Password?
                 </a>
               </div>
@@ -239,8 +251,8 @@ const Login = () => {
                 disabled={loading}
                 className={`w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
                   loading
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105'
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
                 }`}
               >
                 {loading ? (
@@ -264,7 +276,7 @@ const Login = () => {
                     Signing In...
                   </span>
                 ) : (
-                  'Sign In'
+                  "Sign In"
                 )}
               </button>
             </form>
@@ -272,7 +284,7 @@ const Login = () => {
             {/* Sign Up Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm">
-                Don't have an account?{' '}
+                Don't have an account?{" "}
                 <Link
                   to="/signup"
                   className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"

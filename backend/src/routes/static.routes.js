@@ -2,13 +2,13 @@ import express from "express";
 
 const router = express.Router();
 
-router.get('/health', (req, res) => {
+router.get("/health", (req, res) => {
   res.status(200).json({
-    status: 'OK',
+    status: "OK",
     timestamp: new Date().toISOString(),
     PID: process.pid,
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || "development",
   });
 });
 

@@ -6,19 +6,23 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const generateShortURL = asyncHandler(async (req, res) => {
   const { url, customShortId, idLength } = req.body;
-  
+
   if (!url) throw new ApiError(400, "URL is required");
-  if (!req.user || !req.user._id) throw new ApiError(401, "Authentication required");
+  if (!req.user || !req.user._id)
+    throw new ApiError(401, "Authentication required");
 
   let shortId;
 
   if (customShortId) {
-    if (typeof customShortId !== 'string' || customShortId.trim() === '') {
+    if (typeof customShortId !== "string" || customShortId.trim() === "") {
       throw new ApiError(400, "Custom short ID must be a non-empty string");
     }
 
     if (customShortId.length < 3) {
-      throw new ApiError(400, "Custom short ID must be at least 3 characters long");
+      throw new ApiError(
+        400,
+        "Custom short ID must be at least 3 characters long"
+      );
     }
 
     if (customShortId.length > 20) {
@@ -27,12 +31,18 @@ const generateShortURL = asyncHandler(async (req, res) => {
 
     const validShortIdRegex = /^[a-zA-Z0-9_-]+$/;
     if (!validShortIdRegex.test(customShortId)) {
-      throw new ApiError(400, "Custom short ID can only contain letters, numbers, hyphens, and underscores");
+      throw new ApiError(
+        400,
+        "Custom short ID can only contain letters, numbers, hyphens, and underscores"
+      );
     }
 
     const existingShortId = await URL.findOne({ shortId: customShortId });
     if (existingShortId) {
-      throw new ApiError(409, "This custom short ID is already taken. Please choose another one");
+      throw new ApiError(
+        409,
+        "This custom short ID is already taken. Please choose another one"
+      );
     }
 
     shortId = customShortId;
@@ -43,7 +53,10 @@ const generateShortURL = asyncHandler(async (req, res) => {
       length = parseInt(idLength);
 
       if (isNaN(length) || length < 4 || length > 15) {
-        throw new ApiError(400, "ID length must be between 4 and 15 characters");
+        throw new ApiError(
+          400,
+          "ID length must be between 4 and 15 characters"
+        );
       }
     }
 
@@ -60,30 +73,31 @@ const generateShortURL = asyncHandler(async (req, res) => {
     }
 
     if (attempts >= maxAttempts) {
-      throw new ApiError(500, "Failed to generate unique short ID. Please try again");
+      throw new ApiError(
+        500,
+        "Failed to generate unique short ID. Please try again"
+      );
     }
   }
 
-  const existingUrl = await URL.findOne({ 
-    redirectUrl: url, 
-    userId: req.user._id 
+  const existingUrl = await URL.findOne({
+    redirectUrl: url,
+    userId: req.user._id,
   });
 
   if (existingUrl) {
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200, 
-          { 
-            shortId: existingUrl.shortId,
-            redirectUrl: existingUrl.redirectUrl,
-            fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : 'http://localhost:8001'}/${existingUrl.shortId}`,
-            isExisting: true
-          }, 
-          "URL already exists for this user"
-        )
-      );
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          shortId: existingUrl.shortId,
+          redirectUrl: existingUrl.redirectUrl,
+          fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : "http://localhost:8001"}/${existingUrl.shortId}`,
+          isExisting: true,
+        },
+        "URL already exists for this user"
+      )
+    );
   }
 
   const newUrl = await URL.create({
@@ -93,20 +107,18 @@ const generateShortURL = asyncHandler(async (req, res) => {
     visitHistory: [],
   });
 
-  return res
-    .status(201)
-    .json(
-      new ApiResponse(
-        201, 
-        { 
-          shortId: newUrl.shortId,
-          redirectUrl: newUrl.redirectUrl,
-          fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : 'http://localhost:8001'}/${newUrl.shortId}`,
-          isCustom: !!customShortId
-        }, 
-        "Short URL created successfully"
-      )
-    );
+  return res.status(201).json(
+    new ApiResponse(
+      201,
+      {
+        shortId: newUrl.shortId,
+        redirectUrl: newUrl.redirectUrl,
+        fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : "http://localhost:8001"}/${newUrl.shortId}`,
+        isCustom: !!customShortId,
+      },
+      "Short URL created successfully"
+    )
+  );
 });
 
 const getOriginalURL = asyncHandler(async (req, res) => {
@@ -132,28 +144,34 @@ const updateShortURL = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Short ID and QR Code are required");
   }
 
-  if (typeof qrCode !== 'string') {
+  if (typeof qrCode !== "string") {
     throw new ApiError(400, "QR Code must be a string");
   }
 
-  if (qrCode.trim() === '') {
+  if (qrCode.trim() === "") {
     throw new ApiError(400, "QR Code cannot be empty");
   }
 
   const url = await URL.findOne({ shortId, userId: req.user._id });
 
   if (!url) {
-    throw new ApiError(404, "Short URL not found or you don't have permission to update it");
+    throw new ApiError(
+      404,
+      "Short URL not found or you don't have permission to update it"
+    );
   }
 
   if (url.isDeleted) {
-    throw new ApiError(400, "Cannot update a deleted URL. Please restore it first");
+    throw new ApiError(
+      400,
+      "Cannot update a deleted URL. Please restore it first"
+    );
   }
 
   if (url.qrCode !== qrCode) {
-    const existingQrCode = await URL.findOne({ 
-      qrCode, 
-      shortId: { $ne: shortId } 
+    const existingQrCode = await URL.findOne({
+      qrCode,
+      shortId: { $ne: shortId },
     });
 
     if (existingQrCode) {
@@ -171,7 +189,7 @@ const updateShortURL = asyncHandler(async (req, res) => {
         shortId: url.shortId,
         redirectUrl: url.redirectUrl,
         qrCode: url.qrCode,
-        fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : 'http://localhost:8001'}/${url.shortId}`,
+        fullShortUrl: `${process.env.NODE_ENV === "production" ? "https://urltinier.app" : "http://localhost:8001"}/${url.shortId}`,
         updatedAt: url.updatedAt,
       },
       "QR Code updated successfully"
@@ -203,7 +221,12 @@ const getAllUrlsDetails = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Authentication required");
   }
 
-  const { page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
 
   const pageNum = parseInt(page);
   const limitNum = parseInt(limit);
@@ -247,29 +270,30 @@ const getAllUrlsDetails = asyncHandler(async (req, res) => {
   const result = await URL.aggregatePaginate(aggregate, options);
 
   if (!result.docs || result.docs.length === 0) {
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          {
-            urls: [],
-            totalUrls: 0,
-            totalClicks: 0,
-            pagination: {
-              currentPage: pageNum,
-              totalPages: 0,
-              totalDocs: 0,
-              hasNextPage: false,
-              hasPrevPage: false,
-            },
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          urls: [],
+          totalUrls: 0,
+          totalClicks: 0,
+          pagination: {
+            currentPage: pageNum,
+            totalPages: 0,
+            totalDocs: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
           },
-          "No URLs found for this user"
-        )
-      );
+        },
+        "No URLs found for this user"
+      )
+    );
   }
 
-  const totalClicks = result.docs.reduce((sum, url) => sum + url.totalClicks, 0);
+  const totalClicks = result.docs.reduce(
+    (sum, url) => sum + url.totalClicks,
+    0
+  );
 
   return res.status(200).json(
     new ApiResponse(
@@ -296,7 +320,7 @@ const getAllUrlsDetails = asyncHandler(async (req, res) => {
 
 const deleteURL = asyncHandler(async (req, res) => {
   const { shortId } = req.params;
-  
+
   if (!shortId) {
     throw new ApiError(400, "Short ID is required");
   }
@@ -309,7 +333,10 @@ const deleteURL = asyncHandler(async (req, res) => {
   const url = await URL.findOne({ shortId, userId: req.user._id });
 
   if (!url) {
-    throw new ApiError(404, "Short URL not found or you don't have permission to delete it");
+    throw new ApiError(
+      404,
+      "Short URL not found or you don't have permission to delete it"
+    );
   }
 
   // Toggle the isDeleted field

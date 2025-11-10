@@ -46,12 +46,14 @@ const App = () => {
         withCredentials: true,
       });
 
-      console.log("✅ User authenticated:", response.data.data?.email || response.data.data?.name);
-      
+      console.log(
+        "✅ User authenticated:",
+        response.data.data?.email || response.data.data?.name
+      );
+
       // 🔹 Store user data from response
       setUserData(response.data.data);
       setIsAuthenticated(true);
-
     } catch (error) {
       console.log("⚠️ Initial auth check failed, attempting token refresh...");
 
@@ -79,11 +81,10 @@ const App = () => {
             "✅ User authenticated after refresh:",
             retryResponse.data.data?.email || retryResponse.data.data?.name
           );
-          
+
           // 🔹 Store user data
           setUserData(retryResponse.data.data);
           setIsAuthenticated(true);
-
         } catch (retryError) {
           console.error(
             "❌ Failed to authenticate after token refresh:",
@@ -195,7 +196,7 @@ const App = () => {
             )
           }
         />
-        
+
         <Route
           path="/urls"
           element={

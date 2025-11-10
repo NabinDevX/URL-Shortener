@@ -45,9 +45,9 @@ const sendOtpToEmail = asyncHandler(async (req, res) => {
     const ttl = await safeRedisOperation(async (client) => {
       return await client.ttl(`otp:email:${email}`);
     });
-    
+
     throw new ApiError(
-      429, 
+      429,
       `OTP already sent. Please wait ${ttl} seconds before requesting again.`
     );
   }
@@ -70,7 +70,7 @@ const sendOtpToEmail = asyncHandler(async (req, res) => {
       otp,
       createdAt: Date.now(),
     });
-    
+
     // Set with 60 seconds TTL
     await client.setEx(key, 60, otpData);
     console.log(`✅ OTP stored in Redis for ${email} with 60s expiry`);
@@ -110,15 +110,14 @@ URL Shortener Team
     );
 
     console.log(`✅ OTP sent successfully to ${email}`);
-
   } catch (error) {
     // Clean up OTP on send failure
     await safeRedisOperation(async (client) => {
       await client.del(`otp:email:${email}`);
     });
-    
+
     console.error("❌ Brevo API error:", error.response?.data || error.message);
-    
+
     if (error.response?.status === 400) {
       throw new ApiError(400, "Invalid email address or sender configuration");
     } else if (error.response?.status === 401) {
@@ -184,7 +183,10 @@ const emailOtpValidation = asyncHandler(async (req, res, next) => {
   });
 
   if (!otpData) {
-    throw new ApiError(400, "OTP not found or has expired. Please request a new one");
+    throw new ApiError(
+      400,
+      "OTP not found or has expired. Please request a new one"
+    );
   }
 
   const record = JSON.parse(otpData);
@@ -198,7 +200,7 @@ const emailOtpValidation = asyncHandler(async (req, res, next) => {
     await client.del(`otp:email:${email}`);
     console.log(`✅ OTP verified and deleted for ${email}`);
   });
-  
+
   next();
 });
 
@@ -219,12 +221,12 @@ const getOtpInfo = async (email) => {
   return await safeRedisOperation(async (client) => {
     const key = `otp:email:${email}`;
     const data = await client.get(key);
-    
+
     if (!data) return null;
-    
+
     const record = JSON.parse(data);
     const ttl = await client.ttl(key);
-    
+
     return {
       exists: true,
       expiresIn: ttl,
@@ -253,7 +255,7 @@ const clearOtp = async (email) => {
 // Clear all OTPs (for testing)
 const clearAllOtps = async () => {
   return await safeRedisOperation(async (client) => {
-    const keys = await client.keys('otp:email:*');
+    const keys = await client.keys("otp:email:*");
     if (keys.length > 0) {
       await client.del(keys);
       console.log(`🗑️ Cleared ${keys.length} OTP(s)`);

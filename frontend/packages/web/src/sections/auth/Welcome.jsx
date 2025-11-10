@@ -256,26 +256,27 @@ const Welcome = () => {
 
         {/* Stats */}
         <div className="max-w-4xl mx-auto mt-16 overflow-visible">
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-    {[
-      { number: "1M+", label: "Secure Links Created", icon: "🔗" },
-      { number: "50K+", label: "Protected Users", icon: "👥" },
-      { number: "99.9%", label: "Privacy Guaranteed", icon: "🛡️" },
-    ].map((stat, index) => (
-      <div
-        key={index}
-        className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-xl hover:shadow-2xl transition-all overflow-visible"
-      >
-        <div className="text-4xl mb-2">{stat.icon}</div>
-        <p className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1 leading-tight whitespace-nowrap">
-          {stat.number}
-        </p>
-        <p className="text-sm text-gray-600 font-medium">{stat.label}</p>
-      </div>
-    ))}
-  </div>
-</div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {[
+              { number: "1M+", label: "Secure Links Created", icon: "🔗" },
+              { number: "50K+", label: "Protected Users", icon: "👥" },
+              { number: "99.9%", label: "Privacy Guaranteed", icon: "🛡️" },
+            ].map((stat, index) => (
+              <div
+                key={index}
+                className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-xl hover:shadow-2xl transition-all overflow-visible"
+              >
+                <div className="text-4xl mb-2">{stat.icon}</div>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1 leading-tight whitespace-nowrap">
+                  {stat.number}
+                </p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Floating Elements */}
