@@ -7,7 +7,7 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY pnpm-lock.yaml package.json ./
 
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile
