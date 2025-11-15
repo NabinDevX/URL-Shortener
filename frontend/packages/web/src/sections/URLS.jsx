@@ -689,10 +689,10 @@ const URLS = () => {
                             // Show Generate Button if no QR code exists
                             <button
                               onClick={() => handleGenerateQRCode(url.shortId)}
-                              disabled={isGenerating}
+                              disabled={generatingQR[url.shortId]} // ✅ FIX: Use generatingQR instead
                               className="bg-white text-[#667eea] px-4 py-2 rounded-lg font-bold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
                             >
-                              {isGenerating ? (
+                              {generatingQR[url.shortId] ? ( // ✅ FIX: Use generatingQR instead
                                 <>
                                   <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#667eea]"></div>
                                   <span>Generating...</span>

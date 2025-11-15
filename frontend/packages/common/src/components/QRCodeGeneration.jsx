@@ -1,18 +1,33 @@
 import { QRCodeCanvas } from "qrcode.react";
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 
 const QRCodeGeneration = forwardRef(({ url, size = 256 }, ref) => {
   const canvasRef = useRef(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Ensure canvas is fully rendered
+    const timer = setTimeout(() => setIsReady(true), 100);
+    return () => clearTimeout(timer);
+  }, [url]);
 
   // Expose generateQRCode method to parent component
   useImperativeHandle(ref, () => ({
     generateQRCode: () => {
+      if (!isReady) {
+        throw new Error("QR Code not ready yet");
+      }
+
       const canvas = canvasRef.current?.querySelector("canvas");
       if (!canvas) {
         throw new Error("QR Code canvas not found");
       }
-      // ✅ Already converts to base64 string
-      // Returns: "data:image/png;base64,iVBORw0KG..."
       return canvas.toDataURL("image/png");
     },
   }));
@@ -21,10 +36,13 @@ const QRCodeGeneration = forwardRef(({ url, size = 256 }, ref) => {
     <div
       ref={canvasRef}
       style={{
-        position: "absolute",
+        position: "fixed",
         left: "-9999px",
-        visibility: "hidden",
+        top: "0",
+        opacity: 0,
         pointerEvents: "none",
+        width: size,
+        height: size,
       }}
     >
       <QRCodeCanvas
