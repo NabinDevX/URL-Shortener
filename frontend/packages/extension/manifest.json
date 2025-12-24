@@ -5,15 +5,15 @@
   "description": "An awesome browser extension that does amazing things.",
   "permissions": ["storage", "tabs"],
   "background": {
-    "scripts": ["src/background.js"]
+    "scripts": ["src/background.jsx"]
   },
   "action": {
     "default_popup": "index.html"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["src/content.js"]
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["src/content.jsx"]
     }
   ]
 }

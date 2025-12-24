@@ -1,4 +1,3 @@
-import axios from "axios";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
@@ -78,9 +77,13 @@ const sendOtpToEmail = asyncHandler(async (req, res) => {
 
   // Send email via Brevo (text only)
   try {
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
         sender: {
           name: "URL Shortener",
           email: process.env.BREVO_SENDER_EMAIL,
@@ -100,34 +103,45 @@ If you didn't request this code, please ignore this email.
 URL Shortener Team
 © ${new Date().getFullYear()} All rights reserved.
         `.trim(),
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": process.env.BREVO_API_KEY,
-        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+
+      await safeRedisOperation(async (client) => {
+        await client.del(`otp:email:${email}`);
+      });
+
+      console.error("❌ Brevo API error:", errorData);
+
+      if (response.status === 400) {
+        throw new ApiError(
+          400,
+          "Invalid email address or sender configuration"
+        );
+      } else if (response.status === 401) {
+        throw new ApiError(500, "Email service authentication failed");
+      } else {
+        throw new ApiError(
+          500,
+          `Failed to send OTP: ${errorData.message || response.statusText}`
+        );
       }
-    );
+    }
 
     console.log(`✅ OTP sent successfully to ${email}`);
   } catch (error) {
-    // Clean up OTP on send failure
     await safeRedisOperation(async (client) => {
       await client.del(`otp:email:${email}`);
     });
 
-    console.error("❌ Brevo API error:", error.response?.data || error.message);
-
-    if (error.response?.status === 400) {
-      throw new ApiError(400, "Invalid email address or sender configuration");
-    } else if (error.response?.status === 401) {
-      throw new ApiError(500, "Email service authentication failed");
-    } else {
-      throw new ApiError(
-        500,
-        `Failed to send OTP: ${error.response?.data?.message || error.message}`
-      );
+    if (error instanceof ApiError) {
+      throw error;
     }
+
+    console.error("❌ Email sending error:", error.message);
+    throw new ApiError(500, `Failed to send OTP: ${error.message}`);
   }
 
   return res
