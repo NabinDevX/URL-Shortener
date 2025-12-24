@@ -90,3 +90,8 @@ function showNotification(message, type = "success") {
 
 // Initialize content script
 console.log("URL Shortener content script loaded");
+
+// Export a React component if needed for UI injection
+export default function ContentPage() {
+  return null; // Content script UI can be added here if needed
+}
