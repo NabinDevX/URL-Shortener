@@ -1,9 +1,10 @@
 import { NavLink } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ userData }) => {
   return (
     <div>
       <nav>
+        <span>{userData?.name || "User"}</span>
         <NavLink
           className={(e) => {
             return e.isActive ? "to-blue-50" : "";

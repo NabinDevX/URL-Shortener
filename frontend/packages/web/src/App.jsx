@@ -19,16 +19,10 @@ const App = () => {
   const [userData, setUserData] = useState(null);
   const location = useLocation();
 
-  // 🔹 Callback for successful login/signup
   const onAuthSuccess = useCallback((user) => {
+    console.log("🎯 onAuthSuccess called with:", user);
     setUserData(user);
     setIsAuthenticated(true);
-  }, []);
-
-  // 🔹 Callback for logout
-  const onLogout = useCallback(() => {
-    setUserData(null);
-    setIsAuthenticated(false);
   }, []);
 
   useEffect(() => {
@@ -37,7 +31,6 @@ const App = () => {
 
   useEffect(() => {
     if (!isInitialLoad) {
-      console.log("🔄 Route changed to:", location.pathname);
       checkAuth(false);
     }
   }, [location.pathname, isInitialLoad]);
@@ -55,62 +48,34 @@ const App = () => {
         withCredentials: true,
       });
 
-      console.log(
-        "✅ User authenticated:",
-        response.data.data?.email || response.data.data?.name
-      );
-
+      console.log("✅ User authenticated:", response.data.data);
       setUserData(response.data.data);
       setIsAuthenticated(true);
     } catch (error) {
-      console.log("⚠️ Initial auth check failed, attempting token refresh...");
+      console.log("⚠️ Auth check failed, attempting token refresh...");
 
       try {
-        const refreshResponse = await axios.post(
+        await axios.post(
           "/api/v1/user/refresh-token",
           {},
-          {
-            timeout: 5000,
-            withCredentials: true,
-          }
+          { timeout: 5000, withCredentials: true }
         );
 
-        console.log("✅ Token refreshed successfully:", refreshResponse.data);
+        const retryResponse = await axios.get("/api/v1/user/current-user", {
+          timeout: 5000,
+          withCredentials: true,
+        });
 
-        try {
-          const retryResponse = await axios.get("/api/v1/user/current-user", {
-            timeout: 5000,
-            withCredentials: true,
-          });
-
-          console.log(
-            "✅ User authenticated after refresh:",
-            retryResponse.data.data?.email || retryResponse.data.data?.name
-          );
-
-          setUserData(retryResponse.data.data);
-          setIsAuthenticated(true);
-        } catch (retryError) {
-          console.error(
-            "❌ Failed to authenticate after token refresh:",
-            retryError.response?.status
-          );
-          setIsAuthenticated(false);
-          setUserData(null);
-        }
+        console.log(
+          "✅ User authenticated after refresh:",
+          retryResponse.data.data
+        );
+        setUserData(retryResponse.data.data);
+        setIsAuthenticated(true);
       } catch (refreshError) {
-        if (refreshError.response) {
-          console.log("❌ Token refresh failed:", refreshError.response.status);
-        } else if (refreshError.request) {
-          console.error(
-            "🌐 Network error during refresh:",
-            refreshError.message
-          );
-        } else {
-          console.error("⚠️ Error during refresh:", refreshError.message);
-        }
-        setIsAuthenticated(false);
+        console.log("❌ Not authenticated");
         setUserData(null);
+        setIsAuthenticated(false);
       }
     } finally {
       if (showLoading) {
@@ -125,7 +90,7 @@ const App = () => {
     }
   };
 
-  if (loading) {
+  if (loading || isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700">
         <div className="text-center space-y-4">
@@ -150,7 +115,7 @@ const App = () => {
         <Route
           path="/"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <Navigate to="/welcome" replace />
@@ -161,14 +126,18 @@ const App = () => {
         <Route
           path="/welcome"
           element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Welcome />
+            isAuthenticated === true ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Welcome />
+            )
           }
         />
 
         <Route
           path="/login"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <Login onAuthSuccess={onAuthSuccess} />
@@ -179,7 +148,7 @@ const App = () => {
         <Route
           path="/signup"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <Signup onAuthSuccess={onAuthSuccess} />
@@ -190,7 +159,7 @@ const App = () => {
         <Route
           path="/dashboard"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <>
                 <Navbar userData={userData} />
                 <Dashboard userData={userData} />
@@ -204,7 +173,7 @@ const App = () => {
         <Route
           path="/urls"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <>
                 <Navbar userData={userData} />
                 <URLS userData={userData} />
@@ -218,7 +187,7 @@ const App = () => {
         <Route
           path="/profile/:userId"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <>
                 <Navbar userData={userData} />
                 <Profile userData={userData} />
@@ -232,7 +201,7 @@ const App = () => {
         <Route
           path="/profile"
           element={
-            isAuthenticated && userData?._id ? (
+            isAuthenticated === true && userData?._id ? (
               <Navigate to={`/profile/${userData._id}`} replace />
             ) : (
               <Navigate to="/welcome" replace />
@@ -243,7 +212,7 @@ const App = () => {
         <Route
           path="/logout"
           element={
-            isAuthenticated ? (
+            isAuthenticated === true ? (
               <>
                 <Navbar userData={userData} />
                 <Logout onLogout={onLogout} />
