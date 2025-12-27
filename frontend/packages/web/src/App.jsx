@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Welcome from "@/sections/auth/Welcome";
@@ -16,32 +16,44 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [userData, setUserData] = useState(null); // 🔹 Store user data
+  const [userData, setUserData] = useState(null);
   const location = useLocation();
+
+  // 🔹 Callback for successful authentication (login/signup)
+  const onAuthSuccess = useCallback((user) => {
+    console.log("✅ Auth success - updating state");
+    setUserData(user);
+    setIsAuthenticated(true);
+  }, []);
+
+  // 🔹 Callback for logout
+  const onLogout = useCallback(() => {
+    console.log("🚪 Logout - clearing state");
+    setUserData(null);
+    setIsAuthenticated(false);
+  }, []);
 
   // 🔹 Initial auth check with 2-second loading
   useEffect(() => {
-    checkAuth(true); // Pass true for initial load
+    checkAuth(true);
   }, []);
 
   // 🔹 Quick auth check on route changes (no loading screen)
   useEffect(() => {
     if (!isInitialLoad) {
       console.log("🔄 Route changed to:", location.pathname);
-      checkAuth(false); // Pass false for quick check
+      checkAuth(false);
     }
-  }, [location.pathname]);
+  }, [location.pathname, isInitialLoad]);
 
   const checkAuth = async (showLoading = true) => {
     const startTime = Date.now();
 
-    // Only show loading on initial load
     if (showLoading) {
       setLoading(true);
     }
 
     try {
-      // 🔹 Step 1: Try to get current user
       const response = await axios.get("/api/v1/user/current-user", {
         timeout: 5000,
         withCredentials: true,
@@ -52,13 +64,11 @@ const App = () => {
         response.data.data?.email || response.data.data?.name
       );
 
-      // 🔹 Store user data from response
       setUserData(response.data.data);
       setIsAuthenticated(true);
     } catch (error) {
       console.log("⚠️ Initial auth check failed, attempting token refresh...");
 
-      // 🔹 Step 2: Try to refresh the token
       try {
         const refreshResponse = await axios.post(
           "/api/v1/user/refresh-token",
@@ -71,7 +81,6 @@ const App = () => {
 
         console.log("✅ Token refreshed successfully:", refreshResponse.data);
 
-        // 🔹 Step 3: Retry getting current user with refreshed token
         try {
           const retryResponse = await axios.get("/api/v1/user/current-user", {
             timeout: 5000,
@@ -83,7 +92,6 @@ const App = () => {
             retryResponse.data.data?.email || retryResponse.data.data?.name
           );
 
-          // 🔹 Store user data
           setUserData(retryResponse.data.data);
           setIsAuthenticated(true);
         } catch (retryError) {
@@ -95,7 +103,6 @@ const App = () => {
           setUserData(null);
         }
       } catch (refreshError) {
-        // 🔹 Token refresh failed - user is not authenticated
         if (refreshError.response) {
           console.log("❌ Token refresh failed:", refreshError.response.status);
         } else if (refreshError.request) {
@@ -110,7 +117,6 @@ const App = () => {
         setUserData(null);
       }
     } finally {
-      // ✅ Only apply 2-second minimum on initial load
       if (showLoading) {
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(0, 2000 - elapsedTime);
@@ -172,14 +178,22 @@ const App = () => {
         <Route
           path="/login"
           element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login onAuthSuccess={onAuthSuccess} />
+            )
           }
         />
 
         <Route
           path="/signup"
           element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Signup onAuthSuccess={onAuthSuccess} />
+            )
           }
         />
 
@@ -245,7 +259,7 @@ const App = () => {
             isAuthenticated ? (
               <>
                 <Navbar userData={userData} />
-                <Logout />
+                <Logout onLogout={onLogout} />
               </>
             ) : (
               <Navigate to="/welcome" replace />

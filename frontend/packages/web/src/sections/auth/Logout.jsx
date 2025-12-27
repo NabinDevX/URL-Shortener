@@ -2,246 +2,68 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Logout = () => {
+const Logout = ({ onLogout }) => {
+  const [status, setStatus] = useState("logging out");
   const navigate = useNavigate();
-  const [status, setStatus] = useState("loading"); // loading, success, error
-  const [message, setMessage] = useState("Logging you out safely...");
-  const [countdown, setCountdown] = useState(30);
 
   useEffect(() => {
-    performLogout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const performLogout = async () => {
+      try {
+        await axios.post("/api/v1/user/logout", {}, { withCredentials: true });
 
-  useEffect(() => {
-    // Start countdown only after successful logout
-    if (status === "success" && countdown > 0) {
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            navigate("/");
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-
-    // For error state, redirect after 30 seconds
-    if (status === "error") {
-      const errorTimer = setTimeout(() => {
-        navigate("/");
-      }, 30000);
-
-      return () => clearTimeout(errorTimer);
-    }
-  }, [status, countdown, navigate]);
-
-  const performLogout = async () => {
-    try {
-      setStatus("loading");
-      setMessage("Logging you out safely...");
-
-      const response = await axios.post(
-        "/api/v1/user/logout",
-        {},
-        {
-          withCredentials: true,
-          timeout: 10000,
-        }
-      );
-
-      if (response.data.success) {
+        console.log("✅ Logout successful");
         setStatus("success");
-        setMessage("Successfully logged out! 👋");
+
+        // 🔹 Call the callback to clear App's auth state
+        if (onLogout) {
+          onLogout();
+        }
+
+        // Redirect to welcome page after a short delay
+        setTimeout(() => {
+          navigate("/welcome", { replace: true });
+        }, 1000);
+      } catch (err) {
+        console.error("❌ Logout failed:", err.response?.data || err.message);
+        setStatus("error");
+
+        // Still clear state and redirect even on error
+        if (onLogout) {
+          onLogout();
+        }
+
+        setTimeout(() => {
+          navigate("/welcome", { replace: true });
+        }, 2000);
       }
-    } catch (error) {
-      console.error("Logout error:", error);
-      setStatus("error");
-      setMessage(
-        error.response?.data?.message ||
-          "Logout failed, but you can still go home"
-      );
-    }
-  };
+    };
+
+    performLogout();
+  }, [navigate, onLogout]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-3xl shadow-2xl p-12 text-center">
-          {/* Icon Animation */}
-          <div className="mb-8">
-            {status === "loading" && (
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-full shadow-2xl animate-pulse">
-                <span className="text-5xl animate-wave">👋</span>
-              </div>
-            )}
-
-            {status === "success" && (
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-2xl animate-bounce-once">
-                <span className="text-5xl">✅</span>
-              </div>
-            )}
-
-            {status === "error" && (
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full shadow-2xl">
-                <span className="text-5xl">⚠️</span>
-              </div>
-            )}
-          </div>
-
-          {/* Title */}
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            {status === "loading" && "Logging Out..."}
-            {status === "success" && "See You Soon!"}
-            {status === "error" && "Oops!"}
-          </h1>
-
-          {/* Message */}
-          <p className="text-gray-600 text-lg mb-8">{message}</p>
-
-          {/* Loading Spinner */}
-          {status === "loading" && (
-            <div className="flex justify-center mb-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#667eea]"></div>
-            </div>
-          )}
-
-          {/* Countdown Display */}
-          {status === "success" && countdown > 0 && (
-            <div className="mb-6">
-              <div className="inline-flex flex-col items-center gap-3">
-                {/* Circular Countdown */}
-                <div className="relative w-20 h-20">
-                  <svg className="w-20 h-20 transform -rotate-90">
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="36"
-                      stroke="#e5e7eb"
-                      strokeWidth="8"
-                      fill="none"
-                    />
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="36"
-                      stroke="#667eea"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 36}`}
-                      strokeDashoffset={`${2 * Math.PI * 36 * (1 - countdown / 30)}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-1000 ease-linear"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-[#667eea]">
-                      {countdown}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-green-600 font-semibold flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5 animate-pulse"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  Redirecting in {countdown} seconds...
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate("/")}
-              className="w-full py-4 px-6 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 group"
-            >
-              <svg
-                className="w-6 h-6 group-hover:-translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
-              {status === "success" ? "Go to Home Page Now" : "Go to Home Page"}
-            </button>
-
-            {status === "error" && (
-              <button
-                onClick={performLogout}
-                className="w-full py-4 px-6 bg-white text-[#667eea] border-2 border-[#667eea] rounded-2xl font-bold text-lg hover:bg-[#667eea] hover:text-white transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                Try Again
-              </button>
-            )}
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
-              {status === "success" && "Thank you for using URL Shortener! 🎉"}
-              {status === "loading" &&
-                "Please wait while we securely log you out..."}
-              {status === "error" && "You can safely return to the home page"}
-            </p>
-          </div>
-        </div>
-
-        {/* Security Note */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-            <span className="text-sm font-semibold">
-              Your session has been securely ended
-            </span>
-          </div>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">
+        {status === "logging out" && (
+          <>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-700 text-lg">Logging out...</p>
+          </>
+        )}
+        {status === "success" && (
+          <>
+            <div className="text-green-500 text-5xl mb-4">✓</div>
+            <p className="text-gray-700 text-lg">Logged out successfully!</p>
+            <p className="text-gray-500">Redirecting...</p>
+          </>
+        )}
+        {status === "error" && (
+          <>
+            <div className="text-red-500 text-5xl mb-4">✗</div>
+            <p className="text-gray-700 text-lg">Logout failed</p>
+            <p className="text-gray-500">Redirecting anyway...</p>
+          </>
+        )}
       </div>
     </div>
   );
