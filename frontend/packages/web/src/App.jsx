@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Welcome from "@/sections/auth/Welcome";
@@ -30,111 +30,103 @@ const App = () => {
       console.log("🔄 Route changed to:", location.pathname);
       checkAuth(false); // Pass false for quick check
     }
-  }, [location.pathname, isInitialLoad]); // Add isInitialLoad to dependencies
+  }, [location.pathname]);
 
-  const checkAuth = useCallback(
-    async (showLoading = true) => {
-      const startTime = Date.now();
+  const checkAuth = async (showLoading = true) => {
+    const startTime = Date.now();
 
-      // Only show loading on initial load
-      if (showLoading) {
-        setLoading(true);
-      }
+    // Only show loading on initial load
+    if (showLoading) {
+      setLoading(true);
+    }
 
+    try {
+      // 🔹 Step 1: Try to get current user
+      const response = await axios.get("/api/v1/user/current-user", {
+        timeout: 5000,
+        withCredentials: true,
+      });
+
+      console.log(
+        "✅ User authenticated:",
+        response.data.data?.email || response.data.data?.name
+      );
+
+      // 🔹 Store user data from response
+      setUserData(response.data.data);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.log("⚠️ Initial auth check failed, attempting token refresh...");
+
+      // 🔹 Step 2: Try to refresh the token
       try {
-        // 🔹 Step 1: Try to get current user
-        const response = await axios.get("/api/v1/user/current-user", {
-          timeout: 5000,
-          withCredentials: true,
-        });
-
-        console.log(
-          "✅ User authenticated:",
-          response.data.data?.email || response.data.data?.name
+        const refreshResponse = await axios.post(
+          "/api/v1/user/refresh-token",
+          {},
+          {
+            timeout: 5000,
+            withCredentials: true,
+          }
         );
 
-        // 🔹 Store user data from response
-        setUserData(response.data.data);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.log(
-          "⚠️ Initial auth check failed, attempting token refresh..."
-        );
+        console.log("✅ Token refreshed successfully:", refreshResponse.data);
 
-        // 🔹 Step 2: Try to refresh the token
+        // 🔹 Step 3: Retry getting current user with refreshed token
         try {
-          const refreshResponse = await axios.post(
-            "/api/v1/user/refresh-token",
-            {},
-            {
-              timeout: 5000,
-              withCredentials: true,
-            }
+          const retryResponse = await axios.get("/api/v1/user/current-user", {
+            timeout: 5000,
+            withCredentials: true,
+          });
+
+          console.log(
+            "✅ User authenticated after refresh:",
+            retryResponse.data.data?.email || retryResponse.data.data?.name
           );
 
-          console.log("✅ Token refreshed successfully:", refreshResponse.data);
-
-          // 🔹 Step 3: Retry getting current user with refreshed token
-          try {
-            const retryResponse = await axios.get("/api/v1/user/current-user", {
-              timeout: 5000,
-              withCredentials: true,
-            });
-
-            console.log(
-              "✅ User authenticated after refresh:",
-              retryResponse.data.data?.email || retryResponse.data.data?.name
-            );
-
-            // 🔹 Store user data
-            setUserData(retryResponse.data.data);
-            setIsAuthenticated(true);
-          } catch (retryError) {
-            console.error(
-              "❌ Failed to authenticate after token refresh:",
-              retryError.response?.status
-            );
-            setIsAuthenticated(false);
-            setUserData(null);
-          }
-        } catch (refreshError) {
-          // 🔹 Token refresh failed - user is not authenticated
-          if (refreshError.response) {
-            console.log(
-              "❌ Token refresh failed:",
-              refreshError.response.status
-            );
-          } else if (refreshError.request) {
-            console.error(
-              "🌐 Network error during refresh:",
-              refreshError.message
-            );
-          } else {
-            console.error("⚠️ Error during refresh:", refreshError.message);
-          }
+          // 🔹 Store user data
+          setUserData(retryResponse.data.data);
+          setIsAuthenticated(true);
+        } catch (retryError) {
+          console.error(
+            "❌ Failed to authenticate after token refresh:",
+            retryError.response?.status
+          );
           setIsAuthenticated(false);
           setUserData(null);
         }
-      } finally {
-        // ✅ Only apply 2-second minimum on initial load
-        if (showLoading) {
-          const elapsedTime = Date.now() - startTime;
-          const remainingTime = Math.max(0, 2000 - elapsedTime);
-
-          setTimeout(() => {
-            setLoading(false);
-            setIsInitialLoad(false);
-          }, remainingTime);
+      } catch (refreshError) {
+        // 🔹 Token refresh failed - user is not authenticated
+        if (refreshError.response) {
+          console.log("❌ Token refresh failed:", refreshError.response.status);
+        } else if (refreshError.request) {
+          console.error(
+            "🌐 Network error during refresh:",
+            refreshError.message
+          );
+        } else {
+          console.error("⚠️ Error during refresh:", refreshError.message);
         }
+        setIsAuthenticated(false);
+        setUserData(null);
       }
-    },
-    [] // Empty deps since it only uses setters
-  );
+    } finally {
+      // ✅ Only apply 2-second minimum on initial load
+      if (showLoading) {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 2000 - elapsedTime);
+
+        setTimeout(() => {
+          setLoading(false);
+          setIsInitialLoad(false);
+        }, remainingTime);
+      }
+    }
+  };
 
   // 🔄 Loading Screen (only on initial load)
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700">
         <div className="text-center space-y-4">
           <div className="relative inline-block">
             <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-white"></div>
