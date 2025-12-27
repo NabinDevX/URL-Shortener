@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Logout = () => {
+const Logout = ({ onLogout }) => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading, success, error
   const [message, setMessage] = useState("Logging you out safely...");
@@ -10,11 +10,9 @@ const Logout = () => {
 
   useEffect(() => {
     performLogout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // Start countdown only after successful logout
     if (status === "success" && countdown > 0) {
       const timer = setInterval(() => {
         setCountdown((prev) => {
@@ -30,7 +28,6 @@ const Logout = () => {
       return () => clearInterval(timer);
     }
 
-    // For error state, redirect after 30 seconds
     if (status === "error") {
       const errorTimer = setTimeout(() => {
         navigate("/");
@@ -57,6 +54,10 @@ const Logout = () => {
       if (response.data.success) {
         setStatus("success");
         setMessage("Successfully logged out! 👋");
+
+        if (onLogout) {
+          onLogout();
+        }
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -65,56 +66,54 @@ const Logout = () => {
         error.response?.data?.message ||
           "Logout failed, but you can still go home"
       );
+
+      if (onLogout) {
+        onLogout();
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-3xl shadow-2xl p-12 text-center">
-          {/* Icon Animation */}
           <div className="mb-8">
             {status === "loading" && (
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-full shadow-2xl animate-pulse">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-linear-to-br from-[#667eea] to-[#764ba2] rounded-full shadow-2xl animate-pulse">
                 <span className="text-5xl animate-wave">👋</span>
               </div>
             )}
 
             {status === "success" && (
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-2xl animate-bounce-once">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-linear-to-br from-green-400 to-green-600 rounded-full shadow-2xl animate-bounce-once">
                 <span className="text-5xl">✅</span>
               </div>
             )}
 
             {status === "error" && (
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full shadow-2xl">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-linear-to-br from-yellow-400 to-yellow-600 rounded-full shadow-2xl">
                 <span className="text-5xl">⚠️</span>
               </div>
             )}
           </div>
 
-          {/* Title */}
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             {status === "loading" && "Logging Out..."}
             {status === "success" && "See You Soon!"}
             {status === "error" && "Oops!"}
           </h1>
 
-          {/* Message */}
           <p className="text-gray-600 text-lg mb-8">{message}</p>
 
-          {/* Loading Spinner */}
           {status === "loading" && (
             <div className="flex justify-center mb-6">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#667eea]"></div>
             </div>
           )}
 
-          {/* Countdown Display */}
           {status === "success" && countdown > 0 && (
             <div className="mb-6">
               <div className="inline-flex flex-col items-center gap-3">
-                {/* Circular Countdown */}
                 <div className="relative w-20 h-20">
                   <svg className="w-20 h-20 transform -rotate-90">
                     <circle
@@ -165,11 +164,10 @@ const Logout = () => {
             </div>
           )}
 
-          {/* Navigation Buttons */}
           <div className="space-y-3">
             <button
               onClick={() => navigate("/")}
-              className="w-full py-4 px-6 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 group"
+              className="w-full py-4 px-6 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 group"
             >
               <svg
                 className="w-6 h-6 group-hover:-translate-x-1 transition-transform"
@@ -210,7 +208,6 @@ const Logout = () => {
             )}
           </div>
 
-          {/* Additional Info */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-500">
               {status === "success" && "Thank you for using URL Shortener! 🎉"}
@@ -221,7 +218,6 @@ const Logout = () => {
           </div>
         </div>
 
-        {/* Security Note */}
         <div className="mt-6 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-2xl shadow-lg">
             <svg

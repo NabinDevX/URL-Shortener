@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
-const Signup = () => {
+const Signup = ({ onAuthSuccess }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: Form, 2: OTP Verification
   const [formData, setFormData] = useState({
@@ -24,7 +24,6 @@ const Signup = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -34,26 +33,22 @@ const Signup = () => {
   };
 
   const handleOtpChange = (index, value) => {
-    // Only allow numbers
     if (!/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (value && index < 5) {
       document.getElementById(`otp-${index + 1}`)?.focus();
     }
 
-    // Clear error when user types
     if (errors.otp) {
       setErrors((prev) => ({ ...prev, otp: "" }));
     }
   };
 
   const handleOtpKeyDown = (index, e) => {
-    // Handle backspace
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
@@ -74,21 +69,18 @@ const Signup = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Username validation
     if (!formData.username.trim()) {
       newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
       newErrors.username = "Username must be at least 3 characters";
     }
 
-    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Invalid email format";
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
@@ -98,7 +90,6 @@ const Signup = () => {
         "Password must contain uppercase, lowercase, and number";
     }
 
-    // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
@@ -133,7 +124,6 @@ const Signup = () => {
     setErrors({});
 
     try {
-      // Step 1: Send OTP to email
       const response = await axios.post(
         "/api/v1/user/send-otp",
         {
@@ -150,7 +140,6 @@ const Signup = () => {
 
       console.log("✅ OTP sent successfully:", response.data);
 
-      // Move to OTP verification step
       setStep(2);
       startResendTimer();
     } catch (error) {
@@ -197,7 +186,6 @@ const Signup = () => {
     setErrors({});
 
     try {
-      // Step 2: Verify OTP and Create Account
       const response = await axios.post(
         "/api/v1/user/signup",
         {
@@ -216,8 +204,11 @@ const Signup = () => {
 
       console.log("✅ Signup successful:", response.data);
 
-      // Redirect to dashboard or login
-      navigate("/", { replace: true });
+      if (onAuthSuccess && response.data.data?.user) {
+        onAuthSuccess(response.data.data.user);
+      }
+
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("❌ Verify OTP error:", error);
 
@@ -272,7 +263,6 @@ const Signup = () => {
       console.log("✅ OTP resent successfully:", response.data);
       startResendTimer();
 
-      // Show success message
       setErrors({
         success: "OTP sent successfully! Check your email.",
       });
@@ -287,12 +277,10 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
-        {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-6">
+          <div className="bg-linear-to-r from-purple-600 to-indigo-600 px-8 py-6">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-4xl">🔗</span>
               <h1 className="text-3xl font-bold text-white">
@@ -306,7 +294,6 @@ const Signup = () => {
             </p>
           </div>
 
-          {/* Progress Indicator */}
           <div className="px-8 pt-6">
             <div className="flex items-center justify-center gap-2">
               <div
@@ -337,9 +324,7 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Form */}
           <div className="px-8 py-8">
-            {/* General Error */}
             {errors.general && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start gap-2">
@@ -349,7 +334,6 @@ const Signup = () => {
               </div>
             )}
 
-            {/* Success Message */}
             {errors.success && (
               <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-start gap-2">
@@ -359,10 +343,8 @@ const Signup = () => {
               </div>
             )}
 
-            {/* Step 1: Registration Form */}
             {step === 1 && (
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Username Field */}
                 <div>
                   <label
                     htmlFor="username"
@@ -389,7 +371,6 @@ const Signup = () => {
                   )}
                 </div>
 
-                {/* Email Field */}
                 <div>
                   <label
                     htmlFor="email"
@@ -416,7 +397,6 @@ const Signup = () => {
                   )}
                 </div>
 
-                {/* Password Field */}
                 <div>
                   <label
                     htmlFor="password"
@@ -458,7 +438,6 @@ const Signup = () => {
                   )}
                 </div>
 
-                {/* Confirm Password Field */}
                 <div>
                   <label
                     htmlFor="confirmPassword"
@@ -498,11 +477,10 @@ const Signup = () => {
                   )}
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
+                  className={`w-full py-3 px-4 bg-linear-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
                     loading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
@@ -535,7 +513,6 @@ const Signup = () => {
               </form>
             )}
 
-            {/* Step 2: OTP Verification */}
             {step === 2 && (
               <form onSubmit={handleVerifyOtp} className="space-y-6">
                 <div className="text-center mb-6">
@@ -554,7 +531,6 @@ const Signup = () => {
                   </button>
                 </div>
 
-                {/* OTP Input */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-3 text-center">
                     Enter OTP
@@ -584,7 +560,6 @@ const Signup = () => {
                   )}
                 </div>
 
-                {/* Resend OTP */}
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-2">
                     Didn't receive the code?
@@ -608,11 +583,10 @@ const Signup = () => {
                   )}
                 </div>
 
-                {/* Verify Button */}
                 <button
                   type="submit"
                   disabled={loading || otp.join("").length !== 6}
-                  className={`w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
+                  className={`w-full py-3 px-4 bg-linear-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
                     loading || otp.join("").length !== 6
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
@@ -645,7 +619,6 @@ const Signup = () => {
               </form>
             )}
 
-            {/* Sign In Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm">
                 Already have an account?{" "}
@@ -658,14 +631,12 @@ const Signup = () => {
               </p>
             </div>
 
-            {/* Divider */}
             <div className="mt-6 flex items-center">
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-4 text-sm text-gray-500">or</span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
-            {/* Back to Home */}
             <div className="mt-6 text-center">
               <Link
                 to="/welcome"
@@ -678,7 +649,6 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Terms */}
         <p className="text-center text-white text-xs mt-6">
           By signing up, you agree to our{" "}
           <a href="#terms" className="underline hover:text-blue-200">

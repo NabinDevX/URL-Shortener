@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 
-const Login = () => {
+const Login = ({ onAuthSuccess }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [formData, setFormData] = useState({
@@ -22,7 +22,6 @@ const Login = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -34,14 +33,12 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Invalid email format";
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
@@ -80,27 +77,26 @@ const Login = () => {
 
       console.log("✅ Login successful:", response.data);
 
-      // Redirect to dashboard
-      navigate("/dashboard");
+      if (onAuthSuccess && response.data.data?.user) {
+        onAuthSuccess(response.data.data.user);
+      }
+
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("❌ Login error:", error);
 
       if (error.response) {
-        // Server responded with error
         const errorMessage = error.response.data?.message || "Login failed";
 
         if (error.response.status === 401) {
-          // Invalid credentials
           setErrors({
             general: "Invalid email or password",
           });
         } else if (error.response.status === 404) {
-          // User not found
           setErrors({
             general: "No account found with this email",
           });
         } else if (error.response.status === 400) {
-          // Validation error
           setErrors({
             general: errorMessage,
           });
@@ -110,7 +106,6 @@ const Login = () => {
           });
         }
       } else if (error.request) {
-        // Network error
         setErrors({
           general: "Network error. Please check your connection.",
         });
@@ -125,12 +120,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
-        {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-6">
+          <div className="bg-linear-to-r from-purple-600 to-indigo-600 px-8 py-6">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-4xl">🔗</span>
               <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
@@ -140,9 +133,7 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Form */}
           <div className="px-8 py-8">
-            {/* Success Message from Signup */}
             {successMessage && (
               <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-start gap-2">
@@ -152,7 +143,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* General Error */}
             {errors.general && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start gap-2">
@@ -163,7 +153,6 @@ const Login = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email Field */}
               <div>
                 <label
                   htmlFor="email"
@@ -191,7 +180,6 @@ const Login = () => {
                 )}
               </div>
 
-              {/* Password Field */}
               <div>
                 <label
                   htmlFor="password"
@@ -228,7 +216,6 @@ const Login = () => {
                 )}
               </div>
 
-              {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -245,11 +232,10 @@ const Login = () => {
                 </a>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
+                className={`w-full py-3 px-4 bg-linear-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
                   loading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
@@ -281,7 +267,6 @@ const Login = () => {
               </button>
             </form>
 
-            {/* Sign Up Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm">
                 Don't have an account?{" "}
@@ -294,7 +279,6 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Back to Home */}
             <div className="mt-6 text-center">
               <Link
                 to="/welcome"
@@ -307,7 +291,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Security Badge */}
         <div className="mt-6 flex items-center justify-center gap-2 text-white text-sm">
           <span className="text-green-300">🔒</span>
           <span>Secure SSL Connection</span>
