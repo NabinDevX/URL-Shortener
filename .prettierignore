@@ -1,7 +1,10 @@
-/.vscode
-/node_modules
-./dist
-
 *.env
 .env
 .env.*
+node_modules
+dist
+build
+.git
+pnpm-lock.yaml
+*.min.js
+*.min.css

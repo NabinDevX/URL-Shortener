@@ -137,3 +137,24 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# pnpm
+.pnpm-store/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE - JetBrains
+.idea/
+*.iml
+
+# Build error logs
+build-errors.txt
+
+# Local config overrides
+*.local
+
+# Google OAuth client secret
+/backend/config/client_secret.json

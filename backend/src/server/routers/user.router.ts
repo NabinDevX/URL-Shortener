@@ -1,0 +1,372 @@
+import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { z } from "zod";
+import * as userController from "@/controllers/user.controller";
+import { sendOtp, verifyOtp } from "@/middlewares/otp";
+import { handleError } from "@/utils/errorHandler";
+
+const userPublicSchema = z.object({
+  _id: z.string(),
+  email: z.string().email(),
+  name: z.string(),
+  apiKey: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+const sendOtpInputSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  name: z.string().optional(),
+});
+
+const userSignupInputSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(1, "Name is required"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+});
+
+const userLoginInputSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const googleAuthUrlInputSchema = z.object({
+  mode: z.enum(["register", "login"]).optional(),
+  state: z.string().optional(),
+  redirectUri: z.string().url().optional(),
+});
+
+const googleAuthCodeInputSchema = z.object({
+  code: z.string().min(1, "Google authorization code is required"),
+  redirectUri: z.string().url().optional(),
+});
+
+const changePasswordInputSchema = z.object({
+  oldPassword: z.string().min(1, "Old password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+});
+
+const updateAccountInputSchema = z.object({
+  name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  otp: z.string().length(6).optional(),
+});
+
+const deleteAccountInputSchema = z.object({
+  password: z.string().min(1, "Password is required"),
+});
+
+const refreshTokenInputSchema = z.object({
+  refreshToken: z.string().optional(),
+});
+
+const authTokensSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+});
+
+export const userRouter = router({
+  sendOtp: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/send-otp",
+        tags: ["User"],
+        description: "Send OTP to email for verification",
+      },
+    })
+    .input(sendOtpInputSchema)
+    .output(z.object({ email: z.string(), message: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        return await sendOtp(input);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  signup: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/signup",
+        tags: ["User"],
+        description: "Register a new user",
+      },
+    })
+    .input(userSignupInputSchema)
+    .output(
+      z.object({
+        user: userPublicSchema,
+        accessToken: z.string(),
+        refreshToken: z.string(),
+        message: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await verifyOtp(input.email, input.otp);
+        return await userController.signup(input, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  login: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/login",
+        tags: ["User"],
+        description: "Login user",
+      },
+    })
+    .input(userLoginInputSchema)
+    .output(
+      z.object({
+        user: userPublicSchema,
+        accessToken: z.string(),
+        refreshToken: z.string(),
+        message: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.login(input, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  googleAuthUrl: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/user/google/auth-url",
+        tags: ["User"],
+        description: "Generate Google OAuth2 authorization URL",
+      },
+    })
+    .input(googleAuthUrlInputSchema.optional())
+    .output(z.object({ authUrl: z.string().url(), message: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        return await userController.getGoogleOAuthUrl(input ?? {});
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  googleRegister: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/google/register",
+        tags: ["User"],
+        description: "Register user with Google OAuth2 authorization code",
+      },
+    })
+    .input(googleAuthCodeInputSchema)
+    .output(
+      z.object({
+        user: userPublicSchema,
+        accessToken: z.string(),
+        refreshToken: z.string(),
+        message: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.googleRegister(input, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  googleLogin: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/google/login",
+        tags: ["User"],
+        description: "Login user with Google OAuth2 authorization code",
+      },
+    })
+    .input(googleAuthCodeInputSchema)
+    .output(
+      z.object({
+        user: userPublicSchema,
+        accessToken: z.string(),
+        refreshToken: z.string(),
+        message: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.googleLogin(input, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  logout: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/logout",
+        tags: ["User"],
+        description: "Logout user",
+        protect: true,
+      },
+    })
+    .input(z.undefined())
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ ctx }) => {
+      try {
+        return await userController.logout(ctx.user, ctx.token, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  refreshToken: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/refresh-token",
+        tags: ["User"],
+        description: "Refresh access token",
+      },
+    })
+    .input(refreshTokenInputSchema)
+    .output(authTokensSchema.extend({ message: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.refreshAccessToken(input.refreshToken, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  changePassword: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/change-password",
+        tags: ["User"],
+        description: "Change user password",
+        protect: true,
+      },
+    })
+    .input(changePasswordInputSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.changePassword(input, ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  getCurrentUser: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/user/current-user",
+        tags: ["User"],
+        description: "Get current logged in user",
+        protect: true,
+      },
+    })
+    .input(z.undefined())
+    .output(z.object({ user: userPublicSchema, message: z.string() }))
+    .query(({ ctx }) => {
+      try {
+        return userController.getCurrentUser(ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  updateAccount: protectedProcedure
+    .meta({
+      openapi: {
+        method: "PATCH",
+        path: "/user/update-account",
+        tags: ["User"],
+        description: "Update user account details",
+        protect: true,
+      },
+    })
+    .input(updateAccountInputSchema)
+    .output(z.object({ user: userPublicSchema, message: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.updateAccount(input, ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  deleteAccount: protectedProcedure
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/user/delete-account",
+        tags: ["User"],
+        description: "Delete user account",
+        protect: true,
+      },
+    })
+    .input(deleteAccountInputSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await userController.deleteAccount(input, ctx.user, ctx);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  regenerateApiKey: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/regenerate-api-key",
+        tags: ["User"],
+        description: "Regenerate user API key",
+        protect: true,
+      },
+    })
+    .input(z.undefined())
+    .output(z.object({ apiKey: z.string(), message: z.string() }))
+    .mutation(async ({ ctx }) => {
+      try {
+        return await userController.regenerateApiKey(ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  getApiKey: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/user/api-key",
+        tags: ["User"],
+        description: "Get current user API key",
+        protect: true,
+      },
+    })
+    .input(z.undefined())
+    .output(z.object({ apiKey: z.string().optional(), message: z.string() }))
+    .query(({ ctx }) => {
+      try {
+        return userController.getApiKey(ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+});
+
+export type UserRouter = typeof userRouter;

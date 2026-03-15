@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "URL Shortener Floating Widget",
+  "version": "1.0.0",
+  "description": "Draggable URL shortener widget inside any web page",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "URL Shortener Floating Widget",
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["src/content.tsx"],
+      "run_at": "document_end"
+    }
+  ]
+}

@@ -1,31 +1,35 @@
 {
   "name": "url-shortener",
   "private": true,
+  "version": "0.1.0",
+  "type": "module",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "pnpm --filter web dev",
-    "dev:extension": "pnpm --filter extension dev",
-    "build:web": "pnpm --filter web build",
-    "build:extension": "pnpm --filter extension build",
+    "dev:web": "pnpm --filter @myorg/web dev",
+    "dev:extension": "pnpm --filter @myorg/extension dev",
+    "build:web": "pnpm --filter @myorg/web build",
+    "build:extension": "pnpm --filter @myorg/extension build",
     "build": "pnpm -r build",
-    "preview:web": "pnpm --filter web preview",
-    "preview:extension": "pnpm --filter extension preview",
+    "preview:web": "pnpm --filter @myorg/web preview",
+    "preview:extension": "pnpm --filter @myorg/extension preview",
     "prettier": "prettier . --write"
   },
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "eslint": "^9.38.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
-    "eslint-plugin-unused-imports": "^4.3.0",
-    "globals": "^16.4.0",
-    "prettier": "^3.6.2"
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
   }
 }
