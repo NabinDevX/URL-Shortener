@@ -4,12 +4,12 @@ A full-stack URL shortener platform with a web app, a browser extension, shared 
 
 ## Monorepo Layout
 
-- `backend`: Node.js + TypeScript API server
-- `frontend/apps/web`: Vite + React web app
-- `frontend/apps/extension`: Vite + React browser extension
-- `frontend/packages/ui`: shared UI/context/hooks package
+- `apps/backend`: Node.js + TypeScript API server
+- `apps/web`: Next.js web app
+- `apps/extension`: Vite + React browser extension
+- `packages/ui`: shared UI/context/hooks package
 - `docker-compose.yaml`: production-style container setup
-- `docker-compose.prometheus.yml`: Prometheus container setup
+- `turbo.json`: Turborepo task pipeline
 
 ## Core Features
 
@@ -59,10 +59,6 @@ A full-stack URL shortener platform with a web app, a browser extension, shared 
 ### 1. Install dependencies
 
 ```bash
-cd backend
-pnpm install
-
-cd ../frontend
 pnpm install
 ```
 
@@ -70,7 +66,7 @@ pnpm install
 
 Create env files according to your deployment needs.
 
-Common backend variables include:
+Backend env (apps/backend/.env) typically includes:
 
 - `PORT`
 - `MONGODB_URI`
@@ -81,32 +77,48 @@ Common backend variables include:
 - `USER_SECRET_REFRESH_TOKEN`
 - `ACCESS_TOKEN_EXPIRY`
 - `REFRESH_TOKEN_EXPIRY`
+- `BREVO_API_KEY`
+- `BREVO_SENDER_EMAIL`
+
+OTP email behavior:
+
+- Production: requires `BREVO_API_KEY` + `BREVO_SENDER_EMAIL`.
+- Development/test: OTP defaults to logging in backend logs. To enable real emails set `OTP_EMAIL_IN_NON_PRODUCTION=true`.
 
 For Google OAuth, keep your Google client secret file at:
 
-- `backend/config/client_secret.json`
+- `apps/backend/config/client_secret.json`
+
+Web env (apps/web/.env) typically includes:
+
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+- `NEXT_PUBLIC_API_PREFIX` (default: `/api/v1`)
+- `NEXT_PUBLIC_API_URL` (backend base URL for local dev; default in repo is `http://localhost:8000`)
 
 ## Run in Development
 
 ### Backend
 
 ```bash
-cd backend
-pnpm dev
+pnpm dev:backend
 ```
 
 ### Frontend web app
 
 ```bash
-cd frontend
 pnpm dev:web
 ```
 
 ### Frontend extension app
 
 ```bash
-cd frontend
 pnpm dev:extension
+```
+
+Or run everything at once:
+
+```bash
+pnpm dev
 ```
 
 ## Build Commands
@@ -114,36 +126,31 @@ pnpm dev:extension
 ### Backend
 
 ```bash
-cd backend
-pnpm build
+pnpm build:backend
 ```
 
 ### Frontend (all workspace packages)
 
 ```bash
-cd frontend
 pnpm build
 ```
 
 ### Build web app only
 
 ```bash
-cd frontend
 pnpm build:web
 ```
 
 ### Build extension only
 
 ```bash
-cd frontend
 pnpm build:extension
 ```
 
 ## Testing
 
 ```bash
-cd backend
-pnpm test
+pnpm test:backend
 ```
 
 ## Docker
@@ -152,11 +159,7 @@ pnpm test
 docker compose -f docker-compose.yaml up -d
 ```
 
-Prometheus stack:
-
-```bash
-docker compose -f docker-compose.prometheus.yml up -d
-```
+This compose file is designed to pull pre-built images from GHCR (see the GitHub Actions workflow in .github/workflows/ci-cd.yaml).
 
 ## Main API Groups
 
@@ -167,7 +170,7 @@ docker compose -f docker-compose.prometheus.yml up -d
 ## Security Notes
 
 - Do not commit secret files or env secrets
-- `backend/config/client_secret.json` should remain ignored from git
+- `apps/backend/config/client_secret.json` should remain ignored from git
 - Use strong token secrets in production
 
 ## License

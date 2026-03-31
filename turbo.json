@@ -1,0 +1,68 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "NODE_ENV",
+    "JEST_WORKER_ID",
+    "PORT",
+    "CORS_ORIGIN",
+    "MONGODB_URI",
+    "DB_NAME",
+    "REDIS_URL",
+    "JWT_ACCESS_TOKEN_SECRET",
+    "JWT_ACCESS_TOKEN_EXPIRY",
+    "JWT_REFRESH_TOKEN_SECRET",
+    "JWT_REFRESH_TOKEN_EXPIRY",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
+    "GOOGLE_REDIRECT_URI",
+    "API_KEY_RATE_LIMIT_REQUESTS",
+    "RATE_LIMIT_WINDOW_MS",
+    "RATE_LIMIT_MAX_REQUESTS",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "USER_SECRET_ACCESS_TOKEN",
+    "USER_SECRET_REFRESH_TOKEN",
+    "ACCESS_TOKEN_EXPIRY",
+    "REFRESH_TOKEN_EXPIRY",
+    "BREVO_SENDER_EMAIL",
+    "BREVO_API_KEY",
+    "OTP_EMAIL_IN_NON_PRODUCTION",
+    "PRODUCTION_DOMAIN",
+    "LOG_LEVEL",
+    "LOKI_HOST",
+    "API_PROXY_TARGET",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_API_PREFIX",
+    "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+    "VITE_API_PREFIX",
+    "VITE_API_BASE_URL",
+    "VITE_GOOGLE_CLIENT_ID"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "envMode": "loose"
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "outputs": []
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "cache": false
+    }
+  }
+}

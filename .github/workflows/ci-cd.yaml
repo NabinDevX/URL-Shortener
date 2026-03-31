@@ -1,0 +1,176 @@
+name: CI/CD Deployment (GHCR Pull)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # 1️⃣ Build and Push to GHCR
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 🧩 Convert repo name to lowercase for GHCR
+      - name: Prepare lowercase image names
+        id: names
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "REPO_LOWER=$REPO_LOWER" >> $GITHUB_ENV
+          echo "BACKEND_IMAGE_NAME=$REPO_LOWER/backend" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE_NAME=$REPO_LOWER/frontend" >> $GITHUB_ENV
+
+      # 🔐 Login to GHCR
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN_GITHUB }}
+
+      # 🏗️ Build and Push Backend
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/backend/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+
+      # 🏗️ Build and Push Frontend
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+
+  # 2️⃣ Deploy on VM (Pull Images and Run Containers)
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare lowercase repo name
+        run: echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          REGISTRY=${{ env.REGISTRY }}
+          REPO_LOWER=${{ env.REPO_LOWER }}
+          NODE_ENV=${{ secrets.NODE_ENV }}
+          PORT=${{ secrets.PORT }}
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          REDIS_URL=${{ secrets.REDIS_URL }}
+          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+          USER_SECRET_ACCESS_TOKEN=${{ secrets.USER_SECRET_ACCESS_TOKEN }}
+          USER_SECRET_REFRESH_TOKEN=${{ secrets.USER_SECRET_REFRESH_TOKEN }}
+          ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }}
+          REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}
+          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+          EOF
+      - name: Ensure target directory exists on VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: mkdir -p ~/URL-Shortener
+
+      - name: Copy .env file to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: ".env"
+          target: "~/URL-Shortener/"
+
+      - name: Copy docker-compose.yaml to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "docker-compose.yaml"
+          target: "~/URL-Shortener/"
+
+      - name: Login to GHCR on VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: echo "${{ secrets.TOKEN_GITHUB }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull latest images
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/URL-Shortener
+            sudo docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
+            sudo docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
+        env:
+          REPO_LOWER: ${{ env.REPO_LOWER }}
+
+      - name: Stop old containers
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/URL-Shortener
+            sudo docker compose down --remove-orphans || true
+
+      - name: Start new containers
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/URL-Shortener
+            sudo docker compose up -d
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            sleep 60
+            sudo docker ps
+            curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
+            curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
+
+      - name: Cleanup old images
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: sudo docker image prune -f
+
+      - name: Deployment complete
+        run: echo "✅ Deployment complete!"

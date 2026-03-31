@@ -1,15 +1,15 @@
 services:
   backend:
-    image: ghcr.io/nabindevx/url-shortener/backend:latest
+    image: ${REGISTRY:-ghcr.io}/${REPO_LOWER}/backend:latest
     container_name: backend
     restart: unless-stopped
     ports:
-      - "3333:8001"
+      - "3333:${PORT:-8000}"
     volumes:
-      - extension-dist:/app/public/extension:ro
+      - extension-dist:/app/apps/backend/public/extension:ro
     environment:
-      NODE_ENV: ${NODE_ENV}
-      PORT: ${PORT}
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-8000}
       MONGODB_URI: ${MONGODB_URI}
       DB_NAME: ${DB_NAME}
       REDIS_URL: ${REDIS_URL}
@@ -21,7 +21,7 @@ services:
       BREVO_API_KEY: ${BREVO_API_KEY}
       BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8001/document"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:' + process.env.PORT + '/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1));"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -30,20 +30,18 @@ services:
       - app-network
 
   frontend:
-    image: ghcr.io/nabindevx/url-shortener/frontend:latest
+    image: ${REGISTRY:-ghcr.io}/${REPO_LOWER}/frontend:latest
     container_name: frontend
     restart: unless-stopped
     ports:
-      - "5000:5173"
+      - "5000:3000"
     volumes:
-      - extension-dist:/app/extension
+      - extension-dist:/app/extension-dist
     environment:
-      NODE_ENV: ${NODE_ENV}
-      VITE_API_PREFIX: ${VITE_API_PREFIX}
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      NODE_ENV: ${NODE_ENV:-production}
+      API_PROXY_TARGET: http://backend:${PORT:-8000}
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - app-network
 

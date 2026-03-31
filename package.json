@@ -1,0 +1,30 @@
+{
+  "name": "demo",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "build:backend": "pnpm --filter @repo/backend build",
+    "build:web": "pnpm --filter @repo/web build",
+    "build:extension": "pnpm --filter @repo/extension build",
+    "dev": "turbo run dev",
+    "dev:backend": "pnpm --filter @repo/backend dev",
+    "dev:web": "pnpm --filter @repo/web dev",
+    "test": "turbo run test",
+    "test:backend": "pnpm --filter @repo/backend test",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md}\"",
+    "check-types": "turbo run check-types"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "turbo": "^2.8.20",
+    "typescript": "5.9.2",
+    "vite": "^7.2.4"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  }
+}

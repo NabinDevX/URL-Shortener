@@ -40,6 +40,8 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+.pnp
+.pnp.js
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -64,11 +66,14 @@ web_modules/
 
 # Yarn Integrity file
 .yarn-integrity
+.yarn/install-state.gz
 
 # dotenv environment variable files
 .env
-.env.*
-!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -77,13 +82,13 @@ web_modules/
 # Next.js build output
 .next
 out
+build
+dist
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
-.cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
@@ -93,7 +98,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Sveltekit cache directory
 .svelte-kit/
@@ -141,6 +145,12 @@ vite.config.ts.timestamp-*
 # pnpm
 .pnpm-store/
 
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -157,4 +167,18 @@ build-errors.txt
 *.local
 
 # Google OAuth client secret
-/backend/config/client_secret.json
+**/client_secret.json
+
+# Testing directories
+/node_modules
+/.pnp
+.pnp.js
+/coverage
+
+# next-env
+next-env.d.ts
+/out/
+/build
+
+# Misc build files
+*.pem

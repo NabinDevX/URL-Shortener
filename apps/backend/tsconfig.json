@@ -1,0 +1,13 @@
+{
+  "extends": "@repo/typescript-config/node.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@repo/*": ["../../packages/*/src"]
+    },
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}
