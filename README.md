@@ -49,7 +49,7 @@ A full-stack URL shortener platform with a web app, a browser extension, shared 
 
 ## Prerequisites
 
-- Node.js 22+
+- Node.js 18+ (Node 20+ recommended)
 - pnpm
 - MongoDB
 - Redis
@@ -64,7 +64,13 @@ pnpm install
 
 ### 2. Configure environment
 
-Create env files according to your deployment needs.
+Generate starter env files:
+
+```bash
+pnpm generate:env
+```
+
+Then adjust the generated values for your local setup.
 
 Backend env (apps/backend/.env) typically includes:
 
@@ -91,9 +97,9 @@ For Google OAuth, keep your Google client secret file at:
 
 Web env (apps/web/.env) typically includes:
 
-- `NEXT_GOOGLE_CLIENT_ID`
-- `NEXT_API_PREFIX` (default: `/api/v1`)
-- `NEXT_API_BASE_URL` (backend base URL for local dev; default in repo is `http://localhost:8000`)
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+- `NEXT_PUBLIC_API_PREFIX` (default: `/api/v1`)
+- `NEXT_PUBLIC_API_BASE_URL` (backend base URL for local dev; default in repo is `http://localhost:8000`)
 
 ## Run in Development
 
@@ -120,6 +126,23 @@ Or run everything at once:
 ```bash
 pnpm dev
 ```
+
+## Workspace Scripts
+
+Available from the repo root:
+
+- `pnpm dev` - run all development tasks through Turborepo
+- `pnpm dev:backend` - run backend only
+- `pnpm dev:web` - run Next.js web app only
+- `pnpm dev:extension` - run extension app only
+- `pnpm build` - build all workspaces
+- `pnpm build:backend` - build backend CSS + TypeScript output
+- `pnpm build:web` - build web app only
+- `pnpm build:extension` - build extension only
+- `pnpm test` - run all tests configured in workspaces
+- `pnpm test:backend` - run backend test suite
+- `pnpm lint` - lint all workspaces
+- `pnpm check-types` - type-check all workspaces
 
 ## Build Commands
 
@@ -152,6 +175,13 @@ pnpm build:extension
 ```bash
 pnpm test:backend
 ```
+
+## Troubleshooting
+
+- `pnpm dev:backend` fails immediately: verify `apps/backend/.env` exists and `MONGODB_URI`/`REDIS_URL` are reachable.
+- `pnpm dev:web` fails with API/auth issues: verify `apps/web/.env` and make sure `NEXT_PUBLIC_API_BASE_URL` points to the running backend.
+- Turbo output is noisy in CI or scripted runs: set `TURBO_UI=false` before the command.
+- OAuth errors: ensure `apps/backend/config/client_secret.json` is present and matches your Google OAuth app.
 
 ## Docker
 

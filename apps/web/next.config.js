@@ -7,10 +7,12 @@ const nodeEnv = process.env.NODE_ENV || "development";
 const defaultProxyTarget =
   nodeEnv === "production" ? "http://localhost:8000" : "http://localhost:8000";
 
-const apiPrefix = normalizePrefix(process.env.NEXT_API_PREFIX || "/api/v1");
+const apiPrefix = normalizePrefix(
+  process.env.NEXT_PUBLIC_API_PREFIX || "/api/v1"
+);
 const proxyTarget = stripTrailingSlash(
   process.env.API_PROXY_TARGET ||
-    process.env.NEXT_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
     defaultProxyTarget
 );
 

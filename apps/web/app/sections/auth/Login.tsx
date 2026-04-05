@@ -57,7 +57,7 @@ const Login = () => {
     location.state?.message || ""
   );
 
-  const googleClientIdRaw = process.env.NEXT_GOOGLE_CLIENT_ID;
+  const googleClientIdRaw = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const googleClientId =
     googleClientIdRaw &&
     googleClientIdRaw !== "your_google_client_id_here" &&

@@ -310,7 +310,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const loginWithGoogleToken = useCallback(
     async (token: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/login-token",
+        "/api/v1/user/google/signin-token",
         { token },
         {
           headers: {
@@ -362,7 +362,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const loginWithGoogleCode = useCallback(
     async (code: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/login",
+        "/api/v1/user/google/signin",
         { code, redirectUri: "postmessage" },
         {
           headers: {
@@ -388,7 +388,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const signupWithGoogleCode = useCallback(
     async (code: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/register",
+        "/api/v1/user/google/signup",
         { code, redirectUri: "postmessage" },
         {
           headers: {

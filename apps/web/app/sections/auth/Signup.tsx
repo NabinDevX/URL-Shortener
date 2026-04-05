@@ -59,7 +59,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  const googleClientIdRaw = process.env.NEXT_GOOGLE_CLIENT_ID;
+  const googleClientIdRaw = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const googleClientId =
     googleClientIdRaw &&
     googleClientIdRaw !== "your_google_client_id_here" &&
