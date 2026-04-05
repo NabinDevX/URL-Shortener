@@ -8,6 +8,15 @@ import logger from "@/utils/logger";
 const totalCPUs = os.cpus().length;
 const PORT: number = parseInt(process.env.PORT!, 10);
 const isDevelopment = process.env.NODE_ENV !== "production";
+const HOST = isDevelopment ? "localhost" : "0.0.0.0";
+
+const getServerUrls = () => {
+  if (isDevelopment) {
+    return [`http://localhost:${PORT}`];
+  }
+
+  return [`http://localhost:${PORT}`, `http://0.0.0.0:${PORT}`];
+};
 
 const gracefulShutdown = async () => {
   logger.warn("Received shutdown signal, closing gracefully...");
@@ -49,9 +58,10 @@ if (isDevelopment) {
         });
       }
 
-      app.listen(PORT, "localhost", () => {
+      app.listen(PORT, HOST, () => {
         logger.info(`Server listening on port ${PORT}`, {
-          url: `http://localhost:${PORT}`,
+          host: HOST,
+          urls: getServerUrls(),
         });
       });
     } catch (err) {
@@ -115,8 +125,11 @@ if (isDevelopment) {
           );
         }
 
-        app.listen(PORT, "localhost", () => {
-          logger.info(`Worker ${process.pid} listening on port ${PORT}`);
+        app.listen(PORT, HOST, () => {
+          logger.info(`Worker ${process.pid} listening on port ${PORT}`, {
+            host: HOST,
+            urls: getServerUrls(),
+          });
         });
       } catch (err) {
         logger.error(`Worker ${process.pid} failed to start`, { error: err });
