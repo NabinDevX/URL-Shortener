@@ -135,7 +135,18 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          script: echo "${{ secrets.TOKEN_GITHUB }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          script: |
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if sudo -n docker info >/dev/null 2>&1; then
+                DOCKER="sudo -n docker"
+              else
+                echo "Docker is not accessible for this user, and sudo requires a password. Add VM user to docker group or configure passwordless sudo for docker."
+                exit 1
+              fi
+            fi
+
+            echo "${{ secrets.TOKEN_GITHUB }}" | $DOCKER login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Pull latest images
         uses: appleboy/ssh-action@v1.0.0
@@ -144,9 +155,19 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if sudo -n docker info >/dev/null 2>&1; then
+                DOCKER="sudo -n docker"
+              else
+                echo "Docker is not accessible for this user, and sudo requires a password. Add VM user to docker group or configure passwordless sudo for docker."
+                exit 1
+              fi
+            fi
+
             cd ~/URL-Shortener
-            sudo docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
-            sudo docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
+            $DOCKER pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
+            $DOCKER pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
         env:
           REPO_LOWER: ${{ env.REPO_LOWER }}
 
@@ -157,8 +178,18 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if sudo -n docker info >/dev/null 2>&1; then
+                DOCKER="sudo -n docker"
+              else
+                echo "Docker is not accessible for this user, and sudo requires a password. Add VM user to docker group or configure passwordless sudo for docker."
+                exit 1
+              fi
+            fi
+
             cd ~/URL-Shortener
-            sudo docker compose down --remove-orphans || true
+            $DOCKER compose down --remove-orphans || true
 
       - name: Start new containers
         uses: appleboy/ssh-action@v1.0.0
@@ -167,8 +198,18 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if sudo -n docker info >/dev/null 2>&1; then
+                DOCKER="sudo -n docker"
+              else
+                echo "Docker is not accessible for this user, and sudo requires a password. Add VM user to docker group or configure passwordless sudo for docker."
+                exit 1
+              fi
+            fi
+
             cd ~/URL-Shortener
-            sudo docker compose up -d
+            $DOCKER compose up -d
 
       - name: Health check
         uses: appleboy/ssh-action@v1.0.0
@@ -177,8 +218,18 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if sudo -n docker info >/dev/null 2>&1; then
+                DOCKER="sudo -n docker"
+              else
+                echo "Docker is not accessible for this user, and sudo requires a password. Add VM user to docker group or configure passwordless sudo for docker."
+                exit 1
+              fi
+            fi
+
             sleep 60
-            sudo docker ps
+            $DOCKER ps
             curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
             curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
 
@@ -188,7 +239,18 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          script: sudo docker image prune -f
+          script: |
+            DOCKER="docker"
+            if ! docker info >/dev/null 2>&1; then
+              if sudo -n docker info >/dev/null 2>&1; then
+                DOCKER="sudo -n docker"
+              else
+                echo "Docker is not accessible for this user, and sudo requires a password. Add VM user to docker group or configure passwordless sudo for docker."
+                exit 1
+              fi
+            fi
+
+            $DOCKER image prune -f
 
       - name: Deployment complete
         run: echo "✅ Deployment complete!"
