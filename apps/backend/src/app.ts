@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import cors from "cors";
 import client from "prom-client";
 import cookieParser from "cookie-parser";
@@ -16,7 +16,7 @@ import { getOriginalURL } from "@/controllers/url.controller";
 import { downloadExtension } from "@/controllers/extension.controller";
 import logger from "@/utils/logger";
 
-const app = express();
+const app: Express = express();
 const __dirname = path.resolve();
 
 client.collectDefaultMetrics({ register: client.register });
