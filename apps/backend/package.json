@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@tailwindcss/cli": "^4.2.2",
     "@types/archiver": "^7.0.0",
     "@types/bcrypt": "^6.0.0",

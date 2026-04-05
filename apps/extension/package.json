@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@crxjs/vite-plugin": "^2.3.0",
     "@swc/helpers": "^0.5.17",
     "@tailwindcss/vite": "^4.1.16",
