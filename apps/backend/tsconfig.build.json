@@ -6,6 +6,11 @@
     "declaration": true,
     "declarationMap": true
   },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "resolveFullExtension": ".js",
+    "verbose": false
+  },
   "include": ["src"],
   "exclude": ["tests", "**/*.spec.ts", "**/*.test.ts"]
 }
