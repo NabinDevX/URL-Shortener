@@ -59,7 +59,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  const googleClientIdRaw = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleClientIdRaw = process.env.NEXT_GOOGLE_CLIENT_ID;
   const googleClientId =
     googleClientIdRaw &&
     googleClientIdRaw !== "your_google_client_id_here" &&
@@ -735,7 +735,7 @@ const Signup = () => {
               <p className="text-gray-600 text-sm">
                 Already have an account?{" "}
                 <Link
-                  to="/login"
+                  to="/signin"
                   className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
                 >
                   Sign In

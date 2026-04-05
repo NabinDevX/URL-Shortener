@@ -116,7 +116,7 @@
     "/user/signup": {
       "post": {
         "operationId": "user-signup",
-        "description": "Register a new user",
+        "description": "Sign up a new user",
         "tags": [
           "User"
         ],
@@ -267,10 +267,10 @@
         }
       }
     },
-    "/user/login": {
+    "/user/signin": {
       "post": {
-        "operationId": "user-login",
-        "description": "Login user",
+        "operationId": "user-signin",
+        "description": "Sign in user",
         "tags": [
           "User"
         ],
@@ -429,8 +429,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "register",
-                "login"
+                "signup",
+                "signin"
               ]
             }
           },
@@ -536,10 +536,10 @@
         }
       }
     },
-    "/user/google/register": {
+    "/user/google/signup": {
       "post": {
-        "operationId": "user-googleRegister",
-        "description": "Register user with Google OAuth2 authorization code",
+        "operationId": "user-googleSignup",
+        "description": "Sign up user with Google OAuth2 authorization code",
         "tags": [
           "User"
         ],
@@ -685,10 +685,10 @@
         }
       }
     },
-    "/user/google/login": {
+    "/user/google/signin": {
       "post": {
-        "operationId": "user-googleLogin",
-        "description": "Login user with Google OAuth2 authorization code",
+        "operationId": "user-googleSignin",
+        "description": "Sign in user with Google OAuth2 authorization code",
         "tags": [
           "User"
         ],
@@ -834,10 +834,10 @@
         }
       }
     },
-    "/user/google/login-token": {
+    "/user/google/signin-token": {
       "post": {
-        "operationId": "user-googleLoginWithToken",
-        "description": "Login user with Google ID token from @react-oauth/google",
+        "operationId": "user-googleSigninWithToken",
+        "description": "Sign in user with Google ID token from @react-oauth/google",
         "tags": [
           "User"
         ],
@@ -1108,10 +1108,10 @@
         }
       }
     },
-    "/user/logout": {
+    "/user/signout": {
       "post": {
-        "operationId": "user-logout",
-        "description": "Logout user",
+        "operationId": "user-signout",
+        "description": "Sign out user",
         "tags": [
           "User"
         ],
@@ -1120,6 +1120,18 @@
             "Authorization": []
           }
         ],
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful response",
@@ -1136,6 +1148,16 @@
                     "message"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error.BAD_REQUEST"
                 }
               }
             }
@@ -1725,6 +1747,18 @@
             "Authorization": []
           }
         ],
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful response",
@@ -1745,6 +1779,16 @@
                     "message"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error.BAD_REQUEST"
                 }
               }
             }
@@ -1805,11 +1849,107 @@
                     "apiKey": {
                       "type": "string"
                     },
+                    "apiKeyExpiresAt": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     }
                   },
                   "required": [
+                    "createdAt",
+                    "updatedAt",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization not provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error.UNAUTHORIZED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error.FORBIDDEN"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error.INTERNAL_SERVER_ERROR"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/api-rate-limit": {
+      "get": {
+        "operationId": "user-getApiRateLimit",
+        "description": "Get API key rate-limit snapshot for current user",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "remaining": {
+                      "type": "number"
+                    },
+                    "used": {
+                      "type": "number"
+                    },
+                    "maxRequests": {
+                      "type": "number"
+                    },
+                    "resetIn": {
+                      "type": "number"
+                    },
+                    "windowInSeconds": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "remaining",
+                    "used",
+                    "maxRequests",
+                    "resetIn",
+                    "windowInSeconds",
                     "message"
                   ],
                   "additionalProperties": false

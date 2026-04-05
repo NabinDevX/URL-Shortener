@@ -1,19 +1,11 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { google } from "googleapis";
 import { OAuth2Client } from "google-auth-library";
 import { ApiError } from "@/utils/apiError";
 import type { GoogleAuthUrlInput } from "@/types";
 
-interface GoogleClientSecretPayload {
+interface GoogleOAuthConfig {
   client_id: string;
   client_secret: string;
-  redirect_uris?: string[];
-}
-
-interface GoogleClientSecretFile {
-  installed?: GoogleClientSecretPayload;
-  web?: GoogleClientSecretPayload;
 }
 
 export interface GoogleUserProfile {
@@ -24,46 +16,22 @@ export interface GoogleUserProfile {
   picture?: string;
 }
 
-let cachedConfig: GoogleClientSecretPayload | null = null;
+let cachedConfig: GoogleOAuthConfig | null = null;
 
-const getClientSecretPath = (): string => {
-  const directPath = path.resolve(process.cwd(), "config/client_secret.json");
-  const parentPath = path.resolve(
-    process.cwd(),
-    "../config/client_secret.json"
-  );
-  return process.cwd().includes("backend") ? parentPath : directPath;
-};
-
-const loadGoogleClientConfig = async (): Promise<GoogleClientSecretPayload> => {
+const loadGoogleClientConfig = async (): Promise<GoogleOAuthConfig> => {
   if (cachedConfig) {
     return cachedConfig;
   }
 
-  const candidatePaths = [
-    path.resolve(process.cwd(), "config/client_secret.json"),
-    path.resolve(process.cwd(), "../config/client_secret.json"),
-    getClientSecretPath(),
-  ];
-
-  let parsed: GoogleClientSecretFile | null = null;
-
-  for (const filePath of candidatePaths) {
-    try {
-      const raw = await readFile(filePath, "utf-8");
-      parsed = JSON.parse(raw) as GoogleClientSecretFile;
-      break;
-    } catch {
-      continue;
-    }
-  }
-
-  const config = parsed?.installed ?? parsed?.web;
+  const config: GoogleOAuthConfig = {
+    client_id: process.env.GOOGLE_CLIENT_ID ?? "",
+    client_secret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  };
 
   if (!config?.client_id || !config?.client_secret) {
     throw new ApiError(
       500,
-      "Google OAuth is not configured correctly. Check config/client_secret.json"
+      "Google OAuth is not configured correctly. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env"
     );
   }
 
@@ -71,28 +39,13 @@ const loadGoogleClientConfig = async (): Promise<GoogleClientSecretPayload> => {
   return config;
 };
 
-const resolveRedirectUri = (
-  config: GoogleClientSecretPayload,
-  redirectUri?: string
-): string => {
-  return (
-    redirectUri ??
-    process.env.GOOGLE_REDIRECT_URI ??
-    config.redirect_uris?.[0] ??
-    ""
-  );
+const resolveRedirectUri = (redirectUri?: string): string => {
+  return redirectUri ?? "postmessage";
 };
 
 const getOauthClient = async (redirectUri?: string): Promise<OAuth2Client> => {
   const config = await loadGoogleClientConfig();
-  const finalRedirectUri = resolveRedirectUri(config, redirectUri);
-
-  if (!finalRedirectUri) {
-    throw new ApiError(
-      500,
-      "Google redirect URI is missing. Set GOOGLE_REDIRECT_URI or add redirect_uris in client_secret.json"
-    );
-  }
+  const finalRedirectUri = resolveRedirectUri(redirectUri);
 
   return new google.auth.OAuth2(
     config.client_id,
@@ -149,7 +102,7 @@ export const exchangeCodeForGoogleProfile = async (
   } catch {
     throw new ApiError(
       401,
-      "Unable to verify Google identity (client_id mismatch or invalid token). Ensure your web UI Google Client ID matches backend config/client_secret.json"
+      "Unable to verify Google identity (client_id mismatch or invalid token). Ensure your web UI Google Client ID matches backend GOOGLE_CLIENT_ID"
     );
   }
 

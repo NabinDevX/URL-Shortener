@@ -26,10 +26,7 @@ type RazorpayClientLike = {
 };
 
 const isTestRuntime = (): boolean => {
-  return (
-    process.env.NODE_ENV === "test" ||
-    typeof process.env.JEST_WORKER_ID === "string"
-  );
+  return process.env.NODE_ENV === "test";
 };
 
 const getRazorpayClient = (): RazorpayClientLike => {

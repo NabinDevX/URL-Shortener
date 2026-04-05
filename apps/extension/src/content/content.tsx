@@ -659,7 +659,7 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
     setMessage("");
 
     try {
-      const response = await fetch(`${API_BASE}/user/login`, {
+      const response = await fetch(`${API_BASE}/user/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

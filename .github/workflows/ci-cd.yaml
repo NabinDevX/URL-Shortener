@@ -54,6 +54,13 @@ jobs:
           file: apps/web/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+          build-args: |
+            NEXT_GOOGLE_CLIENT_ID=${{ secrets.NEXT_GOOGLE_CLIENT_ID }}
+            NEXT_API_PREFIX=${{ secrets.NEXT_API_PREFIX }}
+            NEXT_API_BASE_URL=${{ secrets.NEXT_API_BASE_URL }}
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+            VITE_API_PREFIX=${{ secrets.VITE_API_PREFIX }}
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
 
   # 2️⃣ Deploy on VM (Pull Images and Run Containers)
   deploy:
@@ -82,8 +89,19 @@ jobs:
           USER_SECRET_REFRESH_TOKEN=${{ secrets.USER_SECRET_REFRESH_TOKEN }}
           ACCESS_TOKEN_EXPIRY=${{ secrets.ACCESS_TOKEN_EXPIRY }}
           REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+          RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}
+          LOG_LEVEL=${{ secrets.LOG_LEVEL }}
+          LOKI_HOST=${{ secrets.LOKI_HOST }}
+          OTP_EMAIL_IN_NON_PRODUCTION=${{ secrets.OTP_EMAIL_IN_NON_PRODUCTION }}
+          PRODUCTION_DOMAIN=${{ secrets.PRODUCTION_DOMAIN }}
+          API_KEY_RATE_LIMIT_REQUESTS=${{ secrets.API_KEY_RATE_LIMIT_REQUESTS }}
+          RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }}
+          RATE_LIMIT_MAX_REQUESTS=${{ secrets.RATE_LIMIT_MAX_REQUESTS }}
           EOF
       - name: Ensure target directory exists on VM
         uses: appleboy/ssh-action@v1.0.0

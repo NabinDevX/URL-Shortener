@@ -18,8 +18,19 @@ services:
       USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
       ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
       REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       BREVO_API_KEY: ${BREVO_API_KEY}
       BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+      OTP_EMAIL_IN_NON_PRODUCTION: ${OTP_EMAIL_IN_NON_PRODUCTION:-false}
+      PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-urltinier.app}
+      API_KEY_RATE_LIMIT_REQUESTS: ${API_KEY_RATE_LIMIT_REQUESTS}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOKI_HOST: ${LOKI_HOST}
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:' + process.env.PORT + '/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1));"]
       interval: 30s

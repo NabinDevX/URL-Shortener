@@ -14,10 +14,10 @@ const Logout = () => {
   const performLogout = useCallback(async (): Promise<void> => {
     try {
       const response = await requestOnce(
-        "auth:logout",
+        "auth:signout",
         () =>
           axios.post(
-            "/api/v1/user/logout",
+            "/api/v1/user/signout",
             {},
             {
               withCredentials: true,

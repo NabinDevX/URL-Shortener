@@ -16,7 +16,6 @@ if (!document.getElementById("url-shortener-shadow-host")) {
   style.textContent = widgetCss;
 
   const container = document.createElement("div");
-  // Cover the viewport so `position: fixed` inside the shadow root behaves consistently.
   container.style.cssText = "position:fixed;inset:0;pointer-events:none;";
   shadow.appendChild(style);
   shadow.appendChild(container);

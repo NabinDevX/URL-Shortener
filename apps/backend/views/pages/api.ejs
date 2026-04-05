@@ -1,0 +1,80 @@
+<div class="mx-auto max-w-6xl space-y-8 p-8 lg:p-12 intro-reveal">
+  <section class="rounded-3xl bg-surface-container-lowest p-8 shadow-sm">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h2 class="font-headline text-3xl font-extrabold text-on-surface">Create and Manage APIs</h2>
+        <p class="mt-2 text-sm text-on-surface-variant">Manage your API key, rotate credentials, and test endpoints quickly.</p>
+      </div>
+      <a class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container" href="/api/key-docs">
+        <span class="material-symbols-outlined text-base">description</span>
+        API Key Docs
+      </a>
+    </div>
+  </section>
+
+  <section class="grid gap-6 lg:grid-cols-2">
+    <div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm">
+      <h3 class="font-headline text-xl font-bold text-on-surface">API Key</h3>
+      <p class="mt-1 text-sm text-on-surface-variant">Use this key in the <strong>x-api-key</strong> header for protected API requests.</p>
+
+      <div class="mt-5 rounded-xl border border-outline-variant/30 bg-surface-container-low p-4">
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Current Key</p>
+        <code class="block break-all rounded-lg bg-black/90 px-3 py-2 text-xs text-white" id="apiKeyValue">Loading...</code>
+      </div>
+
+      <div class="mt-5 grid gap-3 sm:grid-cols-2">
+        <div class="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Key Status</p>
+          <p class="mt-1 text-sm font-bold text-on-surface" id="apiKeyStatus">Loading...</p>
+        </div>
+        <div class="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Rate Limit Usage</p>
+          <p class="mt-1 text-sm font-bold text-on-surface" id="apiRateUsage">Loading...</p>
+        </div>
+        <div class="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Account Created</p>
+          <p class="mt-1 text-sm font-bold text-on-surface" id="apiKeyCreatedAt">Loading...</p>
+        </div>
+        <div class="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Last Updated</p>
+          <p class="mt-1 text-sm font-bold text-on-surface" id="apiKeyUpdatedAt">Loading...</p>
+        </div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap gap-3">
+        <button class="rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" id="copyApiKeyBtn" type="button">Copy Key</button>
+        <button class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container" id="regenerateApiKeyBtn" type="button">Regenerate Key</button>
+      </div>
+      <p class="mt-3 text-xs text-on-surface-variant" id="apiKeyMessage"></p>
+    </div>
+
+    <div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm">
+      <h3 class="font-headline text-xl font-bold text-on-surface">Quick Start</h3>
+      <p class="mt-1 text-sm text-on-surface-variant">Use your API key to call URLTinier endpoints from your app.</p>
+
+      <div class="mt-5 space-y-4">
+        <div>
+          <p class="mb-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Generate Short URL</p>
+          <pre class="overflow-x-auto rounded-xl bg-black/90 p-4 text-xs text-white"><code>curl -X POST "<%= process.env.BASE_URL || 'http://localhost:8000' %>/api/v1/url/shorten" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"url":"https://example.com"}'</code></pre>
+        </div>
+
+        <div>
+          <p class="mb-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Fetch My URLs</p>
+          <pre class="overflow-x-auto rounded-xl bg-black/90 p-4 text-xs text-white"><code>curl -X GET "<%= process.env.BASE_URL || 'http://localhost:8000' %>/api/v1/url/my-urls?page=1&limit=10" \
+  -H "x-api-key: YOUR_API_KEY"</code></pre>
+        </div>
+
+        <div>
+          <p class="mb-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Get Rate Limit Snapshot</p>
+          <pre class="overflow-x-auto rounded-xl bg-black/90 p-4 text-xs text-white"><code>curl -X GET "<%= process.env.BASE_URL || 'http://localhost:8000' %>/api/v1/user/api-rate-limit" \
+  -H "x-api-key: YOUR_API_KEY"</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="/js/api.js" defer></script>

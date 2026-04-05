@@ -1,211 +1,47 @@
-<div class="profile-container">
-  <div class="profile-card">
-    <div class="profile-header">
-      <div class="avatar">
-        <span class="avatar-icon">👤</span>
+<div class="mx-auto max-w-5xl p-8 lg:p-12">
+  <div class="rounded-3xl bg-surface-container-lowest p-8 shadow-sm lg:p-10">
+    <div class="mb-8 flex items-center gap-4">
+      <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <span class="material-symbols-outlined text-2xl">person</span>
       </div>
-      <h1 class="profile-title">My Profile</h1>
-    </div>
-
-    <div class="profile-info">
-      <div class="info-row">
-        <span class="info-label">Name:</span>
-        <span class="info-value" id="userName">Loading...</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Email:</span>
-        <span class="info-value" id="userEmail">Loading...</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Member Since:</span>
-        <span class="info-value" id="memberSince">Loading...</span>
+      <div>
+        <h1 class="font-headline text-3xl font-extrabold text-on-surface">My Profile</h1>
+        <p class="text-sm text-on-surface-variant">Manage your account details and sign out when needed.</p>
       </div>
     </div>
 
-    <div class="profile-actions">
-      <button class="btn btn-primary" onclick="window.location.href='/dashboard'">
-        ← Back to Dashboard
-      </button>
-      <button class="btn btn-danger" onclick="logout()">
-        Logout
-      </button>
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div class="md:col-span-1 rounded-2xl bg-surface-container-low p-6 text-center">
+        <div class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-fixed text-primary-fixed-variant">
+          <span class="avatar-icon text-5xl">👤</span>
+        </div>
+        <button id="changePhotoBtn" class="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-container transition-colors">Change Photo</button>
+      </div>
+
+      <div class="md:col-span-2 space-y-6 rounded-2xl bg-surface-container-low p-6">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="space-y-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Name</span>
+            <div class="rounded-xl bg-white px-4 py-3 text-sm text-on-surface shadow-sm" id="userName">Loading...</div>
+          </div>
+          <div class="space-y-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Email</span>
+            <div class="rounded-xl bg-white px-4 py-3 text-sm text-on-surface shadow-sm" id="userEmail">Loading...</div>
+          </div>
+          <div class="space-y-2 sm:col-span-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Member Since</span>
+            <div class="rounded-xl bg-white px-4 py-3 text-sm text-on-surface shadow-sm" id="memberSince">Loading...</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button id="backToDashboardBtn" class="btn btn-primary" type="button">← Back to Dashboard</button>
+          <button id="profileSettingsBtn" class="btn btn-primary" type="button">Profile Settings</button>
+          <button id="profileSignoutBtn" class="btn btn-danger" type="button">Logout</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .profile-container {
-    width: 100%;
-    max-width: 500px;
-  }
-
-  .profile-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  }
-
-  .profile-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-
-  .avatar {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-  }
-
-  .avatar-icon {
-    font-size: 3rem;
-    color: white;
-  }
-
-  .profile-title {
-    font-size: 2rem;
-    color: #333;
-    font-weight: 700;
-  }
-
-  .profile-info {
-    background: #f8f9fa;
-    border-radius: 15px;
-    padding: 30px;
-    margin-bottom: 30px;
-  }
-
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  .info-row:last-child {
-    border-bottom: none;
-  }
-
-  .info-label {
-    font-weight: 600;
-    color: #666;
-  }
-
-  .info-value {
-    font-weight: 500;
-    color: #333;
-  }
-
-  .profile-actions {
-    display: flex;
-    gap: 15px;
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 15px;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-  }
-
-  .btn-danger {
-    background: #dc3545;
-    color: white;
-    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
-  }
-
-  .btn-danger:hover {
-    background: #c82333;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
-  }
-
-  @media (max-width: 768px) {
-    .profile-card {
-      padding: 30px 20px;
-    }
-
-    .profile-title {
-      font-size: 1.5rem;
-    }
-
-    .info-row {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 5px;
-    }
-  }
-</style>
-
-<script>
-  async function loadUserProfile() {
-    try {
-      const response = await fetch('/api/v1/user/current-user', {
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const { data } = await response.json();
-        document.getElementById('userName').textContent = data.name || 'N/A';
-        document.getElementById('userEmail').textContent = data.email || 'N/A';
-        document.getElementById('memberSince').textContent = 
-          new Date(data.createdAt).toLocaleDateString() || 'N/A';
-      } else {
-        window.location.href = '/login';
-      }
-    } catch (error) {
-      console.error('Failed to load profile:', error);
-      window.location.href = '/login';
-    }
-  }
-
-  async function logout() {
-    try {
-      await fetch('/api/v1/user/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Logout failed:', error);
-      window.location.href = '/profile';
-    }
-  }
-
-  loadUserProfile();
-</script>
+<script src="/js/profile.js" defer></script>

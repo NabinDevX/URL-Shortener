@@ -2,8 +2,8 @@ export const API_ROUTES = {
   USER: {
     SEND_OTP: "/user/sendOtp",
     SIGNUP: "/user/signup",
-    LOGIN: "/user/login",
-    LOGOUT: "/user/logout",
+    SIGNIN: "/user/signin",
+    SIGNOUT: "/user/signout",
     GOOGLE_AUTH_URL: "/user/googleAuthUrl",
     GOOGLE_AUTH_CODE: "/user/googleAuthCode",
     GET_PROFILE: "/user/getProfile",
@@ -51,6 +51,6 @@ export const SUBSCRIPTION_STATUS = {
 } as const;
 
 export const OAUTH_MODES = {
-  LOGIN: "login",
-  REGISTER: "register",
+  SIGNIN: "signin",
+  SIGNUP: "signup",
 } as const;

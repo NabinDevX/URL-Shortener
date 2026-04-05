@@ -1,0 +1,228 @@
+<div class="p-8 min-h-[calc(100vh-64px)] intro-reveal">
+  <!-- Header Controls / Filters -->
+  <div class="flex flex-wrap items-end justify-between gap-6 mb-8 reveal-on-scroll" data-reveal>
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-1 bg-primary rounded-full"></div>
+        <h2 class="text-2xl font-extrabold tracking-tight font-headline">Detailed Link Performance</h2>
+      </div>
+      <div class="flex items-center gap-2 bg-surface-container-low p-1 rounded-xl w-fit">
+        <button class="px-4 py-1.5 bg-surface-container-lowest shadow-sm rounded-lg text-sm font-semibold text-primary">Bar Chart</button>
+        <button class="px-4 py-1.5 text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors">Radar Chart</button>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 bg-surface-container-lowest px-4 py-2 rounded-xl shadow-sm border border-outline-variant/10">
+        <span class="material-symbols-outlined text-outline text-sm">calendar_today</span>
+        <span class="text-sm font-medium">Last 30 Days</span>
+        <span class="material-symbols-outlined text-outline text-sm">expand_more</span>
+      </div>
+      <div class="flex items-center gap-2 bg-surface-container-lowest px-4 py-2 rounded-xl shadow-sm border border-outline-variant/10">
+        <span class="material-symbols-outlined text-outline text-sm">devices</span>
+        <span class="text-sm font-medium">All Devices</span>
+      </div>
+      <button class="flex items-center gap-2 bg-on-surface text-surface py-2 px-6 rounded-xl font-bold text-sm shadow-xl hover:bg-slate-800 transition-all">
+        <span class="material-symbols-outlined text-sm">download</span>
+        Export CSV
+      </button>
+    </div>
+  </div>
+  <!-- Bento Grid Layout -->
+  <div class="grid grid-cols-12 gap-6 mb-8">
+    <!-- Quick Link Creation Card -->
+    <div class="col-span-12 lg:col-span-8 glass-card rounded-4xl p-8 shadow-sm border border-white/40 flex flex-col justify-between reveal-on-scroll hover-float" data-reveal>
+      <div>
+        <h3 class="text-xl font-bold font-headline mb-2">Create New Branded Link</h3>
+        <p class="text-on-surface-variant text-sm mb-6">Pro users can customize the back-half and use dedicated domains.</p>
+      </div>
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1 flex flex-col gap-2">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-outline px-1">Destination URL</label>
+          <input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" type="text" value="https://example.com/very-long-product-campaign-url-2024" />
+        </div>
+        <div class="w-full md:w-64 flex flex-col gap-2">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-outline px-1">Custom Back-half</label>
+          <div class="flex items-center bg-surface-container-low rounded-xl px-4 py-3 border border-primary/20">
+            <span class="text-sm font-medium text-primary">shrt.ly/</span>
+            <input class="flex-1 bg-transparent border-none p-0 text-sm focus:ring-0 font-bold" type="text" value="winter-sale" />
+            <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+          </div>
+        </div>
+        <div class="flex items-end">
+          <button class="h-11.5 bg-linear-to-tr from-primary to-primary-container text-white px-8 rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all">Shorten Link</button>
+        </div>
+      </div>
+    </div>
+    <!-- QR Preview Card (Contextual Feature) -->
+    <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-4xl p-8 shadow-sm flex flex-col items-center justify-center text-center premium-border reveal-on-scroll hover-float" data-reveal>
+      <div class="bg-surface-container-low p-6 rounded-2xl mb-4 relative group">
+        <img alt="QR Code" class="w-32 h-32 opacity-20 grayscale" data-alt="Stylized modern QR code graphic on a textured background with purple neon highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2xuLhjGGrOGTXy9vxQKmlVRTll8OPCLwMbBvvGfDmO9NGLzRYsswJ9wxjr603bCdeXeFeP_HL9H0AbhFd8-CCVGKViHluI86Ll6OO3KWQnK-n0P5xQ9Rj5wFBKHvWROoZhLTP9aTjbV8DnD6azgU2zjhXB7uD71X1IRc4yLGggcZI5hJnGMk3kC3XA5Zq93dZ-8U-405uo3HU6B_1Wq3aOBYNkEWTihlGZVpoLEc5Cv5V96KRU7Mm-8w960-WtJHR1zwRtczF9HM" />
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="material-symbols-outlined text-tertiary text-5xl">qr_code_2</span>
+        </div>
+        <div class="absolute -top-2 -right-2 bg-tertiary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">PRO</div>
+      </div>
+      <h4 class="font-bold mb-1">Live QR Generation</h4>
+      <p class="text-xs text-on-surface-variant mb-4">Real-time QR tracking for print campaigns</p>
+      <button class="text-xs font-bold text-tertiary flex items-center gap-1 hover:underline">
+        Download High-Res SVG <span class="material-symbols-outlined text-sm">open_in_new</span>
+      </button>
+    </div>
+    <!-- Analytics Chart Module (Visual Placeholder) -->
+    <div class="col-span-12 bg-surface-container-low rounded-[2.5rem] p-10 relative overflow-hidden reveal-on-scroll" data-reveal>
+      <div class="flex items-center justify-between mb-10">
+        <div>
+          <h3 class="text-2xl font-extrabold font-headline leading-tight">Click Distribution</h3>
+          <p class="text-on-surface-variant">Global performance over the past 30 days</p>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="flex flex-col items-end">
+            <span class="text-3xl font-extrabold text-primary">124.8k</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">+12% vs last month</span>
+          </div>
+          <div class="h-12 w-px bg-outline-variant/30"></div>
+          <div class="flex flex-col items-end">
+            <span class="text-3xl font-extrabold text-tertiary">3.4%</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Avg. Click Rate</span>
+          </div>
+        </div>
+      </div>
+      <!-- Abstract Chart Visualization -->
+      <div class="w-full h-80 flex items-end gap-3 px-4">
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[40%] hover:bg-primary/20 transition-all cursor-pointer relative group">
+          <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">12k</div>
+        </div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[65%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-primary rounded-t-xl h-[85%] relative">
+          <div class="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <span class="text-sm font-bold text-primary">Peak</span>
+            <div class="h-4 w-px bg-primary/40"></div>
+          </div>
+        </div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[55%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[45%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[30%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-tertiary/60 rounded-t-xl h-[70%] hover:bg-tertiary transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[50%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[40%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[35%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-primary/40 rounded-t-xl h-[60%] hover:bg-primary transition-all cursor-pointer relative group"></div>
+        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[45%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+      </div>
+      <!-- Gradient Mesh Overlay (Premium Aesthetic) -->
+      <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-64 h-64 bg-tertiary/5 rounded-full blur-[80px] pointer-events-none"></div>
+    </div>
+    <!-- Advanced Data Table -->
+    <div class="col-span-12 bg-surface-container-lowest rounded-4xl shadow-sm overflow-hidden reveal-on-scroll" data-reveal>
+      <div class="px-8 py-6 flex items-center justify-between border-b border-surface-container">
+        <h3 class="font-bold text-lg font-headline">Recent Link Activity</h3>
+        <div class="flex items-center gap-4">
+          <span class="text-xs text-on-surface-variant font-medium">Displaying 24 of 1,240 links</span>
+          <div class="flex gap-1">
+            <button class="p-1 hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+            <button class="p-1 hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+          </div>
+        </div>
+      </div>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-low/50">
+            <th class="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Short URL</th>
+            <th class="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant text-center">Total Clicks</th>
+            <th class="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">IP Address</th>
+            <th class="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Device</th>
+            <th class="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Location</th>
+            <th class="px-8 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container">
+          <tr class="hover:bg-surface-bright transition-colors group">
+            <td class="px-8 py-5">
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-primary">shrt.ly/winter-sale</span>
+                <span class="text-[10px] text-on-surface-variant truncate w-48">https://amazon.com/dp/B08N5K16HR...</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-center">
+              <span class="text-sm font-bold bg-secondary-container px-3 py-1 rounded-full text-on-secondary-container">12,450</span>
+            </td>
+            <td class="px-8 py-5 text-sm font-mono text-on-surface-variant">192.168.1.45</td>
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">smartphone</span>
+                <span class="text-sm">iOS / iPhone</span>
+              </div>
+            </td>
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-3.5 bg-slate-200 rounded-sm"></span>
+                <span class="text-sm">San Francisco, US</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-right">
+              <button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
+            </td>
+          </tr>
+          <tr class="hover:bg-surface-bright transition-colors group">
+            <td class="px-8 py-5">
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-primary">shrt.ly/bio-link</span>
+                <span class="text-[10px] text-on-surface-variant truncate w-48">https://linktree.com/user-profile-2024</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-center">
+              <span class="text-sm font-bold bg-secondary-container px-3 py-1 rounded-full text-on-secondary-container">8,912</span>
+            </td>
+            <td class="px-8 py-5 text-sm font-mono text-on-surface-variant">45.23.112.9</td>
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">laptop</span>
+                <span class="text-sm">MacOS / Chrome</span>
+              </div>
+            </td>
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-3.5 bg-slate-200 rounded-sm"></span>
+                <span class="text-sm">London, UK</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-right">
+              <button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
+            </td>
+          </tr>
+          <tr class="hover:bg-surface-bright transition-colors group">
+            <td class="px-8 py-5">
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-primary">shrt.ly/new-drop</span>
+                <span class="text-[10px] text-on-surface-variant truncate w-48">https://shop.brand.com/products/limited</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-center">
+              <span class="text-sm font-bold bg-secondary-container px-3 py-1 rounded-full text-on-secondary-container">4,302</span>
+            </td>
+            <td class="px-8 py-5 text-sm font-mono text-on-surface-variant">212.4.98.11</td>
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">tablet</span>
+                <span class="text-sm">Android / Tablet</span>
+              </div>
+            </td>
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-3.5 bg-slate-200 rounded-sm"></span>
+                <span class="text-sm">Berlin, DE</span>
+              </div>
+            </td>
+            <td class="px-8 py-5 text-right">
+              <button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="px-8 py-5 bg-surface-container-low/30 text-center">
+        <button class="text-xs font-bold text-primary uppercase tracking-widest hover:text-primary-container">View all activity history</button>
+      </div>
+    </div>
+  </div>
+</div>

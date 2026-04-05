@@ -35,9 +35,9 @@ const Navbar = ({ userData }: { userData?: any }) => {
           className={(e: any) => {
             return e.isActive ? "to-blue-50" : "";
           }}
-          to="/logout"
+          to="/signout"
         >
-          <li>Logout</li>
+          <li>Sign Out</li>
         </NavLink>
       </nav>
     </div>

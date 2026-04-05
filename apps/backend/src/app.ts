@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import client from "prom-client";
 import cookieParser from "cookie-parser";
@@ -121,7 +121,7 @@ app.use(
   })
 );
 
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   logger.error("Unhandled error", {
     message: err.message,
     stack: err.stack,

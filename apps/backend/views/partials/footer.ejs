@@ -1,7 +1,37 @@
-<footer style="text-align:center; padding:15px; margin-top:30px;">
-  <p>
-    © <%= new Date().getFullYear() %> URL Shortener — Built with care | 
-    <a href="/terms">Terms</a> · 
-    <a href="/privacy">Privacy</a>
-  </p>
+<footer class="bg-surface-container-low py-8 text-on-surface lg:py-10 dark:bg-surface-container intro-reveal" id="resources">
+  <div class="mx-auto grid max-w-6xl gap-8 px-2 md:grid-cols-4 md:gap-10">
+    <div class="col-span-1 md:col-span-2">
+      <div class="mb-2 text-2xl font-extrabold tracking-tighter text-on-surface">URLTinier</div>
+      <p class="mb-6 max-w-sm text-on-surface-variant">Empowering brands with precision link management and actionable data insights across the digital landscape.</p>
+      <div class="flex gap-3">
+        <div class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant transition-colors hover:bg-primary/20 hover:text-primary">
+          <span class="material-symbols-outlined">public</span>
+        </div>
+        <div class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant transition-colors hover:bg-primary/20 hover:text-primary">
+          <span class="material-symbols-outlined">alternate_email</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h4 class="mb-2 font-bold text-on-surface">Product</h4>
+      <ul class="space-y-1 text-on-surface-variant">
+        <li><a class="transition-colors hover:text-primary" href="/#features">Features</a></li>
+        <li><a class="transition-colors hover:text-primary" href="/#pricing">Pricing</a></li>
+        <li><a class="transition-colors hover:text-primary" href="/#enterprise">Enterprise</a></li>
+        <li><a class="transition-colors hover:text-primary" href="/document">API Docs</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="mb-2 font-bold text-on-surface">Company</h4>
+      <ul class="space-y-1 text-on-surface-variant">
+        <li><a class="transition-colors hover:text-primary" href="#">About</a></li>
+        <li><a class="transition-colors hover:text-primary" href="#">Blog</a></li>
+        <li><a class="transition-colors hover:text-primary" href="#">Privacy</a></li>
+        <li><a class="transition-colors hover:text-primary" href="#">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="mx-auto mt-10 max-w-6xl border-t border-outline-variant/40 px-6 pt-6 text-center text-sm text-on-surface-variant">
+    © 2024 URLTinier Inc. All rights reserved.
+  </div>
 </footer>

@@ -1,21 +1,14 @@
-FROM node:22-alpine AS deps
-WORKDIR /app
-RUN npm install -g pnpm
-
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-COPY configs ./configs
-COPY packages ./packages
-COPY apps/backend ./apps/backend
-
-RUN pnpm install --frozen-lockfile
-
-
 FROM node:22-alpine AS builder
 WORKDIR /app
 RUN npm install -g pnpm
 
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages ./packages
+COPY apps/backend ./apps/backend
+
+RUN pnpm install --frozen-lockfile --filter @repo/backend...
+
 COPY . .
-COPY --from=deps /app/node_modules ./node_modules
 
 RUN pnpm --filter @repo/backend build
 
@@ -27,7 +20,6 @@ RUN npm install -g pnpm
 ENV NODE_ENV=production
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-COPY configs ./configs
 COPY packages ./packages
 COPY apps/backend/package.json ./apps/backend/package.json
 

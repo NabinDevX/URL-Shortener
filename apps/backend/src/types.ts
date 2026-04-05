@@ -64,7 +64,7 @@ export interface IURLDocument extends IURL, Document {
 }
 
 export interface IURLModel
-  extends Model<IURLDocument>, AggregatePaginateModel<IURLDocument> {}
+  extends Model<IURLDocument>, AggregatePaginateModel<IURLDocument> { }
 
 export interface JWTPayload {
   _id: string;
@@ -189,7 +189,7 @@ export interface UserSignupInput {
   otp: string;
 }
 
-export interface UserLoginInput {
+export interface UserSigninInput {
   email: string;
   password: string;
 }
@@ -214,7 +214,7 @@ export interface RefreshTokenInput {
 }
 
 export interface GoogleAuthUrlInput {
-  mode?: "register" | "login";
+  mode?: "signup" | "signin";
   state?: string;
   redirectUri?: string;
 }
@@ -319,7 +319,8 @@ declare global {
       REFRESH_TOKEN_EXPIRY?: string;
       BREVO_API_KEY?: string;
       BREVO_SENDER_EMAIL?: string;
-      GOOGLE_REDIRECT_URI?: string;
+      GOOGLE_CLIENT_ID?: string;
+      GOOGLE_CLIENT_SECRET?: string;
       RAZORPAY_KEY_ID?: string;
       RAZORPAY_KEY_SECRET?: string;
     }

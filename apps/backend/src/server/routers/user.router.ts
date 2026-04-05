@@ -3,6 +3,11 @@ import { z } from "zod";
 import * as userController from "@/controllers/user.controller";
 import { sendOtp, verifyOtp } from "@/middlewares/otp";
 import { handleError } from "@/utils/errorHandler";
+import {
+  getRateLimitInfo,
+  MAX_REQUESTS_PER_WINDOW,
+  RATE_LIMIT_WINDOW,
+} from "@/middlewares/rateLimit";
 
 const userPublicSchema = z.object({
   _id: z.string(),
@@ -25,13 +30,13 @@ const userSignupInputSchema = z.object({
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
-const userLoginInputSchema = z.object({
+const userSigninInputSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
 });
 
 const googleAuthUrlInputSchema = z.object({
-  mode: z.enum(["register", "login"]).optional(),
+  mode: z.enum(["signup", "signin"]).optional(),
   state: z.string().optional(),
   redirectUri: z.union([z.literal("postmessage"), z.string().url()]).optional(),
 });
@@ -95,7 +100,7 @@ export const userRouter = router({
         method: "POST",
         path: "/user/signup",
         tags: ["User"],
-        description: "Register a new user",
+        description: "Sign up a new user",
       },
     })
     .input(userSignupInputSchema)
@@ -116,16 +121,16 @@ export const userRouter = router({
       }
     }),
 
-  login: publicProcedure
+  signin: publicProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/user/login",
+        path: "/user/signin",
         tags: ["User"],
-        description: "Login user",
+        description: "Sign in user",
       },
     })
-    .input(userLoginInputSchema)
+    .input(userSigninInputSchema)
     .output(
       z.object({
         user: userPublicSchema,
@@ -136,7 +141,7 @@ export const userRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await userController.login(input, ctx);
+        return await userController.signin(input, ctx);
       } catch (error) {
         throw handleError(error);
       }
@@ -161,13 +166,13 @@ export const userRouter = router({
       }
     }),
 
-  googleRegister: publicProcedure
+  googleSignup: publicProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/user/google/register",
+        path: "/user/google/signup",
         tags: ["User"],
-        description: "Register user with Google OAuth2 authorization code",
+        description: "Sign up user with Google OAuth2 authorization code",
       },
     })
     .input(googleAuthCodeInputSchema)
@@ -181,19 +186,19 @@ export const userRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await userController.googleRegister(input, ctx);
+        return await userController.googleSignup(input, ctx);
       } catch (error) {
         throw handleError(error);
       }
     }),
 
-  googleLogin: publicProcedure
+  googleSignin: publicProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/user/google/login",
+        path: "/user/google/signin",
         tags: ["User"],
-        description: "Login user with Google OAuth2 authorization code",
+        description: "Sign in user with Google OAuth2 authorization code",
       },
     })
     .input(googleAuthCodeInputSchema)
@@ -207,19 +212,20 @@ export const userRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await userController.googleLogin(input, ctx);
+        return await userController.googleSignin(input, ctx);
       } catch (error) {
         throw handleError(error);
       }
     }),
 
-  googleLoginWithToken: publicProcedure
+  googleSigninWithToken: publicProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/user/google/login-token",
+        path: "/user/google/signin-token",
         tags: ["User"],
-        description: "Login user with Google ID token from @react-oauth/google",
+        description:
+          "Sign in user with Google ID token from @react-oauth/google",
       },
     })
     .input(googleTokenInputSchema)
@@ -233,7 +239,7 @@ export const userRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        return await userController.googleLoginWithToken(input.token, ctx);
+        return await userController.googleSigninWithToken(input.token, ctx);
       } catch (error) {
         throw handleError(error);
       }
@@ -266,21 +272,21 @@ export const userRouter = router({
       }
     }),
 
-  logout: protectedProcedure
+  signout: protectedProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/user/logout",
+        path: "/user/signout",
         tags: ["User"],
-        description: "Logout user",
+        description: "Sign out user",
         protect: true,
       },
     })
-    .input(z.undefined())
+    .input(z.object({}).optional())
     .output(z.object({ message: z.string() }))
     .mutation(async ({ ctx }) => {
       try {
-        return await userController.logout(ctx.user, ctx.token, ctx);
+        return await userController.signout(ctx.user, ctx.token, ctx);
       } catch (error) {
         throw handleError(error);
       }
@@ -395,7 +401,7 @@ export const userRouter = router({
         protect: true,
       },
     })
-    .input(z.undefined())
+    .input(z.object({}).optional())
     .output(z.object({ apiKey: z.string(), message: z.string() }))
     .mutation(async ({ ctx }) => {
       try {
@@ -416,10 +422,55 @@ export const userRouter = router({
       },
     })
     .input(z.undefined())
-    .output(z.object({ apiKey: z.string().optional(), message: z.string() }))
+    .output(
+      z.object({
+        apiKey: z.string().optional(),
+        apiKeyExpiresAt: z.date().optional(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+        message: z.string(),
+      })
+    )
     .query(({ ctx }) => {
       try {
         return userController.getApiKey(ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  getApiRateLimit: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/user/api-rate-limit",
+        tags: ["User"],
+        description: "Get API key rate-limit snapshot for current user",
+        protect: true,
+      },
+    })
+    .input(z.undefined())
+    .output(
+      z.object({
+        remaining: z.number(),
+        used: z.number(),
+        maxRequests: z.number(),
+        resetIn: z.number(),
+        windowInSeconds: z.number(),
+        message: z.string(),
+      })
+    )
+    .query(async ({ ctx }) => {
+      try {
+        const snapshot = await getRateLimitInfo(ctx.user._id.toString());
+        return {
+          remaining: snapshot.remaining,
+          used: Math.max(0, MAX_REQUESTS_PER_WINDOW - snapshot.remaining),
+          maxRequests: MAX_REQUESTS_PER_WINDOW,
+          resetIn: snapshot.resetIn,
+          windowInSeconds: RATE_LIMIT_WINDOW,
+          message: "API rate-limit snapshot fetched successfully",
+        };
       } catch (error) {
         throw handleError(error);
       }

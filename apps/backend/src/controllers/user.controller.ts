@@ -12,7 +12,7 @@ import type {
   IUserDocument,
   JWTPayload,
   UserSignupInput,
-  UserLoginInput,
+  UserSigninInput,
   GoogleAuthCodeInput,
   GoogleAuthUrlInput,
   ChangePasswordInput,
@@ -43,7 +43,9 @@ const generateAccessAndRefreshTokens = async (
 const getCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "none" as const,
+  sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as
+    | "none"
+    | "lax",
 });
 
 const formatUserPublic = (user: IUserDocument): UserPublic => ({
@@ -131,12 +133,12 @@ export const signup = async (
     user: formatUserPublic(createdUser as IUserDocument),
     accessToken,
     refreshToken,
-    message: "User registered successfully",
+    message: "User signed up successfully",
   };
 };
 
-export const login = async (
-  input: UserLoginInput,
+export const signin = async (
+  input: UserSigninInput,
   ctx: Context
 ): Promise<{
   user: UserPublic;
@@ -189,7 +191,7 @@ export const getGoogleOAuthUrl = async (
   };
 };
 
-export const googleRegister = async (
+export const googleSignup = async (
   input: GoogleAuthCodeInput,
   ctx: Context
 ): Promise<{
@@ -250,12 +252,12 @@ export const googleRegister = async (
 
   return createGoogleAuthResponse(
     user as IUserDocument,
-    "Google user registered successfully",
+    "Google user signed up successfully",
     ctx
   );
 };
 
-export const googleLogin = async (
+export const googleSignin = async (
   input: GoogleAuthCodeInput,
   ctx: Context
 ): Promise<{
@@ -278,7 +280,7 @@ export const googleLogin = async (
   })) as IUserDocument | null;
 
   if (!user) {
-    throw new ApiError(404, "Google account is not registered");
+    throw new ApiError(404, "Google account is not signed up");
   }
 
   if (user.isDeleted) {
@@ -305,7 +307,7 @@ export const googleLogin = async (
   );
 };
 
-export const logout = async (
+export const signout = async (
   user: IUserDocument,
   token: string,
   ctx: Context
@@ -485,14 +487,23 @@ export const regenerateApiKey = async (
 
 export const getApiKey = (
   user: IUserDocument
-): { apiKey: string | undefined; message: string } => {
+): {
+  apiKey: string | undefined;
+  apiKeyExpiresAt: Date | undefined;
+  createdAt: Date;
+  updatedAt: Date;
+  message: string;
+} => {
   return {
     apiKey: user.apiKey,
+    apiKeyExpiresAt: user.apiKeyExpiresAt,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
     message: "API key fetched successfully",
   };
 };
 
-export const googleLoginWithToken = async (
+export const googleSigninWithToken = async (
   token: string,
   ctx: Context
 ): Promise<{
@@ -583,7 +594,7 @@ export const googleSignupWithToken = async (
     if (existingByGoogleId) {
       throw new ApiError(
         409,
-        "Google account already registered. Please login."
+        "Google account already signed up. Please sign in."
       );
     }
 
@@ -591,7 +602,7 @@ export const googleSignupWithToken = async (
     if (existingByEmail) {
       throw new ApiError(
         409,
-        "Email already registered. Please login instead."
+        "Email already signed up. Please sign in instead."
       );
     }
 
@@ -608,13 +619,13 @@ export const googleSignupWithToken = async (
 
     return createGoogleAuthResponse(
       user as IUserDocument,
-      "Google user registered successfully",
+      "Google user signed up successfully",
       ctx
     );
   } catch (error: unknown) {
     const errorWithCode = error as { code?: unknown };
     if (errorWithCode?.code === 11000) {
-      throw new ApiError(409, "Google account or email is already registered");
+      throw new ApiError(409, "Google account or email is already signed up");
     }
     throw error;
   }

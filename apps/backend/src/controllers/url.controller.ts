@@ -15,7 +15,7 @@ import type {
 
 const getBaseUrl = (): string => {
   return process.env.NODE_ENV === "production"
-    ? `https://${process.env.PRODUCTION_DOMAIN || "shortener.com"}`
+    ? `https://${process.env.PRODUCTION_DOMAIN || "urltinier.app"}`
     : `http://localhost:${process.env.PORT || 3001}`;
 };
 

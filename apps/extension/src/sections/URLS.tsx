@@ -84,7 +84,7 @@ const URLS = () => {
     } catch (err) {
       const error = err as AxiosErrorResponse;
       if (error.response?.status === 401) {
-        navigate("/login");
+        navigate("/signin");
       }
       if (error.response?.status === 404) {
         setUrls([]);

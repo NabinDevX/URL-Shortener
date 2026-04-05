@@ -283,7 +283,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const login = useCallback(
     async (email: string, password: string) => {
       const response = await axios.post(
-        "/api/v1/user/login",
+        "/api/v1/user/signin",
         { email, password },
         {
           headers: {
@@ -414,10 +414,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const logout = useCallback(async () => {
     try {
       await requestOnce(
-        "auth:logout",
+        "auth:signout",
         () =>
           axios.post(
-            "/api/v1/user/logout",
+            "/api/v1/user/signout",
             {},
             {
               withCredentials: true,

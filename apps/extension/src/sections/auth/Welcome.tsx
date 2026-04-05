@@ -20,7 +20,7 @@ const Welcome = () => {
   }, []);
 
   const handleGetStarted = () => navigate("/signup");
-  const handleSignIn = () => navigate("/login");
+  const handleSignIn = () => navigate("/signin");
 
   const currentUseCase = useCases[currentStep] ?? useCases[0];
 

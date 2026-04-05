@@ -2,132 +2,41 @@
 <html lang="en">
 <%- include('./partials/head') %>
 
-<body>
-  <div class="app-wrapper">
-    
-    <% 
-      const noNavbarPages = ['home', 'login', 'signup', 'logout'];
-      const showNavbar = locals.user && !noNavbarPages.includes(locals.currentPage);
-    %>
+<body class="bg-surface font-body text-on-surface">
+  <div class="min-h-screen">
+    <% const appPages = ['dashboard', 'urls', 'analytics', 'campaigns', 'api', 'settings', 'profile']; %>
+    <% const currentPage = locals.currentPage || ''; %>
+    <% const showAppShell = appPages.includes(currentPage); %>
+    <% const pageTitleMap = { dashboard: 'Dashboard', urls: 'Manage URLs', analytics: 'Analytics', campaigns: 'Campaigns', api: 'API Management', settings: 'Settings', profile: 'My Profile' }; %>
+    <% const searchPlaceholderMap = { dashboard: 'Search links...', urls: 'Search URLs...', analytics: 'Search links...', campaigns: 'Search campaigns...', api: 'Search API docs...', settings: 'Search settings...', profile: 'Search profile...' }; %>
+    <% const showPlanBadge = ['dashboard', 'urls', 'analytics'].includes(currentPage); %>
 
-    <% if (showNavbar) { %>
-    <header class="site-header">
-      <%- include('./partials/navbar') %>
-    </header>
-    <% } %>
+    <% if (showAppShell) { %>
+    <div class="lg:flex lg:min-h-screen">
+      <%- include('./partials/sidebar', { activePage: currentPage }) %>
 
-    <main class="main-content">
+      <div class="flex min-w-0 flex-1 flex-col">
+        <%- include('./partials/header', { pageTitle: pageTitleMap[currentPage], searchPlaceholder: searchPlaceholderMap[currentPage], showPlanBadge, authUser: locals.authUser }) %>
+
+        <main class="flex-1">
+          <%- body %>
+        </main>
+
+        <footer>
+          <%- include('./partials/footer') %>
+        </footer>
+      </div>
+    </div>
+    <% } else { %>
+    <main>
       <%- body %>
     </main>
 
-    <footer class="site-footer">
+    <footer>
       <%- include('./partials/footer') %>
     </footer>
+    <% } %>
   </div>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    }
-
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .app-wrapper {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      width: 100%;
-    }
-
-    
-    .site-header {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .main-content {
-      flex: 1;
-      width: 100%;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    
-    .site-header+.main-content {
-      padding-top: 40px;
-    }
-
-    
-    .site-footer {
-      margin-top: auto;
-      width: 100%;
-      padding: 24px 20px;
-      text-align: center;
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .site-footer p {
-      color: rgba(255, 255, 255, 0.95);
-      font-size: 14px;
-      font-weight: 500;
-      margin: 0;
-      letter-spacing: 0.3px;
-    }
-
-    .site-footer a {
-      color: #a5b4fc;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .site-footer a:hover {
-      color: #fff;
-      text-decoration: underline;
-    }
-
-    @media (max-width: 768px) {
-      .main-content {
-        padding: 20px 15px;
-      }
-
-      .site-header+.main-content {
-        padding-top: 30px;
-      }
-
-      .site-footer {
-        padding: 18px 15px;
-      }
-
-      .site-footer p {
-        font-size: 12px;
-      }
-    }
-  </style>
 </body>
 
 </html>

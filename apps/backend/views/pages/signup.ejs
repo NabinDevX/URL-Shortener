@@ -1,283 +1,112 @@
-<div class="auth-container">
-  <div class="auth-card">
-    <h1 class="auth-title">Create Account</h1>
-    <p class="auth-subtitle">Join us to start shortening URLs</p>
+<section id="signup-root" data-google-client-id="<%= process.env.GOOGLE_CLIENT_ID || '' %>" class="relative min-h-screen overflow-hidden px-6 py-12 lg:px-10 lg:py-16">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -left-[8%] top-[8%] h-[36%] w-[36%] rounded-full bg-primary/10 blur-[120px]"></div>
+    <div class="absolute -bottom-[10%] right-[0%] h-[34%] w-[34%] rounded-full bg-indigo-900/10 blur-[120px]"></div>
+  </div>
 
-    <form id="signupForm" class="auth-form">
-      <div class="form-group">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" placeholder="Enter your name" required />
+  <main class="relative z-10 mx-auto grid w-full max-w-300 grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-20">
+    <div class="hidden max-w-xl lg:flex lg:flex-col lg:space-y-8 lg:justify-self-start">
+      <div class="space-y-4">
+        <div class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
+          Start fast
+        </div>
+        <h1 class="text-5xl font-extrabold leading-[1.1] tracking-tighter text-on-surface xl:text-6xl">
+          Create your account and start shortening links.
+        </h1>
+        <p class="max-w-md text-lg leading-relaxed text-on-surface-variant">
+          Set up your URLTinier profile, verify your email with OTP, or continue with Google in one secure flow.
+        </p>
       </div>
 
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email" required />
+      <div class="grid grid-cols-2 gap-4">
+        <div class="rounded-xl border border-outline-variant/10 bg-surface-container-low/50 p-6">
+          <span class="material-symbols-outlined mb-3 text-primary">verified_user</span>
+          <h3 class="font-bold text-on-surface">Verified access</h3>
+          <p class="text-sm text-on-surface-variant">Email OTP and Google sign-up are both supported.</p>
+        </div>
+        <div class="rounded-xl border border-outline-variant/10 bg-surface-container-low/50 p-6">
+          <span class="material-symbols-outlined mb-3 text-primary">bolt</span>
+          <h3 class="font-bold text-on-surface">Fast setup</h3>
+          <p class="text-sm text-on-surface-variant">Create your account and get to the dashboard quickly.</p>
+        </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Create a password" required />
-      </div>
-
-      <button type="button" onclick="sendOTP()" class="btn btn-primary" id="sendOtpBtn">
-        Send OTP
-      </button>
-
-      <div id="otpSection" style="display: none;">
-        <div class="form-group">
-          <label for="otp">Enter OTP</label>
-          <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" />
+    <div class="flex w-full justify-center lg:justify-self-end intro-reveal intro-delay-1">
+      <div class="obsidian-card relative w-full max-w-md overflow-hidden rounded-4xl p-8 shadow-2xl md:p-12 hover-float">
+        <div class="mb-10 flex flex-col items-center text-center">
+          <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-container shadow-lg shadow-primary-container/20">
+            <span class="material-symbols-outlined text-2xl font-bold text-on-primary-container">person_add</span>
+          </div>
+          <h2 class="mb-2 text-3xl font-black tracking-tighter text-on-surface">Create Account</h2>
+          <p class="text-sm font-medium text-on-surface-variant">Sign up to your URLTinier account</p>
         </div>
 
-        <button type="submit" class="btn btn-primary">
-          Sign Up
+        <div id="message" class="hidden mb-6 rounded-xl px-4 py-3 text-sm font-medium"></div>
+
+        <form id="signupForm" class="space-y-6">
+          <div class="space-y-2">
+            <label class="block px-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant" for="name">Full Name</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline">person</span>
+              <input class="glass-input h-14 w-full rounded-xl px-4 pl-12 text-on-surface transition-all placeholder:text-outline/60" id="name" name="name" placeholder="Jane Doe" type="text" required />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block px-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant" for="email">Email Address</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline">mail</span>
+              <input class="glass-input h-14 w-full rounded-xl px-4 pl-12 text-on-surface transition-all placeholder:text-outline/60" id="email" name="email" placeholder="name@company.com" type="email" required />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block px-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant" for="password">Password</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline">lock</span>
+              <input class="glass-input h-14 w-full rounded-xl px-4 pl-12 text-on-surface transition-all placeholder:text-outline/60" id="password" name="password" placeholder="••••••••" type="password" required />
+            </div>
+          </div>
+
+          <button id="sendOtpBtn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-surface-container-highest/30 font-bold text-on-surface transition-all hover:bg-surface-container-highest/50 active:scale-[0.98]" type="button">
+            Send OTP
+            <span class="material-symbols-outlined text-lg">mail_lock</span>
+          </button>
+
+          <div id="otpSection" class="hidden space-y-2">
+            <label class="block px-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant" for="otp">OTP Code</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline">pin</span>
+              <input class="glass-input h-14 w-full rounded-xl px-4 pl-12 text-on-surface transition-all placeholder:text-outline/60" id="otp" name="otp" inputmode="numeric" maxlength="6" placeholder="123456" type="text" />
+            </div>
+          </div>
+
+          <button id="signupBtn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary-container font-bold text-on-primary-container shadow-lg shadow-primary-container/20 transition-all hover:brightness-110 active:scale-[0.98]" type="submit" style="display: none;">
+            Verify OTP & Sign Up
+            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+          </button>
+        </form>
+
+        <div class="my-8 flex items-center gap-4">
+          <div class="h-px flex-1 bg-outline-variant/20"></div>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-outline">or continue with</span>
+          <div class="h-px flex-1 bg-outline-variant/20"></div>
+        </div>
+
+        <button id="googleSignupBtn" type="button" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container-highest/30 text-sm font-bold text-on-surface transition-all hover:bg-surface-container-highest/50">
+          <img alt="Google" class="h-5 w-5" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" />
+          Continue with Google
         </button>
+
+        <p class="mt-10 text-center text-xs font-medium text-on-surface-variant">
+          Already have an account?
+          <a class="ml-1 font-bold text-primary underline-offset-4 hover:underline" href="/signin">Sign in</a>
+        </p>
       </div>
+    </div>
+  </main>
 
-      <div id="message" class="message"></div>
-    </form>
-
-    <p class="auth-footer">
-      Already have an account?
-      <a href="/login" class="auth-link">Log In</a>
-    </p>
-  </div>
-</div>
-
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .auth-container {
-    width: 100%;
-    max-width: 450px;
-    padding: 20px;
-  }
-
-  .auth-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  }
-
-  .auth-title {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 10px;
-    text-align: center;
-    font-weight: 700;
-  }
-
-  .auth-subtitle {
-    font-size: 1rem;
-    color: #666;
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .auth-form {
-    width: 100%;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 8px;
-  }
-
-  .form-group input {
-    width: 100%;
-    padding: 12px 15px;
-    font-size: 1rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    transition: border-color 0.3s ease;
-  }
-
-  .form-group input:focus {
-    outline: none;
-    border-color: #667eea;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 15px;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-  }
-
-  .btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .message {
-    margin-top: 20px;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    text-align: center;
-    display: none;
-  }
-
-  .message.success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-    display: block;
-  }
-
-  .message.error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-    display: block;
-  }
-
-  .auth-footer {
-    text-align: center;
-    margin-top: 30px;
-    font-size: 0.9rem;
-    color: #666;
-  }
-
-  .auth-link {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 600;
-  }
-
-  .auth-link:hover {
-    text-decoration: underline;
-  }
-
-  #otpSection {
-    margin-top: 20px;
-  }
-</style>
-
-<script>
-  async function sendOTP() {
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const messageDiv = document.getElementById('message');
-    const sendOtpBtn = document.getElementById('sendOtpBtn');
-
-    if (!name || !email) {
-      showMessage('Please fill in name and email', 'error');
-      return;
-    }
-
-    sendOtpBtn.disabled = true;
-    sendOtpBtn.textContent = 'Sending...';
-
-    try {
-      const response = await fetch('/api/v1/user/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name,
-          email
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showMessage(data.message || 'OTP sent successfully!', 'success');
-        document.getElementById('otpSection').style.display = 'block';
-        sendOtpBtn.textContent = 'Resend OTP';
-
-        setTimeout(() => {
-          sendOtpBtn.disabled = false;
-        }, 60000);
-      } else {
-        showMessage(data.message || 'Failed to send OTP', 'error');
-        sendOtpBtn.disabled = false;
-        sendOtpBtn.textContent = 'Send OTP';
-      }
-    } catch (error) {
-      showMessage('Network error. Please try again.', 'error');
-      sendOtpBtn.disabled = false;
-      sendOtpBtn.textContent = 'Send OTP';
-    }
-  }
-
-  document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const formData = {
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      password: document.getElementById('password').value,
-      otp: document.getElementById('otp').value
-    };
-
-    try {
-      const response = await fetch('/api/v1/user/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showMessage('Account created successfully! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
-      } else {
-        showMessage(data.message || 'Signup failed', 'error');
-      }
-    } catch (error) {
-      showMessage('Network error. Please try again.', 'error');
-    }
-  });
-
-  function showMessage(text, type) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.textContent = text;
-    messageDiv.className = `message ${type}`;
-  }
-</script>
+  <script src="https://accounts.google.com/gsi/client" defer></script>
+  <script src="/js/signup.js" defer></script>
+</section>

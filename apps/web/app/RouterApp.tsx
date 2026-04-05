@@ -82,18 +82,17 @@ export default function RouterApp() {
           }
         />
         <Route
-          path="/login"
+          path="/signin"
           element={
             isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
           }
         />
         <Route
-          path="/logout"
+          path="/signout"
           element={
             isAuthenticated ? <Logout /> : <Navigate to="/welcome" replace />
           }
         />
-
         {isAuthenticated ? (
           <>
             <Route

@@ -49,9 +49,9 @@ if (isDevelopment) {
         });
       }
 
-      app.listen(PORT, "0.0.0.0", () => {
+      app.listen(PORT, "localhost", () => {
         logger.info(`Server listening on port ${PORT}`, {
-          url: `http://0.0.0.0:${PORT}`,
+          url: `http://localhost:${PORT}`,
         });
       });
     } catch (err) {
@@ -115,7 +115,7 @@ if (isDevelopment) {
           );
         }
 
-        app.listen(PORT, "0.0.0.0", () => {
+        app.listen(PORT, "localhost", () => {
           logger.info(`Worker ${process.pid} listening on port ${PORT}`);
         });
       } catch (err) {

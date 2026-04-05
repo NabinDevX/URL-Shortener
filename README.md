@@ -91,9 +91,9 @@ For Google OAuth, keep your Google client secret file at:
 
 Web env (apps/web/.env) typically includes:
 
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
-- `NEXT_PUBLIC_API_PREFIX` (default: `/api/v1`)
-- `NEXT_PUBLIC_API_URL` (backend base URL for local dev; default in repo is `http://localhost:8000`)
+- `NEXT_GOOGLE_CLIENT_ID`
+- `NEXT_API_PREFIX` (default: `/api/v1`)
+- `NEXT_API_BASE_URL` (backend base URL for local dev; default in repo is `http://localhost:8000`)
 
 ## Run in Development
 

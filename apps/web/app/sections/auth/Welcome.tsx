@@ -22,7 +22,7 @@ const Welcome = () => {
   }, []);
 
   const handleGetStarted = () => navigate("/signup");
-  const handleSignIn = () => navigate("/login");
+  const handleSignIn = () => navigate("/signin");
 
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700">
