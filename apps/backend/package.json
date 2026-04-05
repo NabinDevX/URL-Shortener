@@ -7,8 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "build:css": "tailwindcss -i ./src/input.css -o ./public/css/output.css",
-    "start:production": "node dist/index.js",
-    "start": "dotenv -- node dist/index.js",
+    "start": "dotenv -- node --experimental-specifier-resolution=node dist/index.js",
     "dev": "dotenv -- tsx watch src/index.ts",
     "dev:css": "tailwindcss -i ./src/input.css -o ./public/css/output.css --watch",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",

@@ -32,4 +32,4 @@ COPY --from=builder /app/apps/backend/public ./apps/backend/public
 WORKDIR /app/apps/backend
 
 EXPOSE 8000
-CMD ["node", "dist/index.js"]
+CMD ["node", "--experimental-specifier-resolution=node", "dist/index.js"]
