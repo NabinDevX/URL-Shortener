@@ -180,8 +180,8 @@ jobs:
           script: |
             sleep 60
             sudo docker ps
-            curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
-            curl -s -f http://localhost:3333/health || echo "⚠️ Backend health check failed"
+            curl -s -f http://localhost:8000/health || echo "⚠️ Backend health check failed"
+            curl -s -f http://localhost:8000/health || echo "⚠️ Backend health check failed"
 
       - name: Cleanup old images
         uses: appleboy/ssh-action@v1.0.0

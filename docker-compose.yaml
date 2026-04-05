@@ -4,7 +4,7 @@ services:
     container_name: backend
     restart: unless-stopped
     ports:
-      - "3333:${PORT:-8000}"
+      - "8000:${PORT:-8000}"
     volumes:
       - extension-dist:/app/apps/backend/public/extension:ro
     environment:
