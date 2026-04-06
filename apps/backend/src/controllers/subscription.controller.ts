@@ -105,10 +105,13 @@ export const createSubscription = async (
 
     const razorpay = getRazorpayClient();
 
+    // Razorpay receipt should be short and unique; keep safely under limits.
+    const receipt = `sub_${Date.now()}_${user._id.toString().slice(-8)}`;
+
     const order = (await razorpay.orders.create({
       amount: planConfig.amount * 100,
       currency: "INR",
-      receipt: `sub_${user._id}_${Date.now()}`,
+      receipt,
     })) as unknown as { id: string };
 
     const subscription = await Subscription.create({
@@ -131,7 +134,14 @@ export const createSubscription = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(500, "Failed to create subscription");
+
+    const errorMessage =
+      (error as { error?: { description?: string }; message?: string })?.error
+        ?.description ||
+      (error as { message?: string })?.message ||
+      "Failed to create subscription";
+
+    throw new ApiError(500, errorMessage);
   }
 };
 

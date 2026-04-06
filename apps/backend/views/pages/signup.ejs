@@ -1,10 +1,10 @@
-<section id="signup-root" data-google-client-id="<%= process.env.GOOGLE_CLIENT_ID || '' %>" class="relative min-h-screen overflow-hidden px-6 py-12 lg:px-10 lg:py-16">
+<section id="signup-root" data-google-client-id="<%= process.env.GOOGLE_CLIENT_ID || '' %>" class="relative min-h-screen overflow-hidden px-4 py-6 sm:px-6 sm:py-10 lg:px-10 lg:py-16">
   <div class="pointer-events-none absolute inset-0">
     <div class="absolute -left-[8%] top-[8%] h-[36%] w-[36%] rounded-full bg-primary/10 blur-[120px]"></div>
     <div class="absolute -bottom-[10%] right-[0%] h-[34%] w-[34%] rounded-full bg-indigo-900/10 blur-[120px]"></div>
   </div>
 
-  <main class="relative z-10 mx-auto grid w-full max-w-300 grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-20">
+  <main class="relative z-10 mx-auto grid w-full max-w-300 grid-cols-1 items-center gap-10 sm:gap-12 lg:grid-cols-2 lg:gap-20">
     <div class="hidden max-w-xl lg:flex lg:flex-col lg:space-y-8 lg:justify-self-start">
       <div class="space-y-4">
         <div class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
@@ -33,7 +33,7 @@
     </div>
 
     <div class="flex w-full justify-center lg:justify-self-end intro-reveal intro-delay-1">
-      <div class="obsidian-card relative w-full max-w-md overflow-hidden rounded-4xl p-8 shadow-2xl md:p-12 hover-float">
+      <div class="obsidian-card relative w-full max-w-xl overflow-hidden rounded-4xl p-8 shadow-2xl sm:p-10 md:p-12 lg:max-w-md hover-float">
         <div class="mb-10 flex flex-col items-center text-center">
           <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-container shadow-lg shadow-primary-container/20">
             <span class="material-symbols-outlined text-2xl font-bold text-on-primary-container">person_add</span>

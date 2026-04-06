@@ -1,61 +1,136 @@
-<aside class="flex w-full flex-col gap-2 overflow-y-auto bg-slate-50 p-4 dark:bg-surface-container-low lg:sticky lg:top-0 lg:z-50 lg:h-screen lg:w-64 lg:shrink-0">
-  <div class="mb-8 px-2">
-    <div class="flex items-center gap-3">
-      <div class="pro-gradient flex h-8 w-8 items-center justify-center rounded-lg text-white">
-        <span class="material-symbols-outlined text-sm">link</span>
+<aside id="appSidebar" class="group fixed inset-y-0 left-0 z-50 flex w-20 flex-col gap-2 overflow-y-auto border-r border-slate-200 bg-slate-50 p-3 transition-[width] duration-200 dark:border-outline-variant dark:bg-surface-container-low lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:p-4">
+  <div class="mb-6 px-1 lg:mb-8 lg:px-2">
+    <div class="sidebar-header-row flex items-center justify-between gap-2">
+      <div class="sidebar-brand-wrap flex min-w-0 items-center gap-3">
+        <div class="sidebar-brand-icon pro-gradient flex h-8 w-8 items-center justify-center rounded-lg text-white">
+          <span class="material-symbols-outlined text-sm">link</span>
+        </div>
+        <span class="sidebar-label hidden truncate font-headline text-xl font-bold text-indigo-600 dark:text-primary lg:inline">URLTinier Pro</span>
       </div>
-      <span class="font-headline text-xl font-bold text-indigo-600 dark:text-primary">URLTinier Pro</span>
+      <button id="sidebarToggleBtn" type="button" aria-label="Toggle sidebar" aria-expanded="false" class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-200 hover:text-indigo-600 dark:text-on-surface-variant dark:hover:bg-primary/20 dark:hover:text-primary lg:hidden">
+        <span class="material-symbols-outlined sidebar-toggle-open">menu</span>
+        <span class="material-symbols-outlined sidebar-toggle-close">close</span>
+      </button>
     </div>
-    <p class="mt-1 text-xs font-medium uppercase tracking-widest text-slate-500 dark:text-on-surface-variant">Enterprise Workspace</p>
+    <p class="sidebar-label mt-1 hidden text-xs font-medium uppercase tracking-widest text-slate-500 dark:text-on-surface-variant lg:block">Enterprise Workspace</p>
   </div>
 
   <nav class="flex-1 space-y-1">
-    <a href="/dashboard" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 <%= activePage === 'dashboard' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
+    <a href="/dashboard" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 lg:justify-start <%= activePage === 'dashboard' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
       <span class="material-symbols-outlined">dashboard</span>
-      Dashboard
+      <span class="sidebar-label hidden lg:inline">Dashboard</span>
     </a>
-    <a href="/urls" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 <%= activePage === 'urls' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
+    <a href="/urls" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 lg:justify-start <%= activePage === 'urls' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
       <span class="material-symbols-outlined">link</span>
-      My Links
+      <span class="sidebar-label hidden lg:inline">My Links</span>
     </a>
-    <a href="/analytics" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 <%= activePage === 'analytics' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
+    <a href="/analytics" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 lg:justify-start <%= activePage === 'analytics' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
       <span class="material-symbols-outlined">bar_chart</span>
-      Analytics
+      <span class="sidebar-label hidden lg:inline">Analytics</span>
     </a>
-    <a href="/campaigns" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 <%= activePage === 'campaigns' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
+    <a href="/campaigns" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 lg:justify-start <%= activePage === 'campaigns' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
       <span class="material-symbols-outlined">campaign</span>
-      Campaigns
+      <span class="sidebar-label hidden lg:inline">Campaigns</span>
     </a>
-    <a href="/api" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 <%= activePage === 'api' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
+    <a href="/api" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 lg:justify-start <%= activePage === 'api' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
       <span class="material-symbols-outlined">api</span>
-      API
+      <span class="sidebar-label hidden lg:inline">API</span>
     </a>
-    <a href="/settings" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 <%= activePage === 'settings' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
+    <a href="/settings" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 lg:justify-start <%= activePage === 'settings' ? 'bg-white text-indigo-600 shadow-sm dark:bg-primary dark:text-on-primary' : 'text-slate-500 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20' %>">
       <span class="material-symbols-outlined">settings</span>
-      Settings
+      <span class="sidebar-label hidden lg:inline">Settings</span>
     </a>
   </nav>
 
   <div class="mt-auto space-y-4 border-t border-slate-200 pt-4 dark:border-outline-variant">
-    <div class="rounded-xl bg-indigo-600 p-4 text-white dark:bg-primary hover-float">
+    <div class="sidebar-label hidden rounded-xl bg-indigo-600 p-4 text-white dark:bg-primary hover-float lg:block">
       <p class="mb-1 text-xs font-bold opacity-80">CURRENT PLAN</p>
       <p class="font-headline text-lg font-bold">Pro Plan</p>
       <button class="mt-3 w-full rounded-lg bg-white/20 py-2 text-xs font-bold transition-colors hover:bg-white/30 dark:bg-on-primary/15 dark:hover:bg-on-primary/25">Upgrade to Pro</button>
     </div>
-    <div class="space-y-1">
-      <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20">
+    <div class="sidebar-bottom space-y-1">
+      <a href="#" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20 lg:justify-start">
         <span class="material-symbols-outlined">help</span>
-        Support
+        <span class="sidebar-label hidden lg:inline">Support</span>
       </a>
-      <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20">
+      <a href="#" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition-all duration-200 hover:bg-slate-100 hover:translate-x-1 dark:text-on-surface-variant dark:hover:bg-primary/20 lg:justify-start">
         <span class="material-symbols-outlined">description</span>
-        Docs
+        <span class="sidebar-label hidden lg:inline">Docs</span>
       </a>
-      <a href="#" id="sidebarSignoutLink" class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition-all duration-200 hover:bg-red-50 hover:translate-x-1 dark:hover:bg-primary/20">
+      <a href="#" id="sidebarSignoutLink" class="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition-all duration-200 hover:bg-red-50 hover:translate-x-1 dark:hover:bg-primary/20 lg:justify-start">
         <span class="material-symbols-outlined">logout</span>
-        Sign Out
+        <span class="sidebar-label hidden lg:inline">Sign Out</span>
       </a>
     </div>
   </div>
 </aside>
+<button id="sidebarMobileBackdrop" type="button" aria-label="Close sidebar" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-[1px] lg:hidden"></button>
+<style>
+  @media (max-width: 1023px) {
+    #appSidebar .sidebar-toggle-open {
+      display: inline;
+    }
+
+    #appSidebar .sidebar-toggle-close {
+      display: none;
+    }
+
+    #appSidebar:not(.sidebar-mobile-expanded) .sidebar-header-row {
+      justify-content: center;
+    }
+
+    #appSidebar:not(.sidebar-mobile-expanded) .sidebar-brand-wrap {
+      display: none;
+    }
+
+    #appSidebar:not(.sidebar-mobile-expanded) #sidebarToggleBtn {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #appSidebar.sidebar-mobile-expanded .sidebar-brand-wrap {
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    #appSidebar .sidebar-brand-icon {
+      display: none;
+    }
+
+    #appSidebar.sidebar-mobile-expanded {
+      width: 16rem;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 20px 60px rgba(2, 6, 23, 0.35);
+    }
+
+    #appSidebar.sidebar-mobile-expanded .sidebar-brand-icon {
+      display: flex;
+    }
+
+    #appSidebar.sidebar-mobile-expanded .sidebar-label {
+      display: inline;
+    }
+
+    #appSidebar.sidebar-mobile-expanded .sidebar-link {
+      justify-content: flex-start;
+    }
+
+    #appSidebar.sidebar-mobile-expanded .sidebar-toggle-open {
+      display: none;
+    }
+
+    #appSidebar.sidebar-mobile-expanded .sidebar-toggle-close {
+      display: inline;
+    }
+
+    #appSidebar.sidebar-mobile-expanded~#sidebarMobileBackdrop {
+      display: block;
+    }
+
+    #appSidebar .sidebar-bottom {
+      margin-bottom: 0.5rem;
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+    }
+  }
+</style>
 <script src="/js/sidebar.js" defer></script>

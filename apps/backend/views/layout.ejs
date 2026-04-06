@@ -12,19 +12,17 @@
     <% const showPlanBadge = ['dashboard', 'urls', 'analytics'].includes(currentPage); %>
 
     <% if (showAppShell) { %>
-    <div class="lg:flex lg:min-h-screen">
+    <div class="min-h-screen lg:flex">
       <%- include('./partials/sidebar', { activePage: currentPage }) %>
 
-      <div class="flex min-w-0 flex-1 flex-col">
+      <div class="ml-20 flex min-h-screen min-w-0 flex-1 flex-col transition-[margin] duration-200 lg:ml-0">
         <%- include('./partials/header', { pageTitle: pageTitleMap[currentPage], searchPlaceholder: searchPlaceholderMap[currentPage], showPlanBadge, authUser: locals.authUser }) %>
 
-        <main class="flex-1">
+        <main class="flex-1 overflow-x-auto">
           <%- body %>
         </main>
 
-        <footer>
-          <%- include('./partials/footer') %>
-        </footer>
+        <%- include('./partials/footer-app') %>
       </div>
     </div>
     <% } else { %>
@@ -32,9 +30,7 @@
       <%- body %>
     </main>
 
-    <footer>
-      <%- include('./partials/footer') %>
-    </footer>
+    <%- include('./partials/footer') %>
     <% } %>
   </div>
 </body>

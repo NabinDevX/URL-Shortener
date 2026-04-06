@@ -1,5 +1,5 @@
 <!-- Content Canvas -->
-<div class="p-8 max-w-7xl mx-auto space-y-12 intro-reveal">
+<div class="mx-auto max-w-7xl space-y-10 p-4 sm:space-y-12 sm:p-6 lg:p-8 intro-reveal">
   <!-- Hero Title -->
   <div class="space-y-2 reveal-on-scroll" data-reveal>
     <h1 class="text-4xl font-extrabold text-on-surface tracking-tight font-headline">Overview</h1>
@@ -146,95 +146,97 @@
   </div>
   <!-- Table Section -->
   <div class="space-y-6 reveal-on-scroll" data-reveal>
-    <div class="flex justify-between items-end">
+    <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
         <h2 class="text-2xl font-extrabold text-on-surface font-headline">Recent Links</h2>
         <p class="text-on-surface-variant text-sm">Managing 24 of 50 total free links</p>
       </div>
-      <button class="px-6 py-3 pro-gradient text-white font-bold rounded-2xl flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform">
+      <button class="flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3 font-bold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 sm:w-auto pro-gradient">
         <span class="material-symbols-outlined text-sm" data-icon="add">add</span>
         Create New Link
       </button>
     </div>
     <div class="bg-surface-container-lowest rounded-4xl overflow-hidden border border-outline-variant/10 reveal-on-scroll" data-reveal>
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-surface-container-low">
-            <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Short URL</th>
-            <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Original Destination</th>
-            <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Total Clicks</th>
-            <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-surface-container">
-          <tr class="hover:bg-surface-bright transition-colors">
-            <td class="px-8 py-5">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
-                  <span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low">
+              <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Short URL</th>
+              <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Original Destination</th>
+              <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Total Clicks</th>
+              <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container">
+            <tr class="hover:bg-surface-bright transition-colors">
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+                  </div>
+                  <span class="font-bold text-on-surface">shrt.ly/summer-sale</span>
                 </div>
-                <span class="font-bold text-on-surface">shrt.ly/summer-sale</span>
-              </div>
-            </td>
-            <td class="px-8 py-5 text-sm text-on-surface-variant truncate max-w-xs">https://store.example.com/collections/summer2024?ref=dashboard...</td>
-            <td class="px-8 py-5 text-center">
-              <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-bold text-on-surface">482</span>
-            </td>
-            <td class="px-8 py-5 text-right">
-              <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
-                <span class="material-symbols-outlined text-xl" data-icon="content_copy">content_copy</span>
-              </button>
-              <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
-                <span class="material-symbols-outlined text-xl" data-icon="edit">edit</span>
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-bright transition-colors">
-            <td class="px-8 py-5">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
-                  <span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+              </td>
+              <td class="px-8 py-5 text-sm text-on-surface-variant truncate max-w-xs">https://store.example.com/collections/summer2024?ref=dashboard...</td>
+              <td class="px-8 py-5 text-center">
+                <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-bold text-on-surface">482</span>
+              </td>
+              <td class="px-8 py-5 text-right">
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                  <span class="material-symbols-outlined text-xl" data-icon="content_copy">content_copy</span>
+                </button>
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                  <span class="material-symbols-outlined text-xl" data-icon="edit">edit</span>
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-surface-bright transition-colors">
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+                  </div>
+                  <span class="font-bold text-on-surface">shrt.ly/vlog-update</span>
                 </div>
-                <span class="font-bold text-on-surface">shrt.ly/vlog-update</span>
-              </div>
-            </td>
-            <td class="px-8 py-5 text-sm text-on-surface-variant truncate max-w-xs">https://youtube.com/watch?v=dQw4w9WgXcQ&amp;feature=share...</td>
-            <td class="px-8 py-5 text-center">
-              <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-bold text-on-surface">321</span>
-            </td>
-            <td class="px-8 py-5 text-right">
-              <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
-                <span class="material-symbols-outlined text-xl" data-icon="content_copy">content_copy</span>
-              </button>
-              <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
-                <span class="material-symbols-outlined text-xl" data-icon="edit">edit</span>
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-surface-bright transition-colors">
-            <td class="px-8 py-5">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
-                  <span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+              </td>
+              <td class="px-8 py-5 text-sm text-on-surface-variant truncate max-w-xs">https://youtube.com/watch?v=dQw4w9WgXcQ&amp;feature=share...</td>
+              <td class="px-8 py-5 text-center">
+                <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-bold text-on-surface">321</span>
+              </td>
+              <td class="px-8 py-5 text-right">
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                  <span class="material-symbols-outlined text-xl" data-icon="content_copy">content_copy</span>
+                </button>
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                  <span class="material-symbols-outlined text-xl" data-icon="edit">edit</span>
+                </button>
+              </td>
+            </tr>
+            <tr class="hover:bg-surface-bright transition-colors">
+              <td class="px-8 py-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+                  </div>
+                  <span class="font-bold text-on-surface">shrt.ly/newsletter-sign</span>
                 </div>
-                <span class="font-bold text-on-surface">shrt.ly/newsletter-sign</span>
-              </div>
-            </td>
-            <td class="px-8 py-5 text-sm text-on-surface-variant truncate max-w-xs">https://substack.com/signup/brand-official...</td>
-            <td class="px-8 py-5 text-center">
-              <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-bold text-on-surface">210</span>
-            </td>
-            <td class="px-8 py-5 text-right">
-              <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
-                <span class="material-symbols-outlined text-xl" data-icon="content_copy">content_copy</span>
-              </button>
-              <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
-                <span class="material-symbols-outlined text-xl" data-icon="edit">edit</span>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td class="px-8 py-5 text-sm text-on-surface-variant truncate max-w-xs">https://substack.com/signup/brand-official...</td>
+              <td class="px-8 py-5 text-center">
+                <span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-bold text-on-surface">210</span>
+              </td>
+              <td class="px-8 py-5 text-right">
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                  <span class="material-symbols-outlined text-xl" data-icon="content_copy">content_copy</span>
+                </button>
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                  <span class="material-symbols-outlined text-xl" data-icon="edit">edit</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="p-6 bg-surface-container-low flex justify-center">
         <button class="text-sm font-bold text-primary hover:underline underline-offset-4 decoration-2">View All 24 Links</button>
       </div>

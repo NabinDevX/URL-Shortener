@@ -1,5 +1,5 @@
 <!-- Content Canvas -->
-<div class="p-12 max-w-5xl mx-auto space-y-12 intro-reveal">
+<div class="mx-auto max-w-5xl space-y-10 p-4 sm:space-y-12 sm:p-6 lg:p-8 intro-reveal">
   <section class="space-y-6 scroll-mt-28" id="account-settings">
     <script src="/js/settings.js" defer></script>
     <div>
@@ -55,14 +55,14 @@
     </div>
   </section>
   <!-- Advanced Section -->
-  <section class="space-y-6 pb-20" id="advanced">
+  <section class="space-y-6 pb-6" id="advanced">
     <div>
       <h2 class="font-headline text-2xl font-extrabold tracking-tight">Advanced</h2>
       <p class="text-on-surface-variant text-sm mt-1">Configure global application preferences.</p>
     </div>
-    <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm sm:p-8">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-start gap-4 sm:items-center">
           <div class="p-3 bg-indigo-50 rounded-xl dark:bg-primary/20">
             <span class="material-symbols-outlined text-indigo-600 dark:text-primary" data-theme-icon>brightness_auto</span>
           </div>
@@ -71,7 +71,7 @@
             <p class="text-sm text-on-surface-variant">System is the default. You can force Dark or Light mode.</p>
           </div>
         </div>
-        <div class="min-w-64">
+        <div class="w-full lg:min-w-64 lg:w-auto">
           <label class="sr-only" for="themePreferenceSlider">Theme Preference</label>
           <div class="rounded-2xl border border-outline-variant/40 bg-surface px-4 py-3">
             <input aria-label="Theme preference slider" class="w-full cursor-pointer accent-primary" data-theme-slider id="themePreferenceSlider" max="2" min="0" step="1" type="range" value="1" />
@@ -83,8 +83,8 @@
           </div>
         </div>
       </div>
-      <div class="mt-8 pt-8 border-t border-slate-100 flex items-center justify-between">
-        <div class="flex items-center gap-4">
+      <div class="mt-8 flex flex-col gap-5 border-t border-slate-100 pt-8 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-start gap-4 sm:items-center">
           <div class="p-3 bg-error-container rounded-xl">
             <span class="material-symbols-outlined text-error">delete_forever</span>
           </div>
@@ -93,7 +93,7 @@
             <p class="text-sm text-on-surface-variant">Permanently remove all data and links. This cannot be undone.</p>
           </div>
         </div>
-        <button id="deleteAccountBtn" class="px-6 py-2 bg-white border-2 border-error text-error rounded-xl text-sm font-bold hover:bg-error hover:text-white transition-all dark:bg-primary dark:border-primary dark:text-on-primary dark:hover:bg-primary-container">Delete Account</button>
+        <button id="deleteAccountBtn" class="rounded-xl border-2 border-error bg-white px-6 py-2 text-sm font-bold text-error transition-all hover:bg-error hover:text-white dark:border-primary dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container">Delete Account</button>
       </div>
     </div>
   </section>
