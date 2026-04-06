@@ -199,6 +199,12 @@ export interface ChangePasswordInput {
   newPassword: string;
 }
 
+export interface ForgotPasswordChangeInput {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
 export interface UpdateAccountInput {
   name?: string;
   email?: string;

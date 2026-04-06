@@ -6,12 +6,42 @@
   const signupForm = document.getElementById("signupForm");
   const sendOtpBtn = document.getElementById("sendOtpBtn");
   const signupBtn = document.getElementById("signupBtn");
-  const otpSection = document.getElementById("otpSection");
   const googleSignupBtn = document.getElementById("googleSignupBtn");
   const messageBox = document.getElementById("message");
+  const otpHiddenInput = document.getElementById("otp");
+  const signupOtpModal = document.getElementById("signupOtpModal");
+  const closeSignupOtpModalBtn = document.getElementById(
+    "closeSignupOtpModalBtn"
+  );
+  const signupOtpEmail = document.getElementById("signupOtpEmail");
+  const signupOtpTimer = document.getElementById("signupOtpTimer");
+  const resendSignupOtpBtn = document.getElementById("resendSignupOtpBtn");
+  const verifySignupOtpBtn = document.getElementById("verifySignupOtpBtn");
+  const signupOtpDigits = Array.from(
+    document.querySelectorAll("[data-signup-otp-digit]")
+  );
 
   let googleCodeClient = null;
   let otpSent = false;
+  let otpTimerInterval = null;
+  let otpSecondsRemaining = 0;
+
+  function getPostAuthRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const next = (params.get("next") || "").trim();
+    if (next.startsWith("/")) {
+      sessionStorage.removeItem("postAuthRedirect");
+      return next;
+    }
+
+    const stored = (sessionStorage.getItem("postAuthRedirect") || "").trim();
+    if (stored.startsWith("/")) {
+      sessionStorage.removeItem("postAuthRedirect");
+      return stored;
+    }
+
+    return "/dashboard";
+  }
 
   function waitForGoogleOAuth(timeoutMs = 5000) {
     return new Promise((resolve, reject) => {
@@ -36,6 +66,24 @@
   }
 
   function showMessage(text, type) {
+    if (window.appToast) {
+      if (type === "success") {
+        window.appToast.success(text);
+      } else {
+        window.appToast.error(text);
+      }
+
+      if (messageBox) {
+        messageBox.textContent = "";
+        messageBox.className = "hidden";
+      }
+      return;
+    }
+
+    if (!messageBox) {
+      return;
+    }
+
     const baseClass = "mb-6 rounded-xl px-4 py-3 text-sm font-medium";
     const typeClass =
       type === "success"
@@ -48,8 +96,16 @@
 
   function setLoading(isLoading) {
     sendOtpBtn.disabled = isLoading;
-    signupBtn.disabled = isLoading;
+    if (signupBtn) {
+      signupBtn.disabled = isLoading;
+    }
     googleSignupBtn.disabled = isLoading;
+    if (resendSignupOtpBtn) {
+      resendSignupOtpBtn.disabled = isLoading || otpSecondsRemaining > 0;
+    }
+    if (verifySignupOtpBtn) {
+      verifySignupOtpBtn.disabled = isLoading;
+    }
   }
 
   function getFormData() {
@@ -57,8 +113,189 @@
       name: document.getElementById("name").value.trim(),
       email: document.getElementById("email").value.trim(),
       password: document.getElementById("password").value,
-      otp: document.getElementById("otp").value.trim(),
+      otp: (otpHiddenInput?.value || "").trim(),
     };
+  }
+
+  function clearOtpTimer() {
+    if (!otpTimerInterval) {
+      return;
+    }
+
+    window.clearInterval(otpTimerInterval);
+    otpTimerInterval = null;
+  }
+
+  function formatOtpTime(seconds) {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const secs = String(seconds % 60).padStart(2, "0");
+    return `${mins}:${secs}`;
+  }
+
+  function updateSignupTimerUi() {
+    if (signupOtpTimer) {
+      signupOtpTimer.textContent = formatOtpTime(otpSecondsRemaining);
+    }
+
+    if (!resendSignupOtpBtn) {
+      return;
+    }
+
+    if (otpSecondsRemaining > 0) {
+      resendSignupOtpBtn.disabled = true;
+      resendSignupOtpBtn.textContent = `Resend in ${otpSecondsRemaining}s`;
+    } else {
+      resendSignupOtpBtn.disabled = false;
+      resendSignupOtpBtn.textContent = "Resend OTP";
+    }
+  }
+
+  function startSignupOtpTimer(seconds = 60) {
+    clearOtpTimer();
+    otpSecondsRemaining = seconds;
+    updateSignupTimerUi();
+
+    otpTimerInterval = window.setInterval(() => {
+      otpSecondsRemaining = Math.max(otpSecondsRemaining - 1, 0);
+      updateSignupTimerUi();
+
+      if (otpSecondsRemaining === 0) {
+        clearOtpTimer();
+      }
+    }, 1000);
+  }
+
+  function openSignupOtpModal(email) {
+    if (signupOtpEmail) {
+      signupOtpEmail.textContent = email;
+    }
+
+    if (signupOtpModal) {
+      signupOtpModal.classList.remove("hidden");
+      signupOtpModal.classList.add("flex");
+    }
+
+    signupOtpDigits.forEach((input) => {
+      input.value = "";
+    });
+
+    if (otpHiddenInput) {
+      otpHiddenInput.value = "";
+    }
+
+    if (signupOtpDigits[0]) {
+      signupOtpDigits[0].focus();
+    }
+
+    startSignupOtpTimer(60);
+  }
+
+  function closeSignupOtpModal() {
+    if (signupOtpModal) {
+      signupOtpModal.classList.remove("flex");
+      signupOtpModal.classList.add("hidden");
+    }
+  }
+
+  function collectSignupOtpDigits() {
+    return signupOtpDigits.map((input) => input.value.trim()).join("");
+  }
+
+  function bindSegmentedOtpInputs(inputs) {
+    inputs.forEach((input, index) => {
+      input.addEventListener("input", (event) => {
+        const target = event.target;
+        const value = (target.value || "").replace(/\D/g, "").slice(0, 1);
+        target.value = value;
+
+        if (value && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Backspace" && !input.value && index > 0) {
+          inputs[index - 1].focus();
+        }
+
+        if (event.key === "ArrowLeft" && index > 0) {
+          event.preventDefault();
+          inputs[index - 1].focus();
+        }
+
+        if (event.key === "ArrowRight" && index < inputs.length - 1) {
+          event.preventDefault();
+          inputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener("paste", (event) => {
+        const pasted = (event.clipboardData?.getData("text") || "")
+          .replace(/\D/g, "")
+          .slice(0, inputs.length);
+
+        if (!pasted) {
+          return;
+        }
+
+        event.preventDefault();
+        pasted.split("").forEach((char, idx) => {
+          if (inputs[idx]) {
+            inputs[idx].value = char;
+          }
+        });
+
+        const focusIndex = Math.min(pasted.length, inputs.length - 1);
+        inputs[focusIndex]?.focus();
+      });
+    });
+  }
+
+  async function requestSignupOtp(isResend = false) {
+    const { name, email } = getFormData();
+    if (!name || !email) {
+      showMessage(
+        "Please fill in your name and email before requesting OTP.",
+        "error"
+      );
+      return;
+    }
+
+    setLoading(true);
+    sendOtpBtn.textContent = isResend ? "Resending..." : "Sending...";
+
+    try {
+      const response = await fetch("/api/v1/user/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, email }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to send OTP");
+      }
+
+      otpSent = true;
+      if (signupBtn) {
+        signupBtn.style.display = "flex";
+      }
+      sendOtpBtn.textContent = "Resend OTP";
+      showMessage(
+        data?.message || "OTP sent successfully. Please verify to continue.",
+        "success"
+      );
+      openSignupOtpModal(email);
+    } catch (error) {
+      showMessage(
+        error.message || "Failed to send OTP. Please try again.",
+        "error"
+      );
+      sendOtpBtn.textContent = otpSent ? "Resend OTP" : "Send OTP";
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function initGoogleSignup() {
@@ -101,7 +338,7 @@
               throw new Error(signupData?.message || "Google sign-up failed");
             }
 
-            window.location.href = "/dashboard";
+            window.location.href = getPostAuthRedirect();
           } catch (error) {
             showMessage(
               error.message || "Google sign-up failed. Please try again.",
@@ -121,49 +358,33 @@
   }
 
   sendOtpBtn.addEventListener("click", async () => {
-    const { name, email } = getFormData();
-    if (!name || !email) {
-      showMessage(
-        "Please fill in your name and email before requesting OTP.",
-        "error"
-      );
-      return;
-    }
-
-    setLoading(true);
-    sendOtpBtn.textContent = otpSent ? "Resending..." : "Sending...";
-
-    try {
-      const response = await fetch("/api/v1/user/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, email }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.message || "Failed to send OTP");
-      }
-
-      otpSent = true;
-      otpSection.classList.remove("hidden");
-      signupBtn.style.display = "flex";
-      sendOtpBtn.textContent = "Resend OTP";
-      showMessage(
-        data?.message || "OTP sent successfully. Please verify to continue.",
-        "success"
-      );
-    } catch (error) {
-      showMessage(
-        error.message || "Failed to send OTP. Please try again.",
-        "error"
-      );
-      sendOtpBtn.textContent = otpSent ? "Resend OTP" : "Send OTP";
-    } finally {
-      setLoading(false);
-    }
+    await requestSignupOtp(otpSent);
   });
+
+  if (resendSignupOtpBtn) {
+    resendSignupOtpBtn.addEventListener("click", async () => {
+      if (otpSecondsRemaining > 0) {
+        return;
+      }
+      await requestSignupOtp(true);
+    });
+  }
+
+  if (closeSignupOtpModalBtn) {
+    closeSignupOtpModalBtn.addEventListener("click", () => {
+      closeSignupOtpModal();
+    });
+  }
+
+  if (verifySignupOtpBtn) {
+    verifySignupOtpBtn.addEventListener("click", () => {
+      const otp = collectSignupOtpDigits();
+      if (otpHiddenInput) {
+        otpHiddenInput.value = otp;
+      }
+      signupForm.requestSubmit();
+    });
+  }
 
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -171,6 +392,11 @@
     if (!otpSent) {
       showMessage("Please request OTP before signing up.", "error");
       return;
+    }
+
+    const computedOtp = collectSignupOtpDigits();
+    if (otpHiddenInput) {
+      otpHiddenInput.value = computedOtp;
     }
 
     const { name, email, password, otp } = getFormData();
@@ -195,9 +421,11 @@
         throw new Error(data?.message || "Signup failed");
       }
 
+      clearOtpTimer();
+      closeSignupOtpModal();
       showMessage("Account created successfully! Redirecting...", "success");
       setTimeout(() => {
-        window.location.href = "/dashboard";
+        window.location.href = getPostAuthRedirect();
       }, 1200);
     } catch (error) {
       showMessage(error.message || "Signup failed. Please try again.", "error");
@@ -217,6 +445,8 @@
     }
     googleCodeClient.requestCode();
   });
+
+  bindSegmentedOtpInputs(signupOtpDigits);
 
   initGoogleSignup();
 })();

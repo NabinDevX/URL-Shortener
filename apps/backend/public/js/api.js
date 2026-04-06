@@ -23,6 +23,14 @@
   }
 
   function setMessage(message, isError = false) {
+    if (message && window.appToast) {
+      if (isError) {
+        window.appToast.error(message);
+      } else {
+        window.appToast.success(message);
+      }
+    }
+
     if (!apiKeyMessage) {
       return;
     }

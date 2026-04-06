@@ -16,12 +16,14 @@ import type {
   GoogleAuthCodeInput,
   GoogleAuthUrlInput,
   ChangePasswordInput,
+  ForgotPasswordChangeInput,
   UpdateAccountInput,
   DeleteAccountInput,
   AuthTokens,
   UserPublic,
   Context,
 } from "@/types";
+import { verifyOtp } from "@/middlewares/otp";
 
 const generateAccessAndRefreshTokens = async (
   userId: string
@@ -105,32 +107,38 @@ export const signup = async (
 }> => {
   const { email, password, name } = input;
 
-  const existingUser = await User.findOne({ email });
+  const existingUser = (await User.findOne({ email })) as IUserDocument | null;
   if (existingUser) {
-    throw new ApiError(409, "User with this email already exists");
+    if (existingUser.isDeleted) {
+      throw new ApiError(403, "This account has been deleted");
+    }
+    throw new ApiError(
+      409,
+      "User already exists. Please sign in or use Forgot Password"
+    );
   }
 
   const user = await User.create({ name, email, password });
   user.generateApiKey();
   await user.save({ validateBeforeSave: false });
 
-  const createdUser = await User.findById(user._id).select(
+  const currentUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
-  if (!createdUser) {
+  if (!currentUser) {
     throw new ApiError(500, "Something went wrong while creating user");
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    createdUser._id.toString()
+    currentUser._id.toString()
   );
 
   ctx.res.cookie("accessToken", accessToken, getCookieOptions());
   ctx.res.cookie("refreshToken", refreshToken, getCookieOptions());
 
   return {
-    user: formatUserPublic(createdUser as IUserDocument),
+    user: formatUserPublic(currentUser as IUserDocument),
     accessToken,
     refreshToken,
     message: "User signed up successfully",
@@ -151,10 +159,6 @@ export const signin = async (
   const user = (await User.findOne({ email })) as IUserDocument | null;
   if (!user) {
     throw new ApiError(401, "Invalid credentials");
-  }
-
-  if (user.authProvider === "google") {
-    throw new ApiError(400, "This account uses Google login");
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
@@ -216,10 +220,6 @@ export const googleSignup = async (
   if (existingUser) {
     if (existingUser.isDeleted) {
       throw new ApiError(403, "This account has been deleted");
-    }
-
-    if (existingUser.authProvider !== "google") {
-      throw new ApiError(409, "Account already exists with password login");
     }
 
     if (existingUser.googleId && existingUser.googleId !== profile.googleId) {
@@ -285,10 +285,6 @@ export const googleSignin = async (
 
   if (user.isDeleted) {
     throw new ApiError(403, "This account has been deleted");
-  }
-
-  if (user.authProvider !== "google") {
-    throw new ApiError(400, "This account uses password login");
   }
 
   if (user.googleId && user.googleId !== profile.googleId) {
@@ -395,6 +391,30 @@ export const changePassword = async (
   await fullUser.save({ validateBeforeSave: false });
 
   return { message: "Password changed successfully" };
+};
+
+export const forgotPasswordChange = async (
+  input: ForgotPasswordChangeInput
+): Promise<{ message: string }> => {
+  const { email, otp, newPassword } = input;
+
+  const user = (await User.findOne({ email })) as IUserDocument | null;
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (user.isDeleted) {
+    throw new ApiError(403, "This account has been deleted");
+  }
+
+  await verifyOtp(email, otp);
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return {
+    message: "Password changed successfully. Please sign in with your new password",
+  };
 };
 
 export const getCurrentUser = (

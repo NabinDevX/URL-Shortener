@@ -22,6 +22,14 @@
   );
 
   function setMessage(element, message, isError) {
+    if (message && window.appToast) {
+      if (isError) {
+        window.appToast.error(message);
+      } else {
+        window.appToast.success(message);
+      }
+    }
+
     if (!element) {
       return;
     }
@@ -373,7 +381,11 @@
 
       window.location.href = "/";
     } catch (error) {
-      window.alert(error.message || "Failed to delete account");
+      if (window.appToast) {
+        window.appToast.error(error.message || "Failed to delete account");
+      } else {
+        window.alert(error.message || "Failed to delete account");
+      }
       deleteAccountBtn.disabled = false;
       deleteAccountBtn.textContent = originalText;
     }

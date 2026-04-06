@@ -1,7 +1,7 @@
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import * as userController from "@/controllers/user.controller";
-import { sendOtp, verifyOtp } from "@/middlewares/otp";
+import { sendOtp, sendForgotPasswordOtp, verifyOtp } from "@/middlewares/otp";
 import { handleError } from "@/utils/errorHandler";
 import {
   getRateLimitInfo,
@@ -55,6 +55,12 @@ const changePasswordInputSchema = z.object({
   newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
 
+const forgotPasswordChangeInputSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+});
+
 const updateAccountInputSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
@@ -89,6 +95,25 @@ export const userRouter = router({
     .mutation(async ({ input }) => {
       try {
         return await sendOtp(input);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  forgotPasswordSendOtp: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/forgot-password/send-otp",
+        tags: ["User"],
+        description: "Send OTP to email for forgot password flow",
+      },
+    })
+    .input(z.object({ email: z.string().email("Invalid email format") }))
+    .output(z.object({ email: z.string(), message: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        return await sendForgotPasswordOtp(input);
       } catch (error) {
         throw handleError(error);
       }
@@ -326,6 +351,25 @@ export const userRouter = router({
     .mutation(async ({ input, ctx }) => {
       try {
         return await userController.changePassword(input, ctx.user);
+      } catch (error) {
+        throw handleError(error);
+      }
+    }),
+
+  forgotPasswordChange: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/user/forgot-password/change-password",
+        tags: ["User"],
+        description: "Change password using email + OTP",
+      },
+    })
+    .input(forgotPasswordChangeInputSchema)
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        return await userController.forgotPasswordChange(input);
       } catch (error) {
         throw handleError(error);
       }

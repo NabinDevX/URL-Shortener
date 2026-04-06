@@ -1,4 +1,225 @@
 (() => {
+  const PENDING_SUBSCRIPTION_KEY = "pendingSubscriptionPlan";
+  const PENDING_REDIRECT_KEY = "postAuthRedirect";
+
+  function notifyError(message) {
+    if (window.appToast) {
+      window.appToast.error(message);
+      return;
+    }
+    window.alert(message);
+  }
+
+  function getRazorpayKeyId() {
+    const section = document.querySelector("[data-razorpay-key-id]");
+    return (section?.getAttribute("data-razorpay-key-id") || "").trim();
+  }
+
+  function getSafeNextPath() {
+    const params = new URLSearchParams(window.location.search);
+    const next = (params.get("next") || "").trim();
+    if (!next.startsWith("/")) {
+      return "/dashboard";
+    }
+    return next;
+  }
+
+  async function ensureRazorpayScriptLoaded() {
+    if (window.Razorpay) {
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      const existing = document.querySelector(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+      );
+
+      if (existing) {
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener(
+          "error",
+          () => reject(new Error("Failed to load Razorpay SDK")),
+          { once: true }
+        );
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Failed to load Razorpay SDK"));
+      document.head.appendChild(script);
+    });
+  }
+
+  async function checkCurrentUser() {
+    try {
+      const currentUserResponse = await fetch("/api/v1/user/current-user", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!currentUserResponse.ok) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function refreshToken() {
+    try {
+      const refreshResponse = await fetch("/api/v1/user/refresh-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: "{}",
+      });
+
+      return refreshResponse.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function isAuthenticated() {
+    const isCurrentUserValid = await checkCurrentUser();
+    if (isCurrentUserValid) {
+      return true;
+    }
+
+    const refreshed = await refreshToken();
+    if (!refreshed) {
+      return false;
+    }
+
+    return checkCurrentUser();
+  }
+
+  async function beginProCheckout(planId) {
+    const razorpayKeyId = getRazorpayKeyId();
+    if (!razorpayKeyId) {
+      notifyError("Razorpay key is missing on this page.");
+      return;
+    }
+
+    await ensureRazorpayScriptLoaded();
+
+    const createResponse = await fetch("/api/v1/subscription/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ planId }),
+    });
+
+    const createData = await createResponse.json().catch(() => ({}));
+    if (createResponse.status === 401 || createResponse.status === 403) {
+      sessionStorage.setItem(PENDING_SUBSCRIPTION_KEY, planId);
+      sessionStorage.setItem(PENDING_REDIRECT_KEY, "/");
+      const encodedNext = encodeURIComponent("/");
+      window.location.href = `/signin?next=${encodedNext}`;
+      return;
+    }
+
+    if (!createResponse.ok) {
+      throw new Error(createData?.message || "Failed to create subscription");
+    }
+
+    const checkout = new window.Razorpay({
+      key: razorpayKeyId,
+      amount: Number(createData.amount) * 100,
+      currency: createData.currency || "INR",
+      name: "URLTinier",
+      description: "URLTinier Pro Subscription",
+      order_id: createData.orderId,
+      prefill: {
+        name: createData.firstName || "",
+        email: createData.email || "",
+        contact: createData.contact || "",
+      },
+      notes: {
+        subscriptionId: createData.subscriptionId,
+        planId: createData.planId,
+      },
+      handler: () => {
+        sessionStorage.removeItem(PENDING_SUBSCRIPTION_KEY);
+        sessionStorage.removeItem(PENDING_REDIRECT_KEY);
+        window.location.href = "/dashboard";
+      },
+      modal: {
+        ondismiss: () => {
+          sessionStorage.removeItem(PENDING_SUBSCRIPTION_KEY);
+        },
+      },
+      theme: {
+        color: "#4f46e5",
+      },
+    });
+
+    checkout.open();
+  }
+
+  async function handleProUpgrade(planId) {
+    const authed = await isAuthenticated();
+    if (!authed) {
+      sessionStorage.setItem(PENDING_SUBSCRIPTION_KEY, planId);
+      sessionStorage.setItem(PENDING_REDIRECT_KEY, "/");
+      const encodedNext = encodeURIComponent("/");
+      window.location.href = `/signin?next=${encodedNext}`;
+      return;
+    }
+
+    try {
+      await beginProCheckout(planId);
+    } catch (error) {
+      notifyError(error.message || "Unable to start payment gateway");
+    }
+  }
+
+  async function processPendingSubscriptionIfAny() {
+    const pendingPlan = sessionStorage.getItem(PENDING_SUBSCRIPTION_KEY);
+    if (!pendingPlan) {
+      return false;
+    }
+
+    const authed = await isAuthenticated();
+    if (!authed) {
+      return false;
+    }
+
+    try {
+      await beginProCheckout(pendingPlan);
+      return true;
+    } catch (error) {
+      sessionStorage.removeItem(PENDING_SUBSCRIPTION_KEY);
+      notifyError(error.message || "Unable to start payment gateway");
+      return false;
+    }
+  }
+
+  async function redirectIfAuthenticated() {
+    const pendingCheckoutHandled = await processPendingSubscriptionIfAny();
+    if (pendingCheckoutHandled) {
+      return true;
+    }
+
+    const targetPath = getSafeNextPath();
+    if (targetPath !== "/dashboard") {
+      return false;
+    }
+
+    const authed = await isAuthenticated();
+    if (authed) {
+      window.location.replace("/dashboard");
+      return true;
+    }
+
+    return false;
+  }
+
   function initWelcomeNav() {
     const nav = document.querySelector("[data-welcome-nav]");
     const links = Array.from(document.querySelectorAll("[data-nav-link]"));
@@ -120,13 +341,28 @@
     window.addEventListener("resize", onScroll);
     updateNavOnScroll();
     updateActiveFromScroll();
+
+    const proButton = document.getElementById("upgradeToProBtn");
+    if (proButton) {
+      proButton.addEventListener("click", () => {
+        const planId = proButton.getAttribute("data-plan-id") || "pro_50";
+        handleProUpgrade(planId);
+      });
+    }
+  }
+
+  async function initializeWelcome() {
+    const redirected = await redirectIfAuthenticated();
+    if (!redirected) {
+      initWelcomeNav();
+    }
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initWelcomeNav, {
+    document.addEventListener("DOMContentLoaded", initializeWelcome, {
       once: true,
     });
   } else {
-    initWelcomeNav();
+    initializeWelcome();
   }
 })();

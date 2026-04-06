@@ -74,19 +74,47 @@
             <span class="material-symbols-outlined text-lg">mail_lock</span>
           </button>
 
-          <div id="otpSection" class="hidden space-y-2">
-            <label class="block px-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant" for="otp">OTP Code</label>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline">pin</span>
-              <input class="glass-input h-14 w-full rounded-xl px-4 pl-12 text-on-surface transition-all placeholder:text-outline/60" id="otp" name="otp" inputmode="numeric" maxlength="6" placeholder="123456" type="text" />
-            </div>
-          </div>
+          <input id="otp" name="otp" type="hidden" />
 
-          <button id="signupBtn" class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary-container font-bold text-on-primary-container shadow-lg shadow-primary-container/20 transition-all hover:brightness-110 active:scale-[0.98]" type="submit" style="display: none;">
+          <button id="signupBtn" class="hidden h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary-container font-bold text-on-primary-container shadow-lg shadow-primary-container/20 transition-all hover:brightness-110 active:scale-[0.98]" type="submit">
             Verify OTP & Sign Up
             <span class="material-symbols-outlined text-lg">arrow_forward</span>
           </button>
         </form>
+
+        <div id="signupOtpModal" class="fixed inset-0 z-90 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <div class="w-full max-w-md rounded-3xl border border-outline-variant/20 bg-surface-container p-6 shadow-2xl">
+            <div class="mb-5 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-black uppercase tracking-widest text-on-surface">Verify OTP</p>
+                <p class="text-xs text-on-surface-variant">We sent a 6-digit code to</p>
+                <p id="signupOtpEmail" class="text-xs font-bold text-primary mt-1"></p>
+              </div>
+              <button id="closeSignupOtpModalBtn" class="rounded-lg p-1 text-on-surface-variant hover:bg-surface-container-high" type="button" aria-label="Close OTP window">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div class="mb-5 flex items-center justify-between rounded-xl border border-outline-variant/20 bg-surface px-3 py-2">
+              <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Expires In</span>
+              <span id="signupOtpTimer" class="text-sm font-extrabold text-primary">01:00</span>
+            </div>
+
+            <div class="mb-5 grid grid-cols-6 gap-2" id="signupOtpDigits">
+              <input class="h-12 rounded-xl border border-outline-variant/30 bg-surface text-center text-lg font-bold text-on-surface outline-none focus:border-primary" data-signup-otp-digit inputmode="numeric" maxlength="1" type="text" />
+              <input class="h-12 rounded-xl border border-outline-variant/30 bg-surface text-center text-lg font-bold text-on-surface outline-none focus:border-primary" data-signup-otp-digit inputmode="numeric" maxlength="1" type="text" />
+              <input class="h-12 rounded-xl border border-outline-variant/30 bg-surface text-center text-lg font-bold text-on-surface outline-none focus:border-primary" data-signup-otp-digit inputmode="numeric" maxlength="1" type="text" />
+              <input class="h-12 rounded-xl border border-outline-variant/30 bg-surface text-center text-lg font-bold text-on-surface outline-none focus:border-primary" data-signup-otp-digit inputmode="numeric" maxlength="1" type="text" />
+              <input class="h-12 rounded-xl border border-outline-variant/30 bg-surface text-center text-lg font-bold text-on-surface outline-none focus:border-primary" data-signup-otp-digit inputmode="numeric" maxlength="1" type="text" />
+              <input class="h-12 rounded-xl border border-outline-variant/30 bg-surface text-center text-lg font-bold text-on-surface outline-none focus:border-primary" data-signup-otp-digit inputmode="numeric" maxlength="1" type="text" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <button id="resendSignupOtpBtn" class="h-12 rounded-xl border border-outline-variant/30 bg-surface font-bold text-on-surface-variant disabled:opacity-50 disabled:cursor-not-allowed" type="button">Resend OTP</button>
+              <button id="verifySignupOtpBtn" class="h-12 rounded-xl bg-primary-container font-bold text-on-primary-container hover:brightness-110" type="button">Verify & Continue</button>
+            </div>
+          </div>
+        </div>
 
         <div class="my-8 flex items-center gap-4">
           <div class="h-px flex-1 bg-outline-variant/20"></div>

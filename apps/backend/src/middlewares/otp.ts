@@ -73,8 +73,19 @@ export const sendOtp = async (
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new ApiError(409, "User with this email already exists");
+    throw new ApiError(
+      409,
+      "User already exists. Please sign in or use Forgot Password"
+    );
   }
+
+  return sendOtpToEmail(email, name);
+};
+
+const sendOtpToEmail = async (
+  email: string,
+  name?: string
+): Promise<{ email: string; message: string }> => {
 
   const existingOtp = await getOtp(email);
 
@@ -178,6 +189,23 @@ export const sendOtp = async (
   }
 
   return { email, message: "OTP sent successfully. Valid for 60 seconds." };
+};
+
+export const sendForgotPasswordOtp = async (
+  input: SendOtpInput
+): Promise<{ email: string; message: string }> => {
+  const { email } = input;
+
+  const existingUser = await User.findOne({ email });
+  if (!existingUser) {
+    throw new ApiError(404, "No account found for this email");
+  }
+
+  if (existingUser.isDeleted) {
+    throw new ApiError(403, "This account has been deleted");
+  }
+
+  return sendOtpToEmail(email, existingUser.name);
 };
 
 export const verifyOtp = async (
