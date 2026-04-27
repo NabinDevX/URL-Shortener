@@ -13,6 +13,13 @@
   const urlsList = document.getElementById("urlsList");
   const noUrls = document.getElementById("noUrls");
   const errorText = document.getElementById("error-text");
+  const qrPreviewCanvas = document.getElementById("qrPreviewCanvas");
+  const qrPreviewIcon = document.getElementById("qrPreviewIcon");
+  const qrActionBtn = document.getElementById("qrActionBtn");
+
+  let selectedQrShortId = "";
+  let selectedQrUrl = "";
+  let qrGeneratedForSelection = false;
 
   if (urlsDashboardBtn) {
     urlsDashboardBtn.addEventListener("click", () => {
@@ -67,6 +74,185 @@
     );
   }
 
+  function getBaseUrl() {
+    return window.location.origin;
+  }
+
+  function getShortUrl(shortId) {
+    return `${getBaseUrl()}/${shortId}`;
+  }
+
+  function updateQrButton() {
+    if (!qrActionBtn) return;
+
+    const hasSelection = Boolean(selectedQrShortId && selectedQrUrl);
+    qrActionBtn.disabled = !hasSelection;
+
+    if (!hasSelection) {
+      qrActionBtn.innerHTML =
+        'Generate QR Code <span class="material-symbols-outlined text-base">qr_code_2</span>';
+      return;
+    }
+
+    if (qrGeneratedForSelection) {
+      qrActionBtn.innerHTML =
+        'Download QR Code <span class="material-symbols-outlined text-base">download</span>';
+      return;
+    }
+
+    qrActionBtn.innerHTML =
+      'Generate QR Code <span class="material-symbols-outlined text-base">qr_code_2</span>';
+  }
+
+  function resetQrPreview() {
+    if (qrPreviewCanvas) {
+      const iconNode = qrPreviewIcon;
+      qrPreviewCanvas.innerHTML = "";
+
+      if (iconNode) {
+        qrPreviewCanvas.appendChild(iconNode);
+        iconNode.style.display = "block";
+      }
+    }
+
+    selectedQrShortId = "";
+    selectedQrUrl = "";
+    qrGeneratedForSelection = false;
+    updateQrButton();
+  }
+
+  function markSelectedQrItem() {
+    if (!urlsList) return;
+
+    urlsList.querySelectorAll("[data-qr-card]").forEach((item) => {
+      const card = item;
+      const isActive = card.dataset.shortId === selectedQrShortId;
+      card.classList.toggle("border-tertiary", isActive);
+      card.classList.toggle("ring-1", isActive);
+      card.classList.toggle("ring-tertiary/50", isActive);
+    });
+
+    urlsList.querySelectorAll('[data-action="select"]').forEach((button) => {
+      const isActive = button.dataset.shortId === selectedQrShortId;
+      const isDeleted = button.dataset.isDeleted === "true";
+      if (isDeleted) return;
+
+      if (isActive) {
+        button.classList.remove("bg-surface-container-high", "text-on-surface");
+        button.classList.add("bg-tertiary", "text-on-tertiary");
+        button.innerHTML =
+          '<span class="material-symbols-outlined text-base">check_circle</span>Selected';
+      } else {
+        button.classList.remove("bg-tertiary", "text-on-tertiary");
+        button.classList.add("bg-surface-container-high", "text-on-surface");
+        button.innerHTML =
+          '<span class="material-symbols-outlined text-base">qr_code_2</span>Use for QR';
+      }
+    });
+  }
+
+  function selectUrlForQr(shortId, shortUrl, isDeleted, isAlreadyGenerated) {
+    if (!shortId || !shortUrl || isDeleted) {
+      showMessage("Please select an active short URL.", "info");
+      return;
+    }
+
+    selectedQrShortId = shortId;
+    selectedQrUrl = shortUrl;
+    qrGeneratedForSelection = Boolean(isAlreadyGenerated);
+    updateQrButton();
+    markSelectedQrItem();
+
+    // Show QR immediately when a URL is selected.
+    renderQrCode(shortUrl);
+  }
+
+  function renderQrCode(url) {
+    if (!qrPreviewCanvas) {
+      return false;
+    }
+
+    if (typeof window.QRCode !== "function") {
+      showMessage("QR library is not loaded yet. Please try again.", "error");
+      return false;
+    }
+
+    const iconNode = qrPreviewIcon;
+    qrPreviewCanvas.innerHTML = "";
+
+    const mount = document.createElement("div");
+    mount.className = "flex h-full w-full items-center justify-center";
+    qrPreviewCanvas.appendChild(mount);
+
+    // Create a scannable QR inside the preview container.
+    new window.QRCode(mount, {
+      text: url,
+      width: 192,
+      height: 192,
+      // Keep QR colors fixed (light background) regardless of app theme.
+      colorDark: "#111827",
+      colorLight: "#ffffff",
+      correctLevel: window.QRCode.CorrectLevel.H,
+    });
+
+    if (iconNode) {
+      qrPreviewCanvas.appendChild(iconNode);
+      iconNode.style.display = "none";
+    }
+
+    return true;
+  }
+
+  async function persistQrGenerated(shortId, qrCodeUrl) {
+    const response = await fetch(`/api/v1/url/update/${encodeURIComponent(shortId)}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        shortId,
+        qrCode: qrCodeUrl,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(getErrorMessage(result, "Failed to save QR status"));
+    }
+
+    return getPayload(result);
+  }
+
+  function downloadQrCode() {
+    if (!qrPreviewCanvas || !selectedQrShortId) {
+      showMessage("Generate QR Code first.", "info");
+      return;
+    }
+
+    const canvas = qrPreviewCanvas.querySelector("canvas");
+    const image = qrPreviewCanvas.querySelector("img");
+    let source = "";
+
+    if (canvas) {
+      source = canvas.toDataURL("image/png");
+    } else if (image && image.src) {
+      source = image.src;
+    }
+
+    if (!source) {
+      showMessage("Generate QR Code first.", "info");
+      return;
+    }
+
+    const anchor = document.createElement("a");
+    anchor.href = source;
+    anchor.download = `${selectedQrShortId}-qr.png`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  }
+
   function displayResult(data) {
     if (
       !data ||
@@ -78,8 +264,7 @@
       return;
     }
 
-    const fullUrl =
-      data.fullShortUrl || `https://urltinier.app/${data.shortId}`;
+    const fullUrl = data.fullShortUrl || getShortUrl(data.shortId);
 
     shortUrlInput.value = fullUrl;
     shortIdDisplay.textContent = data.shortId;
@@ -143,7 +328,7 @@
   }
 
   function createUrlItem(url) {
-    const shortUrl = `https://urltinier.app/${url.shortId}`;
+    const shortUrl = getShortUrl(url.shortId);
     const clicks =
       url.totalClicks || (url.visitHistory ? url.visitHistory.length : 0);
     const createdDate = new Date(url.createdAt).toLocaleDateString();
@@ -164,7 +349,9 @@
 
     const div = document.createElement("div");
     div.className =
-      "rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-4";
+      "rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-4 transition-all";
+    div.dataset.qrCard = "true";
+    div.dataset.shortId = url.shortId;
 
     div.innerHTML = `
       <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -181,7 +368,11 @@
           <div class="truncate text-sm text-on-surface-variant" title="${url.redirectUrl}">${url.redirectUrl}</div>
         </div>
 
-        <div>
+        <div class="flex flex-wrap gap-2">
+          <button class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-surface-container-high px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-highest disabled:cursor-not-allowed disabled:opacity-50" data-action="select" data-short-id="${url.shortId}" data-short-url="${shortUrl}" data-is-deleted="${isDeleted}" data-qr-generated="${Boolean(url.qrGenerated)}" ${isDeleted ? "disabled" : ""}>
+            <span class="material-symbols-outlined text-base">qr_code_2</span>
+            Use for QR
+          </button>
           <button class="btn-small ${
             isDeleted
               ? "btn-action-restore inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary/15 px-4 text-sm font-bold text-primary transition-colors hover:bg-primary/20"
@@ -260,6 +451,43 @@
         await toggleDeleteUrl(shortId, isDeleted);
       });
     });
+
+    urlsList.querySelectorAll('[data-action="select"]').forEach((button) => {
+      button.addEventListener("click", () => {
+        const shortId = button.dataset.shortId || "";
+        const shortUrl = button.dataset.shortUrl || "";
+        const isDeleted = button.dataset.isDeleted === "true";
+        const isAlreadyGenerated = button.dataset.qrGenerated === "true";
+        selectUrlForQr(shortId, shortUrl, isDeleted, isAlreadyGenerated);
+      });
+    });
+
+    urlsList.querySelectorAll("[data-qr-card]").forEach((card) => {
+      card.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        // Ignore clicks on explicit action controls and links.
+        if (target.closest("button") || target.closest("a")) {
+          return;
+        }
+
+        const shortId = card.dataset.shortId || "";
+        if (!shortId) return;
+
+        const selectButton = card.querySelector('[data-action="select"]');
+        if (!selectButton || !(selectButton instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        const shortUrl = selectButton.dataset.shortUrl || "";
+        const isDeleted = selectButton.dataset.isDeleted === "true";
+        const isAlreadyGenerated = selectButton.dataset.qrGenerated === "true";
+        selectUrlForQr(shortId, shortUrl, isDeleted, isAlreadyGenerated);
+      });
+    });
+
+    markSelectedQrItem();
   }
 
   async function loadUrls() {
@@ -296,8 +524,20 @@
       loading.style.display = "none";
 
       if (urls.length === 0) {
+        resetQrPreview();
         noUrls.style.display = "block";
       } else {
+        const selectedUrl = urls.find(
+          (url) => url.shortId === selectedQrShortId && !url.isDeleted
+        );
+        if (!selectedUrl) {
+          resetQrPreview();
+        } else {
+          selectedQrUrl = getShortUrl(selectedUrl.shortId);
+          qrGeneratedForSelection = Boolean(selectedUrl.qrGenerated);
+          updateQrButton();
+          renderQrCode(selectedQrUrl);
+        }
         displayUrls(urls);
         updateStats(urls);
       }
@@ -420,10 +660,42 @@
     copyShortUrlBtn.addEventListener("click", copyShortUrl);
   }
 
+  if (qrActionBtn) {
+    qrActionBtn.addEventListener("click", async () => {
+      if (!selectedQrShortId || !selectedQrUrl) {
+        showMessage("Select a short URL from the list first.", "info");
+        return;
+      }
+
+      if (qrGeneratedForSelection) {
+        downloadQrCode();
+        return;
+      }
+
+      const rendered = renderQrCode(selectedQrUrl);
+      if (!rendered) {
+        return;
+      }
+
+      try {
+        await persistQrGenerated(selectedQrShortId, selectedQrUrl);
+        qrGeneratedForSelection = true;
+        updateQrButton();
+        showMessage("QR generated and saved successfully.", "success");
+      } catch (requestError) {
+        console.error("QR save error:", requestError);
+        showMessage(requestError.message || "Failed to save QR status.", "error");
+      }
+    });
+  }
+
   window.showMessage = showMessage;
   window.displayResult = displayResult;
   window.copyShortUrl = copyShortUrl;
   window.loadUrls = loadUrls;
+
+  resetQrPreview();
+  updateQrButton();
 
   loadUrls();
 })();

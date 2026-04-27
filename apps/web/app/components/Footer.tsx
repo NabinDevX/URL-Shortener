@@ -29,23 +29,24 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700 text-white">
+    <footer className="mt-8 border-t border-slate-200/70 bg-white/85 backdrop-blur-xl text-on-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
           <div className="space-y-2 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2">
-              <span className="text-2xl">🔗</span>
-              <h3 className="text-lg font-bold">URL Shortener</h3>
+              <h3 className="text-lg font-extrabold tracking-tight text-primary">
+                URLTinier
+              </h3>
             </div>
-            <p className="text-blue-100 text-xs">
-              Clean, professional short links.
+            <p className="text-on-surface-variant text-xs">
+              Professional short links for teams and creators.
             </p>
             <div className="flex gap-3 justify-center md:justify-start">
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all hover:scale-110"
+                className="text-on-surface-variant hover:text-primary transition-all hover:scale-110"
                 aria-label="Twitter"
               >
                 <svg
@@ -60,7 +61,7 @@ const Footer = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all hover:scale-110"
+                className="text-on-surface-variant hover:text-primary transition-all hover:scale-110"
                 aria-label="GitHub"
               >
                 <svg
@@ -75,7 +76,7 @@ const Footer = () => {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all hover:scale-110"
+                className="text-on-surface-variant hover:text-primary transition-all hover:scale-110"
                 aria-label="LinkedIn"
               >
                 <svg
@@ -90,14 +91,14 @@ const Footer = () => {
           </div>
 
           <div className="text-center">
-            <h4 className="font-semibold mb-2 text-white text-sm">
+            <h4 className="font-semibold mb-2 text-on-surface text-sm">
               Quick Links
             </h4>
             <ul className="space-y-1">
               <li>
                 <Link
                   to="/dashboard"
-                  className="text-blue-100 hover:text-white transition-colors text-xs"
+                  className="text-on-surface-variant hover:text-primary transition-colors text-xs"
                 >
                   Dashboard
                 </Link>
@@ -105,7 +106,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/profile"
-                  className="text-blue-100 hover:text-white transition-colors text-xs"
+                  className="text-on-surface-variant hover:text-primary transition-colors text-xs"
                 >
                   Profile
                 </Link>
@@ -113,7 +114,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#features"
-                  className="text-blue-100 hover:text-white transition-colors text-xs"
+                  className="text-on-surface-variant hover:text-primary transition-colors text-xs"
                 >
                   Features
                 </a>
@@ -122,12 +123,14 @@ const Footer = () => {
           </div>
 
           <div className="text-center">
-            <h4 className="font-semibold mb-2 text-white text-sm">Support</h4>
+            <h4 className="font-semibold mb-2 text-on-surface text-sm">
+              Support
+            </h4>
             <ul className="space-y-1">
               <li>
                 <a
                   href="#help"
-                  className="text-blue-100 hover:text-white transition-colors text-xs"
+                  className="text-on-surface-variant hover:text-primary transition-colors text-xs"
                 >
                   Help Center
                 </a>
@@ -135,7 +138,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#contact"
-                  className="text-blue-100 hover:text-white transition-colors text-xs"
+                  className="text-on-surface-variant hover:text-primary transition-colors text-xs"
                 >
                   Contact Us
                 </a>
@@ -143,7 +146,7 @@ const Footer = () => {
               <li>
                 <a
                   href="#privacy"
-                  className="text-blue-100 hover:text-white transition-colors text-xs"
+                  className="text-on-surface-variant hover:text-primary transition-colors text-xs"
                 >
                   Privacy Policy
                 </a>
@@ -152,32 +155,32 @@ const Footer = () => {
           </div>
 
           <div className="text-center md:text-right">
-            <h4 className="font-semibold mb-2 text-white text-sm">
+            <h4 className="font-semibold mb-2 text-on-surface text-sm">
               Current Time
             </h4>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 inline-block">
-              <p className="text-white text-xs font-mono leading-relaxed">
+            <div className="bg-surface-container-low rounded-lg p-2 inline-block">
+              <p className="text-on-surface-variant text-xs font-mono leading-relaxed">
                 {formatDateTime(currentDateTime)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/20 pt-3">
+        <div className="border-t border-slate-200 pt-3">
           <div className="flex flex-col md:flex-row justify-between items-center gap-2">
-            <p className="text-blue-100 text-xs">
-              © {currentYear} URL Shortener. All rights reserved.
+            <p className="text-on-surface-variant text-xs">
+              © {currentYear} URLTinier. All rights reserved.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3">
-              <span className="text-blue-100 text-xs flex items-center gap-1">
-                <span className="text-green-300">🔒</span> SSL Secured
+              <span className="text-on-surface-variant text-xs flex items-center gap-1">
+                SSL Secured
               </span>
-              <span className="text-blue-100 text-xs flex items-center gap-1">
-                <span className="text-blue-300">🛡️</span> GDPR Compliant
+              <span className="text-on-surface-variant text-xs flex items-center gap-1">
+                GDPR Compliant
               </span>
-              <span className="text-blue-100 text-xs flex items-center gap-1">
-                <span className="text-purple-300">⚡</span> 99.9% Uptime
+              <span className="text-on-surface-variant text-xs flex items-center gap-1">
+                99.9% Uptime
               </span>
             </div>
           </div>
@@ -186,7 +189,7 @@ const Footer = () => {
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-6 right-6 bg-white text-purple-600 hover:bg-white/90 p-2 rounded-full shadow-lg transition-all hover:scale-110 z-50"
+        className="fixed bottom-6 right-6 bg-primary text-white hover:bg-primary-container p-2 rounded-full shadow-lg transition-all hover:scale-110 z-50"
         aria-label="Back to top"
       >
         <svg

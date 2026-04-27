@@ -45,6 +45,11 @@ export interface IUserDocument extends IUser, Document {
 
 export interface IVisitHistory {
   timestamp: Date;
+  ipAddress?: string;
+  country?: string;
+  device?: "mobile" | "desktop" | "tablet" | "unknown";
+  userAgent?: string;
+  isReturnVisitor?: boolean;
 }
 
 export interface IURL {
@@ -52,6 +57,7 @@ export interface IURL {
   userId: Types.ObjectId;
   shortId: string;
   qrCode?: string;
+  qrGenerated: boolean;
   redirectUrl: string;
   isDeleted: boolean;
   visitHistory: IVisitHistory[];
@@ -163,6 +169,7 @@ export interface UpdateShortURLOutput {
   shortId: string;
   redirectUrl: string;
   qrCode: string;
+  qrGenerated: boolean;
   fullShortUrl: string;
   updatedAt: Date;
 }

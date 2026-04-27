@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import type { Request } from "express";
 import { URL } from "@/models/url";
 import { ApiError } from "@/utils/apiError";
 import type {
@@ -11,6 +12,7 @@ import type {
   DeleteURLOutput,
   PaginationInfo,
   URLWithAnalytics,
+  IVisitHistory,
 } from "@/types";
 
 const getBaseUrl = (): string => {
@@ -141,6 +143,109 @@ export const getAnalytics = async (
   };
 };
 
+const normalizeIpAddress = (value?: string): string | undefined => {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  return normalized.replace(/^::ffff:/, "");
+};
+
+const getClientIpAddress = (req?: Request): string | undefined => {
+  if (!req) {
+    return undefined;
+  }
+
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const forwardedValue = Array.isArray(forwardedFor)
+    ? forwardedFor[0]
+    : forwardedFor;
+
+  const headerIp = normalizeIpAddress(
+    String(forwardedValue ?? "").split(",")[0]
+  );
+  if (headerIp) {
+    return headerIp;
+  }
+
+  return normalizeIpAddress(req.ip || req.socket.remoteAddress || undefined);
+};
+
+const getCountry = (req?: Request): string => {
+  if (!req) {
+    return "Unknown";
+  }
+
+  const candidateHeaders = [
+    req.headers["cf-ipcountry"],
+    req.headers["x-vercel-ip-country"],
+    req.headers["x-country-code"],
+    req.headers["x-geo-country"],
+  ];
+
+  for (const headerValue of candidateHeaders) {
+    const value = Array.isArray(headerValue) ? headerValue[0] : headerValue;
+    const normalized = String(value ?? "").trim().toUpperCase();
+    if (normalized && normalized !== "XX") {
+      return normalized;
+    }
+  }
+
+  return "Unknown";
+};
+
+const getDevice = (req?: Request): IVisitHistory["device"] => {
+  const userAgent = String(req?.headers["user-agent"] ?? "").toLowerCase();
+
+  if (!userAgent) {
+    return "unknown";
+  }
+
+  if (userAgent.includes("tablet") || userAgent.includes("ipad")) {
+    return "tablet";
+  }
+
+  if (userAgent.includes("mobi") || userAgent.includes("android")) {
+    return "mobile";
+  }
+
+  return "desktop";
+};
+
+export const trackURLVisit = async (
+  shortId: string,
+  req?: Request
+): Promise<string> => {
+  const entry = await URL.findOne({ shortId });
+
+  if (!entry) {
+    throw new ApiError(404, "Short URL not found");
+  }
+
+  const ipAddress = getClientIpAddress(req);
+  const country = getCountry(req);
+  const device = getDevice(req);
+  const userAgent = String(req?.headers["user-agent"] ?? "").trim() || undefined;
+  const isReturnVisitor = Boolean(
+    ipAddress &&
+    entry.visitHistory.some((visit) => visit.ipAddress === ipAddress)
+  );
+
+  entry.visitHistory.push({
+    timestamp: new Date(),
+    ipAddress,
+    country,
+    device,
+    userAgent,
+    isReturnVisitor,
+  });
+
+  await entry.save({ validateBeforeSave: false });
+
+  return entry.redirectUrl;
+};
+
 export const updateShortURL = async (
   input: UpdateShortURLInput,
   user: IUserDocument
@@ -175,12 +280,14 @@ export const updateShortURL = async (
   }
 
   url.qrCode = qrCode.trim();
+  url.qrGenerated = true;
   await url.save({ validateBeforeSave: false });
 
   return {
     shortId: url.shortId,
     redirectUrl: url.redirectUrl,
     qrCode: url.qrCode,
+    qrGenerated: url.qrGenerated,
     fullShortUrl: `${getBaseUrl()}/${url.shortId}`,
     updatedAt: url.updatedAt,
   };
@@ -222,6 +329,7 @@ export const getAllUrls = async (
         userId: 1,
         isDeleted: 1,
         qrCode: 1,
+        qrGenerated: 1,
       },
     },
     { $sort: { [sortBy]: sortDirection } },
@@ -288,16 +396,9 @@ export const deleteURL = async (
   };
 };
 
-export const getOriginalURL = async (shortId: string): Promise<string> => {
-  const entry = await URL.findOneAndUpdate(
-    { shortId },
-    { $push: { visitHistory: { timestamp: new Date() } } },
-    { new: true }
-  );
-
-  if (!entry) {
-    throw new ApiError(404, "Short URL not found");
-  }
-
-  return entry.redirectUrl;
+export const getOriginalURL = async (
+  shortId: string,
+  req?: Request
+): Promise<string> => {
+  return trackURLVisit(shortId, req);
 };

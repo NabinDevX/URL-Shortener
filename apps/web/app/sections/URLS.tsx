@@ -271,26 +271,28 @@ const URLS = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">Loading URLs...</p>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center bg-surface-container-lowest rounded-2xl p-12 shadow-sm border border-slate-200">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mx-auto mb-4"></div>
+          <p className="text-on-surface-variant text-lg font-semibold">
+            Loading URLs...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] py-12 px-4">
+    <div className="min-h-screen bg-surface py-10 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8 text-white">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full mb-4 shadow-2xl">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-surface-container-low rounded-full mb-4">
             <span className="text-5xl">🔗</span>
           </div>
-          <h1 className="text-5xl font-bold mb-2 drop-shadow-lg">
+          <h1 className="text-5xl font-extrabold tracking-tight mb-2 text-on-surface">
             Manage URLs
           </h1>
-          <p className="text-xl text-white/90">
+          <p className="text-lg text-on-surface-variant">
             Create and track your shortened links
           </p>
         </div>
@@ -313,7 +315,7 @@ const URLS = () => {
         <div className="max-w-4xl mx-auto mb-8">
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="w-full py-4 px-6 bg-white text-[#667eea] rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 group"
+            className="w-full py-4 px-6 bg-surface-container-lowest text-primary rounded-2xl border border-slate-200 font-bold text-lg hover:bg-surface-container-low transition-colors flex items-center justify-center gap-3 group"
           >
             <svg
               className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
@@ -333,8 +335,8 @@ const URLS = () => {
         </div>
 
         {showCreateForm && (
-          <div className="max-w-4xl mx-auto mb-8 bg-white rounded-2xl shadow-2xl p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+          <div className="max-w-4xl mx-auto mb-8 bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h2 className="text-2xl font-bold text-on-surface mb-6 flex items-center gap-3">
               <span className="text-3xl">✨</span>
               Create Short URL
             </h2>
@@ -350,7 +352,7 @@ const URLS = () => {
                   onChange={(e) =>
                     setNewUrl({ ...newUrl, url: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#667eea] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-(--ring) focus:outline-none transition-colors"
                   placeholder="https://example.com"
                   required
                 />
@@ -389,7 +391,7 @@ const URLS = () => {
                         setNewUrl({ ...newUrl, customShortId: value });
                       }
                     }}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#667eea] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-(--ring) focus:outline-none transition-colors"
                     placeholder="my-custom-link"
                     minLength={3}
                     maxLength={20}
@@ -420,7 +422,7 @@ const URLS = () => {
                       onChange={(e) =>
                         setNewUrl({ ...newUrl, idLength: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#667eea] focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-(--ring) focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                       min="4"
                       max="15"
                       disabled={!!newUrl.customShortId}
@@ -467,7 +469,7 @@ const URLS = () => {
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 py-3 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {creating ? (
                     <span className="flex items-center justify-center gap-2">
@@ -512,20 +514,20 @@ const URLS = () => {
 
         <div className="max-w-6xl mx-auto">
           {urls.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-2xl p-16 text-center">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-16 text-center">
               <div className="max-w-md mx-auto">
-                <div className="bg-linear-to-br from-[#667eea] to-[#764ba2] rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <div className="bg-surface-container-low rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6">
                   <span className="text-6xl">🔗</span>
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800 mb-3">
+                <h3 className="text-3xl font-bold text-on-surface mb-3">
                   No URLs Yet
                 </h3>
-                <p className="text-gray-600 mb-8 text-lg">
+                <p className="text-on-surface-variant mb-8 text-lg">
                   Create your first shortened URL to get started!
                 </p>
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="inline-flex items-center gap-3 px-10 py-4 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                  className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-white rounded-xl font-bold text-lg hover:bg-primary-container transition-colors"
                 >
                   <svg
                     className="w-6 h-6"
@@ -546,8 +548,8 @@ const URLS = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+              <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h2 className="text-2xl font-bold text-on-surface flex items-center gap-3">
                   <span className="text-3xl">📊</span>
                   Your URLs ({urls.length})
                 </h2>
@@ -561,22 +563,22 @@ const URLS = () => {
                 return (
                   <div
                     key={url._id}
-                    className="bg-white rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300"
+                    className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
                   >
-                    <div className="bg-linear-to-r from-[#667eea] to-[#764ba2] p-6">
+                    <div className="bg-surface-container-low p-6 border-b border-slate-200">
                       <div className="flex items-start justify-between gap-6">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="bg-white p-2 rounded-lg shadow-lg">
+                            <div className="bg-surface-container-lowest p-2 rounded-lg border border-slate-200">
                               <span className="text-2xl">🔗</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-white truncate">
+                            <h3 className="text-2xl font-bold text-on-surface truncate">
                               {url.shortId}
                             </h3>
                           </div>
 
-                          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-3">
-                            <p className="text-xs text-white/70 font-semibold mb-2">
+                          <div className="bg-surface-container-lowest rounded-xl p-4 mb-3 border border-slate-200">
+                            <p className="text-xs text-on-surface-variant font-semibold mb-2">
                               SHORT URL
                             </p>
                             <div className="flex items-center gap-3 flex-wrap">
@@ -584,13 +586,13 @@ const URLS = () => {
                                 href={fullShortUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-white font-bold text-lg hover:underline flex-1 truncate min-w-0"
+                                className="text-primary font-bold text-lg hover:underline flex-1 truncate min-w-0"
                               >
                                 {fullShortUrl}
                               </a>
                               <button
                                 onClick={() => copyToClipboard(url.shortId)}
-                                className="bg-white text-[#667eea] px-4 py-2 rounded-lg font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2 shrink-0"
+                                className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-primary-container transition-colors flex items-center gap-2 shrink-0"
                               >
                                 {copiedUrl === url.shortId ? (
                                   <>
@@ -607,15 +609,15 @@ const URLS = () => {
                             </div>
                           </div>
 
-                          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                            <p className="text-xs text-white/70 font-semibold mb-2">
+                          <div className="bg-surface-container-lowest rounded-xl p-4 border border-slate-200">
+                            <p className="text-xs text-on-surface-variant font-semibold mb-2">
                               REDIRECTS TO
                             </p>
                             <a
                               href={url.redirectUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-white/90 hover:text-white transition-colors break-all"
+                              className="text-on-surface hover:text-primary transition-colors break-all"
                               title={url.redirectUrl}
                             >
                               {url.redirectUrl}
@@ -623,10 +625,10 @@ const URLS = () => {
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 min-w-50">
+                        <div className="flex flex-col items-center gap-3 bg-surface-container-lowest rounded-xl p-4 min-w-50 border border-slate-200">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">📱</span>
-                            <h5 className="font-bold text-white text-sm">
+                            <h5 className="font-bold text-on-surface text-sm">
                               QR Code
                             </h5>
                           </div>
@@ -638,7 +640,7 @@ const URLS = () => {
                                 prev === url.shortId ? null : url.shortId
                               )
                             }
-                            className="bg-white text-[#667eea] px-4 py-2 rounded-lg font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm"
+                            className="bg-primary text-white px-4 py-2 rounded-lg font-bold transition-colors hover:bg-primary-container flex items-center gap-2 text-sm"
                           >
                             {openQrFor === url.shortId ? "Hide QR" : "Show QR"}
                           </button>

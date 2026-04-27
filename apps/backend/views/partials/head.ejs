@@ -13,7 +13,20 @@
   <link rel="stylesheet" href="/css/output.css">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
   <script src="https://unpkg.com/@studio-freight/lenis@1.0.0/bundled/lenis.min.js"></script>
   <script src="/js/toast.js" defer></script>
   <script src="/js/reveal-init.js" defer></script>
+  <script src="/js/spa-nav.js" defer></script>
+
+  <% const nodeEnv = (locals.nodeEnv || 'development').toString().toLowerCase(); %>
+  <% const isProduction = locals.isProduction ?? (nodeEnv === 'production'); %>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <% if (isProduction) { %>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js" defer></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" defer></script>
+  <% } else { %>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js" defer></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" defer></script>
+  <% } %>
 </head>

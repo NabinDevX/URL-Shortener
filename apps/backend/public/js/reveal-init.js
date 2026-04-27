@@ -29,6 +29,8 @@
     });
   }
 
+  window.appRevealInit = initGlobalRevealAnimations;
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initGlobalRevealAnimations, {
       once: true,

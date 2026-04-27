@@ -25,22 +25,22 @@ const Welcome = () => {
   const handleSignIn = () => navigate("/signin");
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700">
+    <div className="min-h-screen bg-surface">
       <div className="w-full px-4 sm:px-6 md:px-8 py-12 overflow-hidden">
         <div className="text-center mb-16">
           <div className="flex flex-wrap justify-center items-center gap-3 mb-6">
             <span className="text-5xl sm:text-6xl animate-bounce">🔗</span>
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-white wrap-break-word">
-              URL Shortener
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-on-surface wrap-break-word">
+              URLTinier
             </h1>
           </div>
-          <p className="text-lg sm:text-2xl md:text-3xl text-blue-100 font-light max-w-3xl mx-auto px-2">
+          <p className="text-lg sm:text-2xl md:text-3xl text-on-surface-variant font-light max-w-3xl mx-auto px-2">
             Hide Your Confidential URLs Behind Clean, Professional Short Links
           </p>
         </div>
 
         <div className="max-w-6xl mx-auto mb-16">
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
+          <div className="bg-surface-container-lowest rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="bg-linear-to-r from-red-500 to-orange-500 p-6">
               <h2 className="text-3xl font-bold text-white flex items-center gap-3">
                 <span className="text-4xl">⚠️</span>
@@ -70,15 +70,15 @@ const Welcome = () => {
 
         <div className="max-w-6xl mx-auto mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-4xl font-bold text-on-surface mb-4">
               ✨ Our Solution: Complete URL Privacy
             </h2>
-            <p className="text-xl text-blue-100">
+            <p className="text-xl text-on-surface-variant">
               Transform any confidential URL into a clean, secure short link
             </p>
           </div>
 
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8">
+          <div className="bg-surface-container-lowest rounded-3xl shadow-sm border border-slate-200 p-8">
             <div
               className={`transition-all duration-300 ${
                 isAnimating
@@ -185,7 +185,7 @@ const Welcome = () => {
                   onClick={() => setCurrentStep(index)}
                   className={`transition-all duration-300 rounded-full ${
                     index === currentStep
-                      ? "w-12 h-3 bg-purple-600"
+                      ? "w-12 h-3 bg-primary"
                       : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
                   }`}
                   aria-label={`Go to use case ${index + 1}`}
@@ -196,14 +196,14 @@ const Welcome = () => {
         </div>
 
         <div className="max-w-6xl mx-auto mb-16">
-          <h2 className="text-4xl font-bold text-white text-center mb-12">
+          <h2 className="text-4xl font-bold text-on-surface text-center mb-12">
             🎯 Why Hide Your URLs?
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {benefits.map((benefit, index) => (
               <div
                 key={index}
-                className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-slate-200 hover-float transition-all duration-300"
               >
                 <div className="text-5xl mb-4">{benefit.icon}</div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
@@ -216,28 +216,28 @@ const Welcome = () => {
         </div>
 
         <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl">
-            <h2 className="text-4xl font-bold text-white mb-4">
+          <div className="bg-surface-container-lowest rounded-3xl p-12 border border-slate-200 shadow-sm">
+            <h2 className="text-4xl font-bold text-on-surface mb-4">
               Ready to Protect Your URLs?
             </h2>
-            <p className="text-xl text-blue-100 mb-8">
+            <p className="text-xl text-on-surface-variant mb-8">
               Join thousands of users who trust us to keep their links secure
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={handleGetStarted}
-                className="px-10 py-5 bg-white text-purple-600 rounded-xl font-bold text-xl shadow-xl hover:shadow-2xl hover:scale-105 transform transition-all duration-200"
+                className="px-10 py-5 bg-primary text-white rounded-xl font-bold text-xl shadow-sm hover:bg-primary-container transform transition-all duration-200"
               >
                 Get Started Free 🚀
               </button>
               <button
                 onClick={handleSignIn}
-                className="px-10 py-5 bg-transparent border-2 border-white text-white rounded-xl font-bold text-xl hover:bg-white hover:text-purple-600 transform transition-all duration-200"
+                className="px-10 py-5 bg-surface-container-low border-2 border-slate-200 text-on-surface rounded-xl font-bold text-xl hover:bg-surface-container transform transition-all duration-200"
               >
                 Sign In
               </button>
             </div>
-            <p className="text-blue-100 mt-6 text-sm">
+            <p className="text-on-surface-variant mt-6 text-sm">
               No credit card required • Unlimited short links • Cancel anytime
             </p>
           </div>
@@ -252,10 +252,10 @@ const Welcome = () => {
             ].map((stat, index) => (
               <div
                 key={index}
-                className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-xl hover:shadow-2xl transition-all overflow-visible"
+                className="bg-surface-container-lowest rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-sm border border-slate-200 transition-all overflow-visible"
               >
                 <div className="text-4xl mb-2">{stat.icon}</div>
-                <p className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1 leading-tight whitespace-nowrap">
+                <p className="text-2xl sm:text-3xl font-bold text-primary mb-1 leading-tight whitespace-nowrap">
                   {stat.number}
                 </p>
                 <p className="text-sm text-gray-600 font-medium">

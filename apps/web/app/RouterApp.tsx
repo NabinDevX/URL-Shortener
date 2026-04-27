@@ -1,7 +1,7 @@
 "use client";
 
 import dynamicImport from "next/dynamic";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth, useLenis } from "@repo/ui";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +21,9 @@ const Logout = dynamicImport(() => import("@/sections/auth/Logout"), {
 const Navbar = dynamicImport(() => import("@/components/Navbar"), {
   ssr: false,
 });
+const Footer = dynamicImport(() => import("@/components/Footer"), {
+  ssr: false,
+});
 const Dashboard = dynamicImport(() => import("@/sections/Dashboard"), {
   ssr: false,
 });
@@ -28,7 +31,19 @@ const URLS = dynamicImport(() => import("@/sections/URLS"), { ssr: false });
 const Profile = dynamicImport(() => import("@/sections/Profile"), {
   ssr: false,
 });
-const Footer = dynamicImport(() => import("@/components/Footer"), {
+const Analytics = dynamicImport(() => import("@/sections/Analytics"), {
+  ssr: false,
+});
+const Campaigns = dynamicImport(() => import("@/sections/Campaigns"), {
+  ssr: false,
+});
+const Settings = dynamicImport(() => import("@/sections/Settings"), {
+  ssr: false,
+});
+const ApiPanel = dynamicImport(() => import("@/sections/ApiPanel"), {
+  ssr: false,
+});
+const ApiKeyDocs = dynamicImport(() => import("@/sections/ApiKeyDocs"), {
   ssr: false,
 });
 const DownloadExtension = dynamicImport(
@@ -37,6 +52,38 @@ const DownloadExtension = dynamicImport(
     ssr: false,
   }
 );
+
+function AuthenticatedShell({ userData }: { userData?: any }) {
+  return (
+    <>
+      <Navbar userData={userData} />
+      <div className="min-h-screen bg-surface">
+        <div className="max-w-7xl mx-auto py-6 px-4">
+          <Routes>
+            <Route
+              path="/dashboard"
+              element={<Dashboard userData={userData} />}
+            />
+            <Route path="/urls" element={<URLS />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/campaigns" element={<Campaigns />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/api" element={<ApiPanel />} />
+            <Route path="/api-key-docs" element={<ApiKeyDocs />} />
+            <Route
+              path="/api/key-docs"
+              element={<Navigate to="/api-key-docs" replace />}
+            />
+            <Route path="/download" element={<DownloadExtension />} />
+            <Route path="/*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
+}
 
 export default function RouterApp() {
   const { isAuthenticated, loading, userData } = useAuth();
@@ -49,17 +96,17 @@ export default function RouterApp() {
 
   if (loading || isAuthenticated === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700">
+      <div className="min-h-screen flex items-center justify-center bg-surface">
         <div className="text-center space-y-4">
           <div className="relative inline-block">
-            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-white"></div>
+            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-4xl">🔗</span>
+              <span className="text-lg font-bold text-primary">URL</span>
             </div>
           </div>
           <div>
-            <p className="text-white text-2xl font-bold">URL Shortener</p>
-            <p className="text-white/80 text-lg mt-2">Loading...</p>
+            <p className="text-on-surface text-2xl font-bold">URLTinier</p>
+            <p className="text-on-surface-variant text-lg mt-2">Loading...</p>
           </div>
         </div>
       </div>
@@ -67,65 +114,36 @@ export default function RouterApp() {
   }
 
   return (
-    <>
-      <Routes>
-        <Route
-          path="/welcome"
-          element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Welcome />
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />
-          }
-        />
-        <Route
-          path="/signin"
-          element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
-          }
-        />
-        <Route
-          path="/signout"
-          element={
-            isAuthenticated ? <Logout /> : <Navigate to="/welcome" replace />
-          }
-        />
-        {isAuthenticated ? (
-          <>
-            <Route
-              path="/*"
-              element={
-                <>
-                  <Navbar userData={userData} />
-                  <div className="min-h-screen bg-gray-50">
-                    <div className="max-w-7xl mx-auto py-6 px-4">
-                      <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/urls" element={<URLS />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route
-                          path="/download"
-                          element={<DownloadExtension />}
-                        />
-                        <Route
-                          path="/*"
-                          element={<Navigate to="/dashboard" replace />}
-                        />
-                      </Routes>
-                    </div>
-                  </div>
-                  <Footer />
-                </>
-              }
-            />
-          </>
-        ) : (
-          <Route path="*" element={<Navigate to="/welcome" />} />
-        )}
-      </Routes>
-    </>
+    <Routes>
+      <Route
+        path="/welcome"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Welcome />
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />
+        }
+      />
+      <Route
+        path="/signin"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+        }
+      />
+      <Route
+        path="/signout"
+        element={
+          isAuthenticated ? <Logout /> : <Navigate to="/welcome" replace />
+        }
+      />
+      {isAuthenticated ? (
+        <Route path="/*" element={<AuthenticatedShell userData={userData} />} />
+      ) : (
+        <Route path="*" element={<Navigate to="/welcome" replace />} />
+      )}
+    </Routes>
   );
 }

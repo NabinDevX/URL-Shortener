@@ -2488,6 +2488,9 @@
                     "qrCode": {
                       "type": "string"
                     },
+                    "qrGenerated": {
+                      "type": "boolean"
+                    },
                     "fullShortUrl": {
                       "type": "string"
                     },
@@ -2499,6 +2502,7 @@
                     "shortId",
                     "redirectUrl",
                     "qrCode",
+                    "qrGenerated",
                     "fullShortUrl",
                     "updatedAt"
                   ],
@@ -2633,6 +2637,13 @@
                           "redirectUrl": {
                             "type": "string"
                           },
+                          "qrCode": {
+                            "type": "string"
+                          },
+                          "qrGenerated": {
+                            "default": false,
+                            "type": "boolean"
+                          },
                           "totalClicks": {
                             "type": "number"
                           },
@@ -2681,6 +2692,7 @@
                         "required": [
                           "shortId",
                           "redirectUrl",
+                          "qrGenerated",
                           "totalClicks",
                           "createdAt",
                           "updatedAt",

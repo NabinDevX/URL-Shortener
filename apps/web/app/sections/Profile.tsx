@@ -243,10 +243,10 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center bg-surface-container-lowest rounded-2xl p-12 shadow-sm border border-slate-200">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mx-auto mb-4"></div>
+          <p className="text-on-surface-variant text-lg font-semibold">
             Loading Profile...
           </p>
         </div>
@@ -255,14 +255,18 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] py-12 px-4">
+    <div className="min-h-screen bg-surface py-10 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8 text-white">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full mb-4 shadow-2xl">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-surface-container-low rounded-full mb-4">
             <span className="text-5xl">👤</span>
           </div>
-          <h1 className="text-5xl font-bold mb-2 drop-shadow-lg">My Profile</h1>
-          <p className="text-xl text-white/90">Manage your account settings</p>
+          <h1 className="text-5xl font-extrabold tracking-tight mb-2 text-on-surface">
+            My Profile
+          </h1>
+          <p className="text-lg text-on-surface-variant">
+            Manage your account settings
+          </p>
         </div>
 
         {message.text && (
@@ -280,14 +284,14 @@ const Profile = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+          <h2 className="text-2xl font-bold text-on-surface mb-6 flex items-center gap-3">
             <span className="text-3xl">ℹ️</span>
             Account Information
           </h2>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-gray-100 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-slate-200">
               <div>
                 <p className="text-sm text-gray-500 font-semibold mb-1">Name</p>
                 <p className="text-xl font-bold text-gray-800">
@@ -297,7 +301,7 @@ const Profile = () => {
               <span className="text-2xl">👤</span>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-gray-100 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-slate-200">
               <div>
                 <p className="text-sm text-gray-500 font-semibold mb-1">
                   Email
@@ -309,7 +313,7 @@ const Profile = () => {
               <span className="text-2xl">📧</span>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-gray-100 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-slate-200">
               <div>
                 <p className="text-sm text-gray-500 font-semibold mb-1">
                   Member Since
@@ -334,10 +338,10 @@ const Profile = () => {
               setShowPasswordForm(false);
               setShowDeleteForm(false);
             }}
-            className="bg-white rounded-2xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-300 hover:scale-105 group"
+            className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-6 transition-all duration-300 hover-float group"
           >
             <div className="text-center">
-              <div className="bg-linear-to-br from-[#667eea] to-[#764ba2] p-4 rounded-2xl mx-auto w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+              <div className="bg-surface-container-low p-4 rounded-2xl mx-auto w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-slate-200">
                 <span className="text-3xl">✏️</span>
               </div>
               <h3 className="text-lg font-bold text-gray-800">
@@ -352,10 +356,10 @@ const Profile = () => {
               setShowUpdateForm(false);
               setShowDeleteForm(false);
             }}
-            className="bg-white rounded-2xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-300 hover:scale-105 group"
+            className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-6 transition-all duration-300 hover-float group"
           >
             <div className="text-center">
-              <div className="bg-linear-to-br from-[#667eea] to-[#764ba2] p-4 rounded-2xl mx-auto w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+              <div className="bg-surface-container-low p-4 rounded-2xl mx-auto w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-slate-200">
                 <span className="text-3xl">🔒</span>
               </div>
               <h3 className="text-lg font-bold text-gray-800">
@@ -370,7 +374,7 @@ const Profile = () => {
               setShowUpdateForm(false);
               setShowPasswordForm(false);
             }}
-            className="bg-white rounded-2xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-300 hover:scale-105 group"
+            className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-6 transition-all duration-300 hover-float group"
           >
             <div className="text-center">
               <div className="bg-linear-to-br from-red-500 to-red-600 p-4 rounded-2xl mx-auto w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
@@ -384,8 +388,8 @@ const Profile = () => {
         </div>
 
         {showUpdateForm && (
-          <div className="bg-white rounded-2xl shadow-2xl p-8 mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+            <h3 className="text-2xl font-bold text-on-surface mb-6 flex items-center gap-3">
               <span className="text-3xl">✏️</span>
               Update Account Information
             </h3>
@@ -426,7 +430,7 @@ const Profile = () => {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={sendingOtp}
-                  className="w-full py-3 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {sendingOtp ? "Sending OTP..." : "Send OTP to Email"}
                 </button>
@@ -453,7 +457,7 @@ const Profile = () => {
                     <button
                       type="submit"
                       disabled={updating}
-                      className="flex-1 py-3 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {updating ? "Updating..." : "Update Account"}
                     </button>
@@ -489,8 +493,8 @@ const Profile = () => {
         )}
 
         {showPasswordForm && (
-          <div className="bg-white rounded-2xl shadow-2xl p-8 mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 mb-6">
+            <h3 className="text-2xl font-bold text-on-surface mb-6 flex items-center gap-3">
               <span className="text-3xl">🔒</span>
               Change Password
             </h3>
@@ -556,7 +560,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className="flex-1 py-3 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {changingPassword ? "Changing..." : "Change Password"}
                 </button>

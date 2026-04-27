@@ -19,6 +19,10 @@ const urlSchema = new Schema<IURLDocument>(
       unique: true,
       sparse: true,
     },
+    qrGenerated: {
+      type: Boolean,
+      default: false,
+    },
     redirectUrl: {
       type: String,
       required: true,
@@ -27,7 +31,16 @@ const urlSchema = new Schema<IURLDocument>(
       type: Boolean,
       default: false,
     },
-    visitHistory: [{ timestamp: { type: Date } }],
+    visitHistory: [
+      {
+        timestamp: { type: Date },
+        ipAddress: { type: String },
+        country: { type: String },
+        device: { type: String },
+        userAgent: { type: String },
+        isReturnVisitor: { type: Boolean },
+      },
+    ],
   },
   { timestamps: true }
 );

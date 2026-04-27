@@ -1,4 +1,5 @@
-<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 intro-reveal">
+<% const analyticsPageData = locals.analyticsPageData || { totalClicks: 0, activeLinks: 0, totalUrls: 0, last30DaysClicks: { labels: [], values: [] }, radar: { labels: [], values: [] }, topUrls: [] }; %>
+<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 intro-reveal" data-analytics-page-data="<%= encodeURIComponent(JSON.stringify(analyticsPageData)) %>">
   <!-- Header Controls / Filters -->
   <div class="mb-8 flex flex-wrap items-end justify-between gap-6 reveal-on-scroll" data-reveal>
     <div class="flex flex-col gap-4">
@@ -7,8 +8,8 @@
         <h2 class="text-2xl font-extrabold tracking-tight font-headline">Detailed Link Performance</h2>
       </div>
       <div class="flex w-fit items-center gap-2 rounded-xl bg-surface-container-low p-1">
-        <button class="px-4 py-1.5 bg-surface-container-lowest shadow-sm rounded-lg text-sm font-semibold text-primary">Bar Chart</button>
-        <button class="px-4 py-1.5 text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors">Radar Chart</button>
+        <button type="button" data-chart-toggle="bar" class="px-4 py-1.5 bg-surface-container-lowest shadow-sm rounded-lg text-sm font-semibold text-primary transition-colors">Bar Chart</button>
+        <button type="button" data-chart-toggle="radar" class="px-4 py-1.5 text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors">Radar Chart</button>
       </div>
     </div>
     <div class="flex w-full flex-wrap items-center gap-3 lg:w-auto lg:justify-end">
@@ -29,87 +30,68 @@
   </div>
   <!-- Bento Grid Layout -->
   <div class="grid grid-cols-12 gap-6 mb-8">
-    <!-- Quick Link Creation Card -->
-    <div class="col-span-12 lg:col-span-8 glass-card rounded-4xl p-8 shadow-sm border border-white/40 flex flex-col justify-between reveal-on-scroll hover-float" data-reveal>
-      <div>
-        <h3 class="text-xl font-bold font-headline mb-2">Create New Branded Link</h3>
-        <p class="text-on-surface-variant text-sm mb-6">Pro users can customize the back-half and use dedicated domains.</p>
-      </div>
-      <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1 flex flex-col gap-2">
-          <label class="text-[11px] font-bold uppercase tracking-wider text-outline px-1">Destination URL</label>
-          <input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20" type="text" value="https://example.com/very-long-product-campaign-url-2024" />
-        </div>
-        <div class="w-full md:w-64 flex flex-col gap-2">
-          <label class="text-[11px] font-bold uppercase tracking-wider text-outline px-1">Custom Back-half</label>
-          <div class="flex items-center bg-surface-container-low rounded-xl px-4 py-3 border border-primary/20">
-            <span class="text-sm font-medium text-primary">shrt.ly/</span>
-            <input class="flex-1 bg-transparent border-none p-0 text-sm focus:ring-0 font-bold" type="text" value="winter-sale" />
-            <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
-          </div>
-        </div>
-        <div class="flex items-end">
-          <button class="h-11.5 bg-linear-to-tr from-primary to-primary-container text-white px-8 rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all">Shorten Link</button>
-        </div>
-      </div>
-    </div>
-    <!-- QR Preview Card (Contextual Feature) -->
-    <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-4xl p-8 shadow-sm flex flex-col items-center justify-center text-center premium-border reveal-on-scroll hover-float" data-reveal>
-      <div class="bg-surface-container-low p-6 rounded-2xl mb-4 relative group">
-        <img alt="QR Code" class="w-32 h-32 opacity-20 grayscale" data-alt="Stylized modern QR code graphic on a textured background with purple neon highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2xuLhjGGrOGTXy9vxQKmlVRTll8OPCLwMbBvvGfDmO9NGLzRYsswJ9wxjr603bCdeXeFeP_HL9H0AbhFd8-CCVGKViHluI86Ll6OO3KWQnK-n0P5xQ9Rj5wFBKHvWROoZhLTP9aTjbV8DnD6azgU2zjhXB7uD71X1IRc4yLGggcZI5hJnGMk3kC3XA5Zq93dZ-8U-405uo3HU6B_1Wq3aOBYNkEWTihlGZVpoLEc5Cv5V96KRU7Mm-8w960-WtJHR1zwRtczF9HM" />
-        <div class="absolute inset-0 flex items-center justify-center">
-          <span class="material-symbols-outlined text-tertiary text-5xl">qr_code_2</span>
-        </div>
-        <div class="absolute -top-2 -right-2 bg-tertiary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">PRO</div>
-      </div>
-      <h4 class="font-bold mb-1">Live QR Generation</h4>
-      <p class="text-xs text-on-surface-variant mb-4">Real-time QR tracking for print campaigns</p>
-      <button class="text-xs font-bold text-tertiary flex items-center gap-1 hover:underline">
-        Download High-Res SVG <span class="material-symbols-outlined text-sm">open_in_new</span>
-      </button>
-    </div>
-    <!-- Analytics Chart Module (Visual Placeholder) -->
     <div class="relative col-span-12 overflow-hidden rounded-[2.5rem] bg-surface-container-low p-6 sm:p-8 lg:p-10 reveal-on-scroll" data-reveal>
-      <div class="mb-10 flex flex-wrap items-center justify-between gap-4">
+      <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 class="text-2xl font-extrabold font-headline leading-tight">Click Distribution</h3>
-          <p class="text-on-surface-variant">Global performance over the past 30 days</p>
+          <h3 class="text-2xl font-extrabold font-headline leading-tight" id="analyticsChartTitle">Click Distribution</h3>
+          <p class="text-on-surface-variant" id="analyticsChartSubtitle">Daily clicks over the last 30 days</p>
         </div>
         <div class="flex items-center gap-4 sm:gap-6">
           <div class="flex flex-col items-end">
-            <span class="text-3xl font-extrabold text-primary">124.8k</span>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">+12% vs last month</span>
+            <span class="text-3xl font-extrabold text-primary" id="analyticsChartValue"><%= analyticsPageData.totalClicks.toLocaleString() %></span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant" id="analyticsChartCaption">Total clicks</span>
           </div>
           <div class="h-12 w-px bg-outline-variant/30"></div>
           <div class="flex flex-col items-end">
-            <span class="text-3xl font-extrabold text-tertiary">3.4%</span>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Avg. Click Rate</span>
+            <span class="text-3xl font-extrabold text-tertiary" id="analyticsChartSecondaryValue"><%= analyticsPageData.topUrls[0]?.clicks ? `${Math.round((analyticsPageData.topUrls[0].clicks / Math.max(analyticsPageData.totalClicks, 1)) * 100)}%` : '0%' %></span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant" id="analyticsChartSecondaryLabel">Top link share</span>
           </div>
         </div>
       </div>
-      <!-- Abstract Chart Visualization -->
-      <div class="w-full h-80 flex items-end gap-3 px-4">
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[40%] hover:bg-primary/20 transition-all cursor-pointer relative group">
-          <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">12k</div>
+
+      <div class="rounded-4xl border border-outline-variant/10 bg-surface-container-lowest p-4 shadow-sm sm:p-6">
+        <div class="h-90 sm:h-105">
+          <canvas id="analyticsChartCanvas"></canvas>
         </div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[65%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-primary rounded-t-xl h-[85%] relative">
-          <div class="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-            <span class="text-sm font-bold text-primary">Peak</span>
-            <div class="h-4 w-px bg-primary/40"></div>
+      </div>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <div class="rounded-4xl border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm">
+          <h4 class="mb-4 text-lg font-bold font-headline text-on-surface">Radar Metrics</h4>
+          <div class="space-y-3">
+            <% analyticsPageData.radar.labels.forEach((label, index) => { %>
+            <div class="rounded-2xl bg-surface-container-low p-3">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant"><%= label %></span>
+                <span class="text-sm font-extrabold text-on-surface"><%= analyticsPageData.radar.values[index] ?? 0 %></span>
+              </div>
+            </div>
+            <% }); %>
           </div>
         </div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[55%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[45%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[30%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-tertiary/60 rounded-t-xl h-[70%] hover:bg-tertiary transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[50%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[40%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[35%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-primary/40 rounded-t-xl h-[60%] hover:bg-primary transition-all cursor-pointer relative group"></div>
-        <div class="flex-1 bg-surface-container-highest rounded-t-xl h-[45%] hover:bg-primary/20 transition-all cursor-pointer relative group"></div>
+
+        <div class="rounded-4xl border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm">
+          <h4 class="mb-4 text-lg font-bold font-headline text-on-surface">Top URLs</h4>
+          <div class="space-y-3">
+            <% if (analyticsPageData.topUrls.length > 0) { %>
+            <% analyticsPageData.topUrls.forEach((url) => { %>
+            <div class="rounded-2xl bg-surface-container-low p-3">
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-bold text-primary"><%= url.shortId %></p>
+                  <p class="truncate text-[11px] text-on-surface-variant"><%= url.redirectUrl %></p>
+                </div>
+                <span class="shrink-0 rounded-full bg-secondary-container px-3 py-1 text-xs font-bold text-on-secondary-container"><%= url.clicks %></span>
+              </div>
+            </div>
+            <% }); %>
+            <% } else { %>
+            <p class="text-sm text-on-surface-variant">No clicks recorded yet.</p>
+            <% } %>
+          </div>
+        </div>
       </div>
-      <!-- Gradient Mesh Overlay (Premium Aesthetic) -->
+
       <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
       <div class="absolute bottom-0 left-0 w-64 h-64 bg-tertiary/5 rounded-full blur-[80px] pointer-events-none"></div>
     </div>
@@ -228,3 +210,5 @@
     </div>
   </div>
 </div>
+
+<script src="/js/analytics.js" defer></script>

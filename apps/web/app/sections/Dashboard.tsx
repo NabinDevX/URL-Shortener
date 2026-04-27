@@ -106,10 +106,10 @@ const Dashboard = ({ userData }: { userData?: any }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center bg-surface-container-lowest rounded-2xl p-12 shadow-sm border border-slate-200">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mx-auto mb-4"></div>
+          <p className="text-on-surface-variant text-lg font-semibold">
             Loading Dashboard...
           </p>
         </div>
@@ -119,15 +119,15 @@ const Dashboard = ({ userData }: { userData?: any }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 max-w-md w-full">
           <div className="text-center">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <h2 className="text-2xl font-bold text-on-surface mb-2">Error</h2>
+            <p className="text-on-surface-variant mb-6">{error}</p>
             <button
               onClick={fetchUrls}
-              className="px-6 py-3 bg-linear-to-r from-[#667eea] to-[#764ba2] text-white rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-container transition-colors"
             >
               Retry
             </button>
@@ -138,74 +138,68 @@ const Dashboard = ({ userData }: { userData?: any }) => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] py-12">
+    <div className="min-h-screen bg-surface py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center text-white">
-          <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface mb-3">
             Welcome back, {userData?.name || userData?.username || "User"}! 👋
           </h1>
-          <p className="text-xl text-white/90">
+          <p className="text-lg text-on-surface-variant">
             Here&apos;s an overview of your shortened URLs
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 hover-float">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">
+                <p className="text-on-surface-variant text-sm font-semibold mb-2 uppercase tracking-wide">
                   Total URLs
                 </p>
-                <p className="text-5xl font-bold bg-linear-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
-                  {totalUrls}
-                </p>
+                <p className="text-5xl font-bold text-primary">{totalUrls}</p>
               </div>
-              <div className="bg-linear-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl shadow-lg">
+              <div className="bg-surface-container-low p-5 rounded-2xl">
                 <span className="text-4xl">🔗</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 hover-float">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">
+                <p className="text-on-surface-variant text-sm font-semibold mb-2 uppercase tracking-wide">
                   Total Clicks
                 </p>
-                <p className="text-5xl font-bold bg-linear-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
-                  {totalClicks}
-                </p>
+                <p className="text-5xl font-bold text-primary">{totalClicks}</p>
               </div>
-              <div className="bg-linear-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl shadow-lg">
+              <div className="bg-surface-container-low p-5 rounded-2xl">
                 <span className="text-4xl">📊</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 p-8 hover-float">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wide">
+                <p className="text-on-surface-variant text-sm font-semibold mb-2 uppercase tracking-wide">
                   Active URLs
                 </p>
-                <p className="text-5xl font-bold bg-linear-to-r from-[#667eea] to-[#764ba2] bg-clip-text text-transparent">
-                  {activeUrls}
-                </p>
+                <p className="text-5xl font-bold text-primary">{activeUrls}</p>
               </div>
-              <div className="bg-linear-to-br from-[#667eea] to-[#764ba2] p-5 rounded-2xl shadow-lg">
+              <div className="bg-surface-container-low p-5 rounded-2xl">
                 <span className="text-4xl">✨</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="px-8 py-6 bg-linear-to-r from-[#667eea] to-[#764ba2]">
+        <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="px-8 py-6 bg-surface-container-low border-b border-slate-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white">Your URLs</h2>
+              <h2 className="text-3xl font-bold text-on-surface">Your URLs</h2>
               <Link
                 to="/urls"
-                className="px-6 py-3 bg-white text-[#667eea] rounded-full font-bold hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors"
               >
                 Manage URLs
               </Link>

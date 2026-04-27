@@ -65,6 +65,7 @@ const updateShortURLOutputSchema = z.object({
   shortId: z.string(),
   redirectUrl: z.string(),
   qrCode: z.string(),
+  qrGenerated: z.boolean(),
   fullShortUrl: z.string(),
   updatedAt: z.date(),
 });
@@ -72,6 +73,8 @@ const updateShortURLOutputSchema = z.object({
 const urlWithAnalyticsSchema = z.object({
   shortId: z.string(),
   redirectUrl: z.string(),
+  qrCode: z.string().optional(),
+  qrGenerated: z.boolean().default(false),
   totalClicks: z.number(),
   lastVisit: z.date().nullable().optional(),
   firstVisit: z.date().nullable().optional(),

@@ -20,12 +20,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <BrowserRouterProvider>
       {googleClientId ? (
-        <GoogleOAuthProvider
-          clientId={googleClientId}
-          onScriptLoadError={() => {
-            console.warn("Google OAuth script failed to load");
-          }}
-        >
+        <GoogleOAuthProvider clientId={googleClientId}>
           <ThemeProvider defaultTheme="light">
             <AuthProvider initialLoadingTime={2000}>{children}</AuthProvider>
           </ThemeProvider>

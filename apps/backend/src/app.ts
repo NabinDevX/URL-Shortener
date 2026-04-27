@@ -67,6 +67,13 @@ app.set("layout", "layout");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  const nodeEnv = process.env.NODE_ENV ?? "development";
+  res.locals.nodeEnv = nodeEnv;
+  res.locals.isProduction = nodeEnv === "production";
+  next();
+});
+
 const openapiDocument = generateOpenApiDocument(appRouter, {
   baseUrl: `http://localhost:${process.env.PORT || 8000}/api/v1`,
   title: "URL Shortener API",
@@ -87,7 +94,7 @@ const handleRedirect = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const redirectUrl = await getOriginalURL(shortId);
+    const redirectUrl = await getOriginalURL(shortId, req);
     res.redirect(redirectUrl);
   } catch (error) {
     if (error instanceof Error && error.message === "Short URL not found") {

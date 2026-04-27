@@ -179,15 +179,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-surface flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-linear-to-r from-purple-600 to-indigo-600 px-8 py-6">
+        <div className="bg-surface-container-lowest rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-surface-container-low border-b border-slate-200 px-8 py-6">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-4xl">🔗</span>
-              <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
+              <h1 className="text-3xl font-bold text-on-surface">
+                Welcome Back
+              </h1>
             </div>
-            <p className="text-center text-purple-100">
+            <p className="text-center text-on-surface-variant">
               Sign in to your account
             </p>
           </div>
@@ -227,7 +229,7 @@ const Login = () => {
                   onChange={handleChange}
                   className={`w-full px-4 py-3 border ${
                     errors.email ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-(--ring) transition-all`}
                   placeholder="Enter your email"
                   disabled={loading}
                   autoComplete="email"
@@ -255,7 +257,7 @@ const Login = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${
                       errors.password ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-(--ring) transition-all`}
                     placeholder="Enter your password"
                     disabled={loading}
                     autoComplete="current-password"
@@ -279,13 +281,13 @@ const Login = () => {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-(--ring)"
                   />
                   <span className="text-sm text-gray-600">Remember me</span>
                 </label>
                 <a
                   href="#forgot"
-                  className="text-sm text-purple-600 hover:text-purple-800 font-semibold transition-colors"
+                  className="text-sm text-primary hover:text-primary-container font-semibold transition-colors"
                 >
                   Forgot Password?
                 </a>
@@ -294,10 +296,10 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 bg-linear-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg transition-all ${
+                className={`w-full py-3 px-4 bg-primary text-white font-bold rounded-lg shadow-sm transition-colors ${
                   loading
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:from-purple-700 hover:to-indigo-700 hover:shadow-xl transform hover:scale-105"
+                    : "hover:bg-primary-container"
                 }`}
               >
                 {loading ? (
@@ -354,7 +356,7 @@ const Login = () => {
                 Don&apos;t have an account?{" "}
                 <Link
                   to="/signup"
-                  className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+                  className="text-primary font-semibold hover:text-primary-container transition-colors"
                 >
                   Sign Up
                 </Link>
@@ -364,7 +366,7 @@ const Login = () => {
             <div className="mt-6 text-center">
               <Link
                 to="/welcome"
-                className="inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors text-sm font-medium"
               >
                 <span>←</span>
                 Back to Home
@@ -373,8 +375,8 @@ const Login = () => {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-white text-sm">
-          <span className="text-green-300">🔒</span>
+        <div className="mt-6 flex items-center justify-center gap-2 text-on-surface-variant text-sm">
+          <span>🔒</span>
           <span>Secure SSL Connection</span>
         </div>
       </div>
