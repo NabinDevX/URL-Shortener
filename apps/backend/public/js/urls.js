@@ -204,17 +204,20 @@
   }
 
   async function persistQrGenerated(shortId, qrCodeUrl) {
-    const response = await fetch(`/api/v1/url/update/${encodeURIComponent(shortId)}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        shortId,
-        qrCode: qrCodeUrl,
-      }),
-    });
+    const response = await fetch(
+      `/api/v1/url/update/${encodeURIComponent(shortId)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          shortId,
+          qrCode: qrCodeUrl,
+        }),
+      }
+    );
 
     const result = await response.json();
     if (!response.ok) {
@@ -684,7 +687,10 @@
         showMessage("QR generated and saved successfully.", "success");
       } catch (requestError) {
         console.error("QR save error:", requestError);
-        showMessage(requestError.message || "Failed to save QR status.", "error");
+        showMessage(
+          requestError.message || "Failed to save QR status.",
+          "error"
+        );
       }
     });
   }
