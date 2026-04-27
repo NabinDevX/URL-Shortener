@@ -67,6 +67,20 @@
     return scripts;
   }
 
+  function getSidebarSyncKey(link) {
+    const id = (link.getAttribute("id") || "").trim();
+    if (id) {
+      return `id:${id}`;
+    }
+
+    const href = (link.getAttribute("href") || "").trim();
+    if (!href || href === "#" || href.startsWith("javascript:")) {
+      return null;
+    }
+
+    return `href:${href}`;
+  }
+
   function syncAppSidebarClasses(nextDoc) {
     const currentSidebar = document.getElementById("appSidebar");
     const nextSidebar = nextDoc.getElementById("appSidebar");
@@ -77,15 +91,24 @@
     const nextLinks = Array.from(
       nextSidebar.querySelectorAll("a.sidebar-link[href]")
     );
-    const nextClassByHref = new Map(
-      nextLinks.map((link) => [link.getAttribute("href"), link.className])
-    );
+    const nextClassByKey = new Map();
+
+    nextLinks.forEach((link) => {
+      const key = getSidebarSyncKey(link);
+      if (!key) {
+        return;
+      }
+      nextClassByKey.set(key, link.className);
+    });
 
     Array.from(currentSidebar.querySelectorAll("a.sidebar-link[href]")).forEach(
       (link) => {
-        const href = link.getAttribute("href");
-        if (!href) return;
-        const nextClassName = nextClassByHref.get(href);
+        const key = getSidebarSyncKey(link);
+        if (!key) {
+          return;
+        }
+
+        const nextClassName = nextClassByKey.get(key);
         if (typeof nextClassName === "string") {
           link.className = nextClassName;
         }
