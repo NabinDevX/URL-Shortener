@@ -159,7 +159,7 @@ const Login = () => {
 
     try {
       await loginWithGoogleCode(code);
-      navigate("/dashboard", { replace: true });
+      window.location.replace("/dashboard");
     } catch (error) {
       console.error("❌ Google login error:", error);
       const axiosError = error as AxiosError<{ message: string }> | unknown;

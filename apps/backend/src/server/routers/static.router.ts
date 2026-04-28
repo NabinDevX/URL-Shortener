@@ -55,6 +55,15 @@ type AnalyticsPageData = {
     redirectUrl: string;
     clicks: number;
   }>;
+  recentActivity: Array<{
+    shortId: string;
+    redirectUrl: string;
+    totalClicks: number;
+    ipAddress: string;
+    device: string;
+    deviceIcon: string;
+    location: string;
+  }>;
 };
 
 const formatDayLabel = (date: Date): string => {
@@ -70,6 +79,19 @@ const getDeviceLabel = (device?: IVisitHistory["device"]): string => {
   }
 
   return device;
+};
+
+const getDeviceIcon = (device?: IVisitHistory["device"]): string => {
+  switch (device) {
+    case "mobile":
+      return "smartphone";
+    case "tablet":
+      return "tablet_mac";
+    case "desktop":
+      return "laptop";
+    default:
+      return "devices_other";
+  }
 };
 
 const buildAnalyticsPageData = (
@@ -121,6 +143,40 @@ const buildAnalyticsPageData = (
     .sort((left, right) => right.clicks - left.clicks)
     .slice(0, 5);
 
+  const recentActivity = urls
+    .map((url) => {
+      const latestVisit =
+        url.visitHistory.length > 0
+          ? url.visitHistory[url.visitHistory.length - 1]
+          : undefined;
+
+      return {
+        shortId: url.shortId,
+        redirectUrl: url.redirectUrl,
+        totalClicks: url.visitHistory.length,
+        ipAddress: latestVisit?.ipAddress || "—",
+        device: getDeviceLabel(latestVisit?.device),
+        deviceIcon: getDeviceIcon(latestVisit?.device),
+        location: latestVisit?.country || "Unknown",
+        lastActivityAt: latestVisit?.timestamp
+          ? new Date(latestVisit.timestamp).getTime()
+          : 0,
+      };
+    })
+    .sort((left, right) => {
+      if (right.lastActivityAt !== left.lastActivityAt) {
+        return right.lastActivityAt - left.lastActivityAt;
+      }
+
+      if (right.totalClicks !== left.totalClicks) {
+        return right.totalClicks - left.totalClicks;
+      }
+
+      return left.shortId.localeCompare(right.shortId);
+    })
+    .slice(0, 24)
+    .map(({ lastActivityAt, ...row }) => row);
+
   const uniqueIps = new Set(
     allVisits.map((visit) => visit.ipAddress).filter(Boolean)
   ).size;
@@ -167,6 +223,7 @@ const buildAnalyticsPageData = (
       ],
     },
     topUrls,
+    recentActivity,
   };
 };
 

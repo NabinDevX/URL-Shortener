@@ -100,7 +100,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-surface-container px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
         <h3 class="font-bold text-lg font-headline">Recent Link Activity</h3>
         <div class="flex items-center gap-4">
-          <span class="text-xs text-on-surface-variant font-medium">Displaying 24 of 1,240 links</span>
+          <span class="text-xs text-on-surface-variant font-medium">Displaying <%= analyticsPageData.recentActivity.length %> of <%= analyticsPageData.totalUrls %> links</span>
           <div class="flex gap-1">
             <button class="p-1 hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
             <button class="p-1 hover:bg-surface-container-low rounded"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
@@ -120,87 +120,43 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-surface-container">
-            <tr class="hover:bg-surface-bright transition-colors group">
+            <% if (analyticsPageData.recentActivity.length > 0) { %>
+            <% analyticsPageData.recentActivity.forEach((item) => { %>
+            <tr class="group transition-colors hover:bg-surface-bright">
               <td class="px-8 py-5">
                 <div class="flex flex-col">
-                  <span class="text-sm font-bold text-primary">shrt.ly/winter-sale</span>
-                  <span class="text-[10px] text-on-surface-variant truncate w-48">https://amazon.com/dp/B08N5K16HR...</span>
+                  <span class="text-sm font-bold text-primary"><%= item.shortId %></span>
+                  <span class="w-48 truncate text-[10px] text-on-surface-variant"><%= item.redirectUrl %></span>
                 </div>
               </td>
               <td class="px-8 py-5 text-center">
-                <span class="text-sm font-bold bg-secondary-container px-3 py-1 rounded-full text-on-secondary-container">12,450</span>
+                <span class="rounded-full bg-secondary-container px-3 py-1 text-sm font-bold text-on-secondary-container"><%= item.totalClicks.toLocaleString() %></span>
               </td>
-              <td class="px-8 py-5 text-sm font-mono text-on-surface-variant">192.168.1.45</td>
+              <td class="px-8 py-5 text-sm font-mono text-on-surface-variant"><%= item.ipAddress %></td>
               <td class="px-8 py-5">
                 <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-sm">smartphone</span>
-                  <span class="text-sm">iOS / iPhone</span>
+                  <span class="material-symbols-outlined text-sm"><%= item.deviceIcon %></span>
+                  <span class="text-sm capitalize"><%= item.device === 'unknown' ? 'Unknown' : item.device %></span>
                 </div>
               </td>
               <td class="px-8 py-5">
                 <div class="flex items-center gap-2">
-                  <span class="w-5 h-3.5 bg-slate-200 rounded-sm"></span>
-                  <span class="text-sm">San Francisco, US</span>
+                  <span class="h-3.5 w-5 rounded-sm bg-slate-200"></span>
+                  <span class="text-sm"><%= item.location %></span>
                 </div>
               </td>
               <td class="px-8 py-5 text-right">
-                <button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
+                <button class="p-2 opacity-0 transition-opacity group-hover:opacity-100"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
               </td>
             </tr>
-            <tr class="hover:bg-surface-bright transition-colors group">
-              <td class="px-8 py-5">
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-primary">shrt.ly/bio-link</span>
-                  <span class="text-[10px] text-on-surface-variant truncate w-48">https://linktree.com/user-profile-2024</span>
-                </div>
-              </td>
-              <td class="px-8 py-5 text-center">
-                <span class="text-sm font-bold bg-secondary-container px-3 py-1 rounded-full text-on-secondary-container">8,912</span>
-              </td>
-              <td class="px-8 py-5 text-sm font-mono text-on-surface-variant">45.23.112.9</td>
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-sm">laptop</span>
-                  <span class="text-sm">MacOS / Chrome</span>
-                </div>
-              </td>
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-2">
-                  <span class="w-5 h-3.5 bg-slate-200 rounded-sm"></span>
-                  <span class="text-sm">London, UK</span>
-                </div>
-              </td>
-              <td class="px-8 py-5 text-right">
-                <button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
+            <% }); %>
+            <% } else { %>
+            <tr>
+              <td class="px-8 py-10 text-center text-sm text-on-surface-variant" colspan="6">
+                No recent link activity yet. Create and share a link to see it here.
               </td>
             </tr>
-            <tr class="hover:bg-surface-bright transition-colors group">
-              <td class="px-8 py-5">
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-primary">shrt.ly/new-drop</span>
-                  <span class="text-[10px] text-on-surface-variant truncate w-48">https://shop.brand.com/products/limited</span>
-                </div>
-              </td>
-              <td class="px-8 py-5 text-center">
-                <span class="text-sm font-bold bg-secondary-container px-3 py-1 rounded-full text-on-secondary-container">4,302</span>
-              </td>
-              <td class="px-8 py-5 text-sm font-mono text-on-surface-variant">212.4.98.11</td>
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-sm">tablet</span>
-                  <span class="text-sm">Android / Tablet</span>
-                </div>
-              </td>
-              <td class="px-8 py-5">
-                <div class="flex items-center gap-2">
-                  <span class="w-5 h-3.5 bg-slate-200 rounded-sm"></span>
-                  <span class="text-sm">Berlin, DE</span>
-                </div>
-              </td>
-              <td class="px-8 py-5 text-right">
-                <button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-sm text-outline">more_vert</span></button>
-              </td>
-            </tr>
+            <% } %>
           </tbody>
         </table>
       </div>
