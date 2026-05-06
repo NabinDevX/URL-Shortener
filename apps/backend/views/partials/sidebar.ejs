@@ -1,4 +1,4 @@
-<aside id="appSidebar" class="group fixed inset-y-0 left-0 z-50 flex w-20 flex-col gap-2 overflow-y-auto border-r border-slate-200 bg-slate-50 p-3 transition-[width] duration-200 dark:border-outline-variant dark:bg-surface-container-low lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:p-4">
+<aside id="appSidebar" class="group hidden flex-col gap-2 overflow-y-auto border-r border-slate-200 bg-slate-50 p-3 dark:border-outline-variant dark:bg-surface-container-low lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:p-4">
   <div class="mb-6 px-1 lg:mb-8 lg:px-2">
     <div class="sidebar-header-row flex items-center justify-between gap-2">
       <div class="sidebar-brand-wrap flex min-w-0 items-center gap-3">
@@ -7,10 +7,6 @@
         </div>
         <span class="sidebar-label hidden truncate font-headline text-xl font-bold text-indigo-600 dark:text-primary lg:inline">URLTinier Pro</span>
       </div>
-      <button id="sidebarToggleBtn" type="button" aria-label="Toggle sidebar" aria-expanded="false" class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-200 hover:text-indigo-600 dark:text-on-surface-variant dark:hover:bg-primary/20 dark:hover:text-primary lg:hidden">
-        <span class="material-symbols-outlined sidebar-toggle-open">menu</span>
-        <span class="material-symbols-outlined sidebar-toggle-close">close</span>
-      </button>
     </div>
     <p class="sidebar-label mt-1 hidden text-xs font-medium uppercase tracking-widest text-slate-500 dark:text-on-surface-variant lg:block">Enterprise Workspace</p>
   </div>
@@ -64,73 +60,4 @@
     </div>
   </div>
 </aside>
-<button id="sidebarMobileBackdrop" type="button" aria-label="Close sidebar" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-[1px] lg:hidden"></button>
-<style>
-  @media (max-width: 1023px) {
-    #appSidebar .sidebar-toggle-open {
-      display: inline;
-    }
-
-    #appSidebar .sidebar-toggle-close {
-      display: none;
-    }
-
-    #appSidebar:not(.sidebar-mobile-expanded) .sidebar-header-row {
-      justify-content: center;
-    }
-
-    #appSidebar:not(.sidebar-mobile-expanded) .sidebar-brand-wrap {
-      display: none;
-    }
-
-    #appSidebar:not(.sidebar-mobile-expanded) #sidebarToggleBtn {
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-    #appSidebar.sidebar-mobile-expanded .sidebar-brand-wrap {
-      display: flex;
-      justify-content: flex-start;
-      width: 100%;
-    }
-
-    #appSidebar .sidebar-brand-icon {
-      display: none;
-    }
-
-    #appSidebar.sidebar-mobile-expanded {
-      width: 16rem;
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 20px 60px rgba(2, 6, 23, 0.35);
-    }
-
-    #appSidebar.sidebar-mobile-expanded .sidebar-brand-icon {
-      display: flex;
-    }
-
-    #appSidebar.sidebar-mobile-expanded .sidebar-label {
-      display: inline;
-    }
-
-    #appSidebar.sidebar-mobile-expanded .sidebar-link {
-      justify-content: flex-start;
-    }
-
-    #appSidebar.sidebar-mobile-expanded .sidebar-toggle-open {
-      display: none;
-    }
-
-    #appSidebar.sidebar-mobile-expanded .sidebar-toggle-close {
-      display: inline;
-    }
-
-    #appSidebar.sidebar-mobile-expanded~#sidebarMobileBackdrop {
-      display: block;
-    }
-
-    #appSidebar .sidebar-bottom {
-      margin-bottom: 0.5rem;
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
-    }
-  }
-</style>
 <script src="/js/sidebar.js" defer></script>

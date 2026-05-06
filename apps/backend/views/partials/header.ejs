@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-40 flex w-full items-center justify-between border-b border-outline-variant/30 bg-surface-container-low/80 px-8 py-4 backdrop-blur-md dark:bg-surface-container/85">
+<header class="sticky top-0 z-40 flex w-full items-center justify-between border-b border-outline-variant/30 bg-surface-container-low/80 px-4 py-3.5 backdrop-blur-md sm:px-6 lg:px-8 dark:bg-surface-container/85">
   <% const profileName = authUser?.name || 'User'; %>
   <% const profileEmail = authUser?.email || ''; %>
   <% const fallbackAvatar = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(profileName)}`; %>
@@ -9,28 +9,28 @@
     <% } %>
   </div>
 
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-2 sm:gap-4">
     <% if (showPlanBadge) { %>
-    <div class="flex items-center gap-2 rounded-full bg-surface-container-high px-3 py-1.5 dark:bg-primary/20">
+    <div class="hidden items-center gap-2 rounded-full bg-surface-container-high px-3 py-1.5 dark:bg-primary/20 sm:flex">
       <span class="h-2 w-2 rounded-full bg-primary"></span>
       <span class="text-xs font-bold uppercase text-on-surface-variant dark:text-primary">Free Plan</span>
     </div>
     <% } %>
 
-    <div class="relative">
+    <div class="relative hidden md:block">
       <span class="absolute inset-y-0 left-3 flex items-center text-on-surface-variant">
         <span class="material-symbols-outlined text-lg">search</span>
       </span>
       <input class="w-64 rounded-full border-none bg-surface-container py-2 pl-10 pr-4 text-sm text-on-surface transition-all placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/20 dark:bg-surface-container-low" placeholder="<%= searchPlaceholder || 'Search settings...' %>" type="text" />
     </div>
-    <button class="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary dark:hover:bg-primary/20">
+    <button class="hidden rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary sm:inline-flex dark:hover:bg-primary/20">
       <span class="material-symbols-outlined">history</span>
     </button>
-    <button class="relative rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary dark:hover:bg-primary/20">
+    <button class="relative hidden rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary sm:inline-flex dark:hover:bg-primary/20">
       <span class="material-symbols-outlined">notifications</span>
       <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-error"></span>
     </button>
-    <div class="h-8 w-px bg-outline-variant/30"></div>
+    <div class="hidden h-8 w-px bg-outline-variant/30 sm:block"></div>
     <div class="group relative">
       <a class="block h-8 w-8 cursor-pointer overflow-hidden rounded-full bg-primary-fixed ring-2 ring-transparent transition-all hover:ring-primary/40" href="/profile">
         <img alt="User Profile" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='<%= fallbackAvatar %>'" src="<%= profileAvatar %>" />

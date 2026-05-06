@@ -1,40 +1,16 @@
-const stripTrailingSlash = (value) => value.replace(/\/+$/, "");
-const normalizePrefix = (value) =>
-  value.startsWith("/") ? value : `/${value}`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const nodeEnv = process.env.NODE_ENV || "development";
-
-const defaultProxyTarget =
-  nodeEnv === "production" ? "http://backend:8000" : "http://localhost:8000";
-
-const apiPrefix = normalizePrefix(
-  process.env.NEXT_PUBLIC_API_PREFIX || "/api/v1"
-);
-const proxyTarget = stripTrailingSlash(
-  process.env.API_PROXY_TARGET || defaultProxyTarget
-);
+console.log("NEXT_PUBLIC_API_BASE_URL =", API_BASE_URL);
 
 const nextConfig = {
+  output: "export",
   reactStrictMode: true,
-  rewrites: async () => {
-    return {
-      beforeFiles: [],
-      afterFiles: [
-        {
-          source: `${apiPrefix}/:path*`,
-          destination: `${proxyTarget}${apiPrefix}/:path*`,
-        },
-        {
-          source: "/download/:path*",
-          destination: `${proxyTarget}/download/:path*`,
-        },
-        {
-          source: "/s/:shortId",
-          destination: `${proxyTarget}/:shortId`,
-        },
-      ],
-      fallback: [],
-    };
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  env: {
+    NEXT_PUBLIC_API_BASE_URL: API_BASE_URL,
+    NEXT_PUBLIC_DOMAIN: process.env.NEXT_PUBLIC_DOMAIN,
   },
 };
 

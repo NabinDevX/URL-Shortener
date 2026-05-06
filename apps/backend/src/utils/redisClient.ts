@@ -1,13 +1,25 @@
-import { createClient, RedisClientType } from "redis";
+import { createClient } from "redis";
 import type { RedisOperation } from "@/types";
 
-let redisClient: RedisClientType | null = null;
-let connectionPromise: Promise<RedisClientType> | null = null;
-let connectionFailed = false;
+type RedisClientInstance = ReturnType<typeof createClient>;
+
+let redisClient: RedisClientInstance | null = null;
+let connectionPromise: Promise<RedisClientInstance> | null = null;
 let lastErrorLog = 0;
 const isTestEnv = process.env.NODE_ENV === "test";
 const defaultRedisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-const redisConnectTimeoutMs = 1000;
+const redisConnectTimeoutMs = 5000;
+const transientRedisErrorPatterns = [
+  /ECONNRESET/i,
+  /ECONNREFUSED/i,
+  /ETIMEDOUT/i,
+  /EPIPE/i,
+  /The client is closed/i,
+  /Socket closed unexpectedly/i,
+];
+
+const isTransientRedisError = (message: string): boolean =>
+  transientRedisErrorPatterns.some((pattern) => pattern.test(message));
 
 const logInfo = (...args: unknown[]) => {
   if (!isTestEnv) {
@@ -21,30 +33,37 @@ const logError = (...args: unknown[]) => {
   }
 };
 
-const initializeRedis = async (): Promise<RedisClientType> => {
+const initializeRedis = async (): Promise<RedisClientInstance> => {
+  if (redisClient?.isReady) {
+    return redisClient;
+  }
+
   if (connectionPromise) {
     return connectionPromise;
   }
 
-  if (connectionFailed) {
-    throw new Error("Redis connection previously failed");
-  }
-
-  connectionPromise = (async (): Promise<RedisClientType> => {
+  connectionPromise = (async (): Promise<RedisClientInstance> => {
     try {
       const redisUrl = process.env.REDIS_URL?.trim() || defaultRedisUrl;
 
       logInfo("🔗 Connecting to Redis...");
 
-      redisClient = createClient({
+      const client: RedisClientInstance = createClient({
         url: redisUrl,
         socket: {
-          connectTimeout: 1000,
-          reconnectStrategy: () => false,
+          connectTimeout: redisConnectTimeoutMs,
+          reconnectStrategy: (retries: number) =>
+            Math.min(250 * 2 ** retries, 5000),
         },
       });
 
-      redisClient.on("error", (err: Error) => {
+      redisClient = client;
+
+      client.on("error", (err: Error) => {
+        if (isTransientRedisError(err.message)) {
+          return;
+        }
+
         const now = Date.now();
         if (now - lastErrorLog > 10000) {
           logError("Redis Client Error:", err.message);
@@ -52,12 +71,21 @@ const initializeRedis = async (): Promise<RedisClientType> => {
         }
       });
 
-      redisClient.on("connect", () => {
+      client.on("ready", () => {
         logInfo("✅ Redis connected successfully");
       });
 
+      client.on("end", () => {
+        if (redisClient === client) {
+          redisClient = null;
+        }
+        if (connectionPromise) {
+          connectionPromise = null;
+        }
+      });
+
       await Promise.race([
-        redisClient.connect(),
+        client.connect(),
         new Promise<never>((_, reject) => {
           setTimeout(() => {
             reject(new Error("Redis connection timeout"));
@@ -65,19 +93,26 @@ const initializeRedis = async (): Promise<RedisClientType> => {
         }),
       ]);
 
-      return redisClient;
+      connectionPromise = null;
+      return client;
     } catch (error) {
       const err = error as Error;
 
       const destroyableClient = redisClient as unknown as {
         destroy?: () => void;
+        quit?: () => Promise<void>;
       } | null;
-      destroyableClient?.destroy?.();
+      try {
+        await destroyableClient?.quit?.();
+      } catch {
+        destroyableClient?.destroy?.();
+      }
       redisClient = null;
 
-      logError("❌ Failed to connect to Redis:", err.message);
       connectionPromise = null;
-      connectionFailed = true;
+      if (!isTransientRedisError(err.message)) {
+        logError("❌ Failed to connect to Redis:", err.message);
+      }
       throw error;
     }
   })();
@@ -85,18 +120,45 @@ const initializeRedis = async (): Promise<RedisClientType> => {
   return connectionPromise;
 };
 
-const getRedisClient = async (): Promise<RedisClientType | null> => {
-  if (connectionFailed) {
-    return null;
+const getRedisClient = async (): Promise<RedisClientInstance | null> => {
+  if (redisClient?.isReady) {
+    return redisClient;
   }
 
-  if (!redisClient || !redisClient.isOpen) {
+  if (!redisClient) {
     try {
       await initializeRedis();
     } catch {
       return null;
     }
   }
+
+  if (redisClient?.isReady) {
+    return redisClient;
+  }
+
+  if (connectionPromise) {
+    try {
+      await connectionPromise;
+    } catch {
+      return null;
+    }
+  }
+
+  if (redisClient?.isReady) {
+    return redisClient;
+  }
+
+  if (redisClient) {
+    return null;
+  }
+
+  try {
+    await initializeRedis();
+  } catch {
+    return null;
+  }
+
   return redisClient;
 };
 
@@ -108,7 +170,7 @@ const safeRedisOperation = async <T>(
     if (!client || !client.isOpen) {
       return null;
     }
-    return await operation(client);
+    return await operation(client as never);
   } catch (error) {
     const err = error as Error;
     const now = Date.now();
@@ -122,7 +184,6 @@ const safeRedisOperation = async <T>(
 
 const closeRedisClient = async (): Promise<void> => {
   connectionPromise = null;
-  connectionFailed = false;
 
   if (redisClient?.isOpen) {
     await redisClient.quit();

@@ -1,69 +1,70 @@
-<!-- Content Canvas -->
 <div class="mx-auto max-w-5xl space-y-10 p-4 sm:space-y-12 sm:p-6 lg:p-8 intro-reveal">
+  <script src="/js/settings.js" defer></script>
+
   <section class="space-y-6 scroll-mt-28" id="account-settings">
-    <script src="/js/settings.js" defer></script>
     <div>
       <h2 class="font-headline text-2xl font-extrabold tracking-tight">Account Settings</h2>
-      <p class="text-on-surface-variant text-sm mt-1">Update your profile details and password.</p>
+      <p class="mt-1 text-sm text-on-surface-variant">Update your profile details and password.</p>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
+      <div class="rounded-2xl bg-surface-container-lowest p-6 shadow-sm sm:p-8 hover-float">
         <h3 class="font-headline text-xl font-bold text-on-surface">Update Account</h3>
-        <p class="text-sm text-on-surface-variant mt-1">Change your display name and email address.</p>
+        <p class="mt-1 text-sm text-on-surface-variant">Change your display name and email address.</p>
 
         <form class="mt-6 space-y-4" id="updateAccountForm">
           <div>
             <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="accountName">Name</label>
-            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="accountName" name="name" placeholder="Your name" type="text" />
+            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="accountName" name="name" placeholder="Your name" type="text" />
           </div>
 
           <div>
             <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="accountEmail">Email</label>
-            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="accountEmail" name="email" placeholder="you@example.com" type="email" />
+            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="accountEmail" name="email" placeholder="you@example.com" type="email" />
           </div>
 
-          <button class="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold hover:bg-primary-container transition-colors" id="updateAccountBtn" type="submit">Save Account Changes</button>
+          <button class="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container sm:w-auto" id="updateAccountBtn" type="submit">Save Account Changes</button>
           <p class="text-xs text-on-surface-variant" id="updateAccountMessage"></p>
         </form>
       </div>
 
-      <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
+      <div class="rounded-2xl bg-surface-container-lowest p-6 shadow-sm sm:p-8 hover-float">
         <h3 class="font-headline text-xl font-bold text-on-surface">Change Password</h3>
-        <p class="text-sm text-on-surface-variant mt-1">Use a strong password with at least 6 characters.</p>
+        <p class="mt-1 text-sm text-on-surface-variant">Use a strong password with at least 6 characters.</p>
 
         <form class="mt-6 space-y-4" id="changePasswordForm">
           <div>
             <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="oldPassword">Current Password</label>
-            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="oldPassword" name="oldPassword" type="password" />
+            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="oldPassword" name="oldPassword" type="password" />
           </div>
 
           <div>
             <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="newPassword">New Password</label>
-            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="newPassword" name="newPassword" type="password" />
+            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="newPassword" name="newPassword" type="password" />
           </div>
 
           <div>
             <label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant" for="confirmNewPassword">Confirm New Password</label>
-            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="confirmNewPassword" name="confirmNewPassword" type="password" />
+            <input class="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface-container-low px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" id="confirmNewPassword" name="confirmNewPassword" type="password" />
           </div>
 
-          <button class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-colors dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container" id="changePasswordBtn" type="submit">Update Password</button>
+          <button class="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-slate-800 dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container sm:w-auto" id="changePasswordBtn" type="submit">Update Password</button>
           <p class="text-xs text-on-surface-variant" id="changePasswordMessage"></p>
         </form>
       </div>
     </div>
   </section>
-  <!-- Advanced Section -->
+
   <section class="space-y-6 pb-6" id="advanced">
     <div>
       <h2 class="font-headline text-2xl font-extrabold tracking-tight">Advanced</h2>
-      <p class="text-on-surface-variant text-sm mt-1">Configure global application preferences.</p>
+      <p class="mt-1 text-sm text-on-surface-variant">Configure global application preferences.</p>
     </div>
-    <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm sm:p-8">
+
+    <div class="rounded-2xl bg-surface-container-lowest p-6 shadow-sm sm:p-8">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-start gap-4 sm:items-center">
-          <div class="p-3 bg-indigo-50 rounded-xl dark:bg-primary/20">
+          <div class="rounded-xl bg-indigo-50 p-3 dark:bg-primary/20">
             <span class="material-symbols-outlined text-indigo-600 dark:text-primary" data-theme-icon>brightness_auto</span>
           </div>
           <div>
@@ -71,6 +72,7 @@
             <p class="text-sm text-on-surface-variant">System is the default. You can force Dark or Light mode.</p>
           </div>
         </div>
+
         <div class="w-full lg:min-w-64 lg:w-auto">
           <label class="sr-only" for="themePreferenceSlider">Theme Preference</label>
           <div class="rounded-2xl border border-outline-variant/40 bg-surface px-4 py-3">
@@ -83,9 +85,10 @@
           </div>
         </div>
       </div>
+
       <div class="mt-8 flex flex-col gap-5 border-t border-slate-100 pt-8 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-start gap-4 sm:items-center">
-          <div class="p-3 bg-error-container rounded-xl">
+          <div class="rounded-xl bg-error-container p-3">
             <span class="material-symbols-outlined text-error">delete_forever</span>
           </div>
           <div>
@@ -93,7 +96,7 @@
             <p class="text-sm text-on-surface-variant">Permanently remove all data and links. This cannot be undone.</p>
           </div>
         </div>
-        <button id="deleteAccountBtn" class="rounded-xl border-2 border-error bg-white px-6 py-2 text-sm font-bold text-error transition-all hover:bg-error hover:text-white dark:border-primary dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container">Delete Account</button>
+        <button id="deleteAccountBtn" class="w-full rounded-xl border-2 border-error bg-white px-6 py-3 text-sm font-bold text-error transition-all hover:bg-error hover:text-white dark:border-primary dark:bg-primary dark:text-on-primary dark:hover:bg-primary-container sm:w-auto">Delete Account</button>
       </div>
     </div>
   </section>

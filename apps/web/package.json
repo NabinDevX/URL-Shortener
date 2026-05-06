@@ -7,14 +7,15 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --max-warnings 0",
+    "lint": "eslint --max-warnings 0 . --ignore-pattern android/** --ignore-pattern ios/** --ignore-pattern .next/** --ignore-pattern out/**",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.1",
     "@capacitor/ios": "^8.3.1",
-    "@react-oauth/google": "^0.12.1",
+    "@capgo/capacitor-social-login": "^8.3.20",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "axios": "^1.12.2",
@@ -22,8 +23,7 @@
     "next": "16.2.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.4"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.1",

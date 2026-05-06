@@ -4,7 +4,7 @@ const useCases = [
     title: "Hide Confidential URLs",
     description: "Keep your actual destination URLs private and secure",
     example: {
-      before: "https://example.com/api/v1/secret/token?key=abc123&user=john",
+      before: "https://example.com/secret/token?key=abc123&user=john",
       after: "urltinier.app/prod25",
     },
   },

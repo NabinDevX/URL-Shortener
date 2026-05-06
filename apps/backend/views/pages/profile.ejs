@@ -1,6 +1,6 @@
-<div class="mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
-  <div class="rounded-3xl bg-surface-container-lowest p-6 shadow-sm sm:p-8 lg:p-10">
-    <div class="mb-8 flex items-center gap-4">
+<div class="mx-auto max-w-4xl space-y-8 p-4 sm:p-6 lg:p-8 intro-reveal">
+  <section class="rounded-3xl bg-surface-container-lowest p-6 shadow-sm sm:p-8 lg:p-10">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
       <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <span class="material-symbols-outlined text-2xl">person</span>
       </div>
@@ -10,38 +10,39 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div class="md:col-span-1 rounded-2xl bg-surface-container-low p-6 text-center">
-        <div class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-fixed text-primary-fixed-variant">
+    <div class="grid gap-6 md:grid-cols-3">
+      <div class="rounded-2xl bg-surface-container-low p-6 text-center shadow-sm hover-float md:col-span-1">
+        <div class="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-primary-fixed text-primary-fixed-variant ring-4 ring-primary/10">
           <span class="avatar-icon text-5xl">👤</span>
         </div>
-        <button id="changePhotoBtn" class="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-container transition-colors">Change Photo</button>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Profile Photo</p>
+        <button id="changePhotoBtn" class="mt-3 text-xs font-bold uppercase tracking-wider text-primary transition-colors hover:text-primary-container" type="button">Change Photo</button>
       </div>
 
-      <div class="md:col-span-2 space-y-6 rounded-2xl bg-surface-container-low p-6">
+      <div class="space-y-6 rounded-2xl bg-surface-container-low p-6 shadow-sm md:col-span-2">
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-2">
             <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Name</span>
-            <div class="rounded-xl bg-white px-4 py-3 text-sm text-on-surface shadow-sm" id="userName">Loading...</div>
+            <div class="rounded-xl bg-surface-container-lowest px-4 py-3 text-sm text-on-surface shadow-sm" id="userName">Loading...</div>
           </div>
           <div class="space-y-2">
             <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Email</span>
-            <div class="rounded-xl bg-white px-4 py-3 text-sm text-on-surface shadow-sm" id="userEmail">Loading...</div>
+            <div class="rounded-xl bg-surface-container-lowest px-4 py-3 text-sm text-on-surface shadow-sm" id="userEmail">Loading...</div>
           </div>
           <div class="space-y-2 sm:col-span-2">
             <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Member Since</span>
-            <div class="rounded-xl bg-white px-4 py-3 text-sm text-on-surface shadow-sm" id="memberSince">Loading...</div>
+            <div class="rounded-xl bg-surface-container-lowest px-4 py-3 text-sm text-on-surface shadow-sm" id="memberSince">Loading...</div>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-3 pt-2">
-          <button id="backToDashboardBtn" class="btn btn-primary" type="button">← Back to Dashboard</button>
-          <button id="profileSettingsBtn" class="btn btn-primary" type="button">Profile Settings</button>
-          <button id="profileSignoutBtn" class="btn btn-danger" type="button">Sign out</button>
+        <div class="grid gap-3 pt-2 sm:grid-cols-3">
+          <button id="backToDashboardBtn" class="btn btn-primary w-full justify-center" type="button">Back to Dashboard</button>
+          <button id="profileSettingsBtn" class="btn btn-primary w-full justify-center" type="button">Profile Settings</button>
+          <button id="profileSignoutBtn" class="btn btn-danger w-full justify-center" type="button">Sign out</button>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </div>
 
 <script src="/js/profile.js" defer></script>

@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import User from "@/models/user";
-import redisClient from "@/utils/redisClient";
 import { ApiError } from "@/utils/apiError";
 import { blacklistToken } from "@/middlewares/auth";
 import {
@@ -314,7 +313,7 @@ export const signout = async (
     { new: true }
   );
 
-  if (token && redisClient) {
+  if (token) {
     await blacklistToken(token);
   }
 

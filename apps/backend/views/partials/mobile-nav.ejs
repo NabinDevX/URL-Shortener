@@ -1,0 +1,17 @@
+<nav class="fixed inset-x-0 bottom-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] lg:hidden">
+  <% const mobileLinks = [
+    { href: '/dashboard', icon: 'dashboard', label: 'Dashboard', page: 'dashboard' },
+    { href: '/urls', icon: 'link', label: 'Links', page: 'urls' },
+    { href: '/analytics', icon: 'bar_chart', label: 'Analytics', page: 'analytics' },
+    { href: '/api', icon: 'api', label: 'API', page: 'api' },
+    { href: '/settings', icon: 'settings', label: 'Settings', page: 'settings' },
+  ]; %>
+  <div class="mx-auto grid max-w-3xl grid-cols-5 gap-2 rounded-[1.75rem] border border-outline-variant/30 bg-surface-container-low/95 p-2 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:bg-surface-container/95">
+    <% mobileLinks.forEach((item) => { %>
+    <a href="<%= item.href %>" class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold transition-all duration-200 <%= currentPage === item.page ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface' %>">
+      <span class="material-symbols-outlined text-[20px]"><%= item.icon %></span>
+      <span class="leading-none"><%= item.label %></span>
+    </a>
+    <% }); %>
+  </div>
+</nav>

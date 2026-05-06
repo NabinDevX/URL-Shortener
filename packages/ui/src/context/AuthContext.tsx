@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -83,6 +85,10 @@ interface AuthContextType {
   signupWithGoogleToken: (token: string) => Promise<void>;
   loginWithGoogleCode: (code: string) => Promise<void>;
   signupWithGoogleCode: (code: string) => Promise<void>;
+  loginWithCapgoGoogle: (token: string) => Promise<void>;
+  signupWithCapgoGoogle: (token: string) => Promise<void>;
+  loginWithCapgoApple: (token: string) => Promise<void>;
+  signupWithCapgoApple: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: (showLoading?: boolean) => Promise<void>;
   refreshAuth: () => Promise<void>;
@@ -134,7 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             const response = await requestOnce(
               `auth:current-user:${storedAccessTokenKey}`,
               () =>
-                axios.get("/api/v1/user/current-user", {
+                axios.get("/user/current-user", {
                   timeout: 5000,
                   withCredentials: true,
                 }),
@@ -158,7 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               `auth:refresh-token:${storedRefreshTokenKey}`,
               () =>
                 axios.post(
-                  "/api/v1/user/refresh-token",
+                  "/user/refresh-token",
                   { refreshToken: storedRefreshToken },
                   {
                     timeout: 5000,
@@ -200,7 +206,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               const retryResponse = await requestOnce(
                 `auth:current-user:retry:${nextAccessTokenKey}`,
                 () =>
-                  axios.get("/api/v1/user/current-user", {
+                  axios.get("/user/current-user", {
                     timeout: 5000,
                     withCredentials: true,
                   }),
@@ -283,7 +289,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const login = useCallback(
     async (email: string, password: string) => {
       const response = await axios.post(
-        "/api/v1/user/signin",
+        "/user/signin",
         { email, password },
         {
           headers: {
@@ -310,7 +316,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const loginWithGoogleToken = useCallback(
     async (token: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/signin-token",
+        "/user/google/signin-token",
         { token },
         {
           headers: {
@@ -336,7 +342,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const signupWithGoogleToken = useCallback(
     async (token: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/signup-token",
+        "/user/google/signup-token",
         { token },
         {
           headers: {
@@ -362,7 +368,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const loginWithGoogleCode = useCallback(
     async (code: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/signin",
+        "/user/google/signin",
         { code, redirectUri: "postmessage" },
         {
           headers: {
@@ -388,8 +394,112 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const signupWithGoogleCode = useCallback(
     async (code: string) => {
       const response = await axios.post(
-        "/api/v1/user/google/signup",
+        "/user/google/signup",
         { code, redirectUri: "postmessage" },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      const nextAccessToken =
+        response?.data?.data?.accessToken ?? response?.data?.accessToken ?? "";
+      const nextRefreshToken =
+        response?.data?.data?.refreshToken ??
+        response?.data?.refreshToken ??
+        "";
+
+      applyAuthTokens(nextAccessToken, nextRefreshToken);
+      await checkAuth(false);
+    },
+    [applyAuthTokens, checkAuth]
+  );
+
+  const loginWithCapgoGoogle = useCallback(
+    async (token: string) => {
+      const response = await axios.post(
+        "/user/google/signin-token",
+        { token },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      const nextAccessToken =
+        response?.data?.data?.accessToken ?? response?.data?.accessToken ?? "";
+      const nextRefreshToken =
+        response?.data?.data?.refreshToken ??
+        response?.data?.refreshToken ??
+        "";
+
+      applyAuthTokens(nextAccessToken, nextRefreshToken);
+      await checkAuth(false);
+    },
+    [applyAuthTokens, checkAuth]
+  );
+
+  const signupWithCapgoGoogle = useCallback(
+    async (token: string) => {
+      const response = await axios.post(
+        "/user/google/signup-token",
+        { token },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      const nextAccessToken =
+        response?.data?.data?.accessToken ?? response?.data?.accessToken ?? "";
+      const nextRefreshToken =
+        response?.data?.data?.refreshToken ??
+        response?.data?.refreshToken ??
+        "";
+
+      applyAuthTokens(nextAccessToken, nextRefreshToken);
+      await checkAuth(false);
+    },
+    [applyAuthTokens, checkAuth]
+  );
+
+  const loginWithCapgoApple = useCallback(
+    async (token: string) => {
+      const response = await axios.post(
+        "/user/apple/signin-token",
+        { token },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      const nextAccessToken =
+        response?.data?.data?.accessToken ?? response?.data?.accessToken ?? "";
+      const nextRefreshToken =
+        response?.data?.data?.refreshToken ??
+        response?.data?.refreshToken ??
+        "";
+
+      applyAuthTokens(nextAccessToken, nextRefreshToken);
+      await checkAuth(false);
+    },
+    [applyAuthTokens, checkAuth]
+  );
+
+  const signupWithCapgoApple = useCallback(
+    async (token: string) => {
+      const response = await axios.post(
+        "/user/apple/signup-token",
+        { token },
         {
           headers: {
             "Content-Type": "application/json",
@@ -417,7 +527,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         "auth:signout",
         () =>
           axios.post(
-            "/api/v1/user/signout",
+            "/user/signout",
             {},
             {
               withCredentials: true,
@@ -460,6 +570,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     signupWithGoogleToken,
     loginWithGoogleCode,
     signupWithGoogleCode,
+    loginWithCapgoGoogle,
+    signupWithCapgoGoogle,
+    loginWithCapgoApple,
+    signupWithCapgoApple,
     logout,
     checkAuth,
     refreshAuth,

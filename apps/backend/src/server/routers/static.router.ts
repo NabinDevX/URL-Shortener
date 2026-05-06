@@ -175,7 +175,7 @@ const buildAnalyticsPageData = (
       return left.shortId.localeCompare(right.shortId);
     })
     .slice(0, 24)
-    .map(({ lastActivityAt, ...row }) => row);
+    .map((row) => row);
 
   const uniqueIps = new Set(
     allVisits.map((visit) => visit.ipAddress).filter(Boolean)

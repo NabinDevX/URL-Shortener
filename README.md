@@ -75,6 +75,7 @@ Then adjust the generated values for your local setup.
 Backend env (apps/backend/.env) typically includes:
 
 - `PORT`
+- `NODE_ENV`
 - `MONGODB_URI`
 - `DB_NAME`
 - `REDIS_URL`
@@ -83,23 +84,43 @@ Backend env (apps/backend/.env) typically includes:
 - `USER_SECRET_REFRESH_TOKEN`
 - `ACCESS_TOKEN_EXPIRY`
 - `REFRESH_TOKEN_EXPIRY`
+- `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+- `NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
+- `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`
+- `GOOGLE_WEB_CLIENT_SECRET`
 - `BREVO_API_KEY`
 - `BREVO_SENDER_EMAIL`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `LOG_LEVEL`
+- `LOKI_HOST`
+- `PRODUCTION_DOMAIN`
 
 OTP email behavior:
 
 - Production: requires `BREVO_API_KEY` + `BREVO_SENDER_EMAIL`.
 - Development/test: OTP defaults to logging in backend logs. To enable real emails set `OTP_EMAIL_IN_NON_PRODUCTION=true`.
 
-For Google OAuth, keep your Google client secret file at:
+Google OAuth in the backend uses the `NEXT_PUBLIC_GOOGLE_*_CLIENT_ID` values for audience validation and `GOOGLE_WEB_CLIENT_SECRET` for token exchange.
+
+For the Google OAuth secret file used by the backend, keep it at:
 
 - `apps/backend/config/client_secret.json`
 
 Web env (apps/web/.env) typically includes:
 
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
-- `NEXT_PUBLIC_API_PREFIX` (default: `/api/v1`)
-- `NEXT_PUBLIC_API_BASE_URL` (backend base URL for local dev; default in repo is `http://localhost:8000`)
+- `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+- `NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
+- `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`
+- `NEXT_PUBLIC_API_BASE_URL` (backend base URL for local dev; default in repo is `http://localhost:8000/api/v1`)
+
+Extension env (apps/extension/.env) typically includes:
+
+- `VITE_GOOGLE_CLIENT_ID`
+- `VITE_API_PREFIX`
+- `VITE_API_BASE_URL`
+
+Note: `API_KEY_RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW_MS`, and `RATE_LIMIT_MAX_REQUESTS` are still passed through Docker Compose and CI, but the current backend rate-limit middleware uses hardcoded values in code. They do not affect runtime behavior yet.
 
 ## Run in Development
 
@@ -126,6 +147,24 @@ Or run everything at once:
 ```bash
 pnpm dev
 ```
+
+## Capacitor Android
+
+The web app now includes a Capacitor Android shell with safe-area aware system-bar handling.
+
+To refresh the native project after web changes:
+
+```bash
+pnpm --dir apps/web exec cap sync android
+```
+
+To open the Android project in Android Studio:
+
+```bash
+pnpm --dir apps/web exec cap open android
+```
+
+If you want the native shell to load a different remote URL, set `CAPACITOR_SERVER_URL` in `apps/web/.env` before syncing.
 
 ## Workspace Scripts
 

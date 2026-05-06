@@ -12,7 +12,7 @@ const HOST = isDevelopment ? "localhost" : "0.0.0.0";
 
 const getServerUrls = () => {
   if (isDevelopment) {
-    return [`http://localhost:${PORT}`];
+    return [`http://${HOST}:${PORT}`];
   }
 
   return [`http://localhost:${PORT}`, `http://0.0.0.0:${PORT}`];

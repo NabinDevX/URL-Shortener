@@ -13,7 +13,6 @@ import {
 import { appRouter } from "@/server";
 import { createContext } from "@/server/context";
 import { getOriginalURL } from "@/controllers/url.controller";
-import { downloadExtension } from "@/controllers/extension.controller";
 import logger from "@/utils/logger";
 
 const app: Express = express();
@@ -110,7 +109,6 @@ app.use("/document", (req, res) => {
   return res.json(openapiDocument);
 });
 app.get("/:shortId", handleRedirect);
-app.get("/download/extension", downloadExtension);
 
 app.use(
   "/api/v1",

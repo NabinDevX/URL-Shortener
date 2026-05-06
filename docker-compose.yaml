@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - "8000:${PORT}"
-    volumes:
-      - extension-dist:/app/apps/backend/public/extension:ro
+    env_file:
+      - ./apps/backend/.env
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT}
@@ -18,8 +18,10 @@ services:
       USER_SECRET_REFRESH_TOKEN: ${USER_SECRET_REFRESH_TOKEN}
       ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
       REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID}
+      GOOGLE_WEB_CLIENT_SECRET: ${GOOGLE_WEB_CLIENT_SECRET}
+      NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
+      NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID}
       BREVO_API_KEY: ${BREVO_API_KEY}
       BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
       OTP_EMAIL_IN_NON_PRODUCTION: ${OTP_EMAIL_IN_NON_PRODUCTION:-false}
@@ -46,18 +48,21 @@ services:
     restart: unless-stopped
     ports:
       - "5000:3000"
-    volumes:
-      - extension-dist:/app/extension-dist
+    env_file:
+      - ./apps/web/.env
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      API_PROXY_TARGET: http://backend:${PORT}
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID}
+      NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
+      NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID}
+      VITE_API_PREFIX: ${VITE_API_PREFIX}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     depends_on:
       - backend
     networks:
       - app-network
-
-volumes:
-  extension-dist:
 
 networks:
   app-network:

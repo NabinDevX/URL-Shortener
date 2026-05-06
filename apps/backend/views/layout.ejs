@@ -15,15 +15,17 @@
     <div class="min-h-screen lg:flex" data-shell="app" id="appShell">
       <%- include('./partials/sidebar', { activePage: currentPage }) %>
 
-      <div class="ml-20 flex min-h-screen min-w-0 flex-1 flex-col transition-[margin] duration-200 lg:ml-0" id="appShellMain">
+      <div class="flex min-h-screen min-w-0 flex-1 flex-col" id="appShellMain">
         <%- include('./partials/header', { pageTitle: pageTitleMap[currentPage], searchPlaceholder: searchPlaceholderMap[currentPage], showPlanBadge, authUser: locals.authUser }) %>
 
-        <main class="flex-1 overflow-x-auto">
+        <main class="flex-1 overflow-x-auto pb-24 lg:pb-0">
           <%- body %>
         </main>
 
         <%- include('./partials/footer-app') %>
       </div>
+
+      <%- include('./partials/mobile-nav', { currentPage }) %>
     </div>
     <% } else { %>
     <div data-shell="public" id="publicShell">

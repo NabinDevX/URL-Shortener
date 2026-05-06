@@ -6,6 +6,7 @@ import type { GoogleAuthUrlInput } from "@/types";
 interface GoogleOAuthConfig {
   client_id: string;
   client_secret: string;
+  all_client_ids: string[];
 }
 
 export interface GoogleUserProfile {
@@ -23,15 +24,33 @@ const loadGoogleClientConfig = async (): Promise<GoogleOAuthConfig> => {
     return cachedConfig;
   }
 
+  const client_secret = process.env.GOOGLE_WEB_CLIENT_SECRET ?? "";
+
+  const all_client_ids: string[] = [];
+  for (const [key, value] of Object.entries(process.env)) {
+    if (
+      key.startsWith("NEXT_PUBLIC_GOOGLE_") &&
+      key.endsWith("_CLIENT_ID") &&
+      typeof value === "string" &&
+      value.trim() !== ""
+    ) {
+      all_client_ids.push(value.trim());
+    }
+  }
+
+  const client_id =
+    process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? all_client_ids[0] ?? "";
+
   const config: GoogleOAuthConfig = {
-    client_id: process.env.GOOGLE_CLIENT_ID ?? "",
-    client_secret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    client_id,
+    client_secret,
+    all_client_ids: Array.from(new Set(all_client_ids)),
   };
 
   if (!config?.client_id || !config?.client_secret) {
     throw new ApiError(
       500,
-      "Google OAuth is not configured correctly. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env"
+      "Google OAuth is not configured correctly. Set NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID and GOOGLE_CLIENT_SECRET in environment"
     );
   }
 
@@ -97,7 +116,7 @@ export const exchangeCodeForGoogleProfile = async (
     const verifier = new OAuth2Client(config.client_id);
     ticket = await verifier.verifyIdToken({
       idToken: tokens.id_token,
-      audience: config.client_id,
+      audience: config.all_client_ids,
     });
   } catch {
     throw new ApiError(
@@ -154,7 +173,7 @@ export const verifyGoogleIdToken = async (
 
     const ticket = await verifier.verifyIdToken({
       idToken: idToken,
-      audience: config.client_id,
+      audience: config.all_client_ids,
     });
 
     const payload = ticket.getPayload();

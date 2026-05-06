@@ -1,35 +1,27 @@
 "use client";
 
-import { AuthProvider, ThemeProvider } from "@repo/ui";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AuthProvider, ThemeProvider, Toaster } from "@repo/ui";
+import axios from "axios";
 import dynamic from "next/dynamic";
 
-const BrowserRouterProvider = dynamic(() => import("./BrowserRouterProvider"), {
+const CapacitorBridge = dynamic(() => import("./components/CapacitorBridge"), {
   ssr: false,
 });
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const googleClientIdRaw = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const googleClientId =
-    googleClientIdRaw &&
-    googleClientIdRaw !== "your_google_client_id_here" &&
-    googleClientIdRaw.endsWith(".apps.googleusercontent.com")
-      ? googleClientIdRaw
-      : undefined;
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL!;
+  axios.defaults.baseURL = base;
+  axios.defaults.withCredentials = true;
 
   return (
-    <BrowserRouterProvider>
-      {googleClientId ? (
-        <GoogleOAuthProvider clientId={googleClientId}>
-          <ThemeProvider defaultTheme="light">
-            <AuthProvider initialLoadingTime={2000}>{children}</AuthProvider>
-          </ThemeProvider>
-        </GoogleOAuthProvider>
-      ) : (
-        <ThemeProvider defaultTheme="light">
-          <AuthProvider initialLoadingTime={2000}>{children}</AuthProvider>
-        </ThemeProvider>
-      )}
-    </BrowserRouterProvider>
+    <>
+      <CapacitorBridge />
+      <ThemeProvider defaultTheme="light">
+        <AuthProvider initialLoadingTime={0}>
+          {children}
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
+    </>
   );
 }

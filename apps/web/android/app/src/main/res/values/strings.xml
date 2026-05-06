@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">URL Tinier</string>
+    <string name="title_activity_main">URL Tinier</string>
+    <string name="package_name">com.nabindevx.urltinier</string>
+    <string name="custom_url_scheme">com.nabindevx.urltinier</string>
+</resources>
