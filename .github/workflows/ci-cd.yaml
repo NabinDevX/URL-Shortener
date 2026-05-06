@@ -71,12 +71,29 @@ jobs:
         run: |
           mkdir -p apps/web/public/apk
           cd apps/web/android
-          ./gradlew build -PversionCode=${{ github.run_number }} -PversionName="1.0.${{ github.run_number }}"
-          cp app/build/outputs/apk/release/app-release.apk ../public/apk/urltinier.apk 2>/dev/null || cp app/build/outputs/apk/debug/app-debug.apk ../public/apk/urltinier.apk
+          
+          # Make gradlew executable
+          chmod +x ./gradlew
+          
+          # Build APK
+          ./gradlew build -PversionCode=${{ github.run_number }} -PversionName="1.0.${{ github.run_number }}" || {
+            echo "❌ Gradle build failed"
+            exit 1
+          }
+          
+          # Copy APK (try release first, fallback to debug)
+          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            cp app/build/outputs/apk/release/app-release.apk ../public/apk/urltinier.apk
+          elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+            cp app/build/outputs/apk/debug/app-debug.apk ../public/apk/urltinier.apk
+          else
+            echo "❌ No APK file found after build"
+            exit 1
+          fi
 
       - name: Verify Android APK output
         if: matrix.platform == 'android'
-        run: test -f apps/web/public/apk/urltinier.apk
+        run: test -f apps/web/public/apk/urltinier.apk || (echo "❌ APK verification failed" && exit 1)
 
       # ========== iOS BUILD (macOS) ==========
       - name: Setup Xcode
@@ -108,15 +125,64 @@ jobs:
         run: |
           mkdir -p apps/web/public/ipa
           cd apps/web/ios/App
-          xcodebuild build -workspace App.xcworkspace -scheme App -configuration Release -derivedDataPath build
-          # Archive and export
-          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -derivedDataPath build archive -archivePath build/App.xcarchive
-          xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath build/ipa -allowProvisioningUpdates 2>/dev/null || echo "⚠️ Export failed, using fallback"
-          cp build/ipa/*.ipa ../../../public/ipa/urltinier.ipa 2>/dev/null || echo "⚠️ IPA not found, manual signing may be required"
+          
+          # Check if workspace exists
+          if [ ! -f "App.xcworkspace/contents.xcworkspacedata" ]; then
+            echo "❌ App.xcworkspace not found. Capacitor sync may have failed."
+            echo "Creating workspace from project..."
+            xcodebuild -list -project App.xcodeproj || (echo "❌ App.xcodeproj also missing!" && exit 1)
+          fi
+          
+          # Build the app
+          xcodebuild build -workspace App.xcworkspace -scheme App -configuration Release -derivedDataPath build || {
+            echo "❌ Build failed. Checking available schemes..."
+            xcodebuild -workspace App.xcworkspace -list
+            exit 1
+          }
+          
+          # Archive
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -derivedDataPath build archive -archivePath build/App.xcarchive || {
+            echo "❌ Archive failed"
+            exit 1
+          }
+          
+          # Create ExportOptions.plist if it doesn't exist
+          if [ ! -f "ExportOptions.plist" ]; then
+            cat > ExportOptions.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>ad-hoc</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>stripSwiftSymbols</key>
+    <true/>
+    <key>teamID</key>
+    <string></string>
+</dict>
+</plist>
+EOF
+          fi
+          
+          # Export IPA
+          xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath build/ipa || {
+            echo "❌ Export failed. Manual signing may be required."
+            exit 1
+          }
+          
+          # Copy IPA to public folder
+          if [ -f "build/ipa"/*.ipa ]; then
+            cp build/ipa/*.ipa ../../../public/ipa/urltinier.ipa
+          else
+            echo "❌ IPA file not found after export"
+            exit 1
+          fi
 
       - name: Verify iOS IPA output
         if: matrix.platform == 'ios'
-        run: test -f apps/web/public/ipa/urltinier.ipa
+        run: test -f apps/web/public/ipa/urltinier.ipa || (echo "❌ iOS IPA verification failed" && exit 1)
 
       - name: Upload mobile build artifact
         if: always()
@@ -124,7 +190,7 @@ jobs:
         with:
           name: mobile-builds-${{ matrix.platform }}
           path: apps/web/public/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
 
   # 🔧 Build Extension (Vite, Linux only)
@@ -152,19 +218,31 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
         run: |
           mkdir -p apps/web/public/extension
-          pnpm --filter @repo/extension build
+          pnpm --filter @repo/extension build || {
+            echo "❌ Extension build failed"
+            exit 1
+          }
+          
+          if [ ! -d "apps/extension/dist" ]; then
+            echo "❌ Extension dist directory not found"
+            exit 1
+          fi
+          
           cd apps/extension/dist
-          zip -r ../../web/public/extension/urltinier.zip . -x "node_modules/*" ".git/*"
+          zip -r ../../web/public/extension/urltinier.zip . -x "node_modules/*" ".git/*" || {
+            echo "❌ Failed to create extension ZIP"
+            exit 1
+          }
 
       - name: Verify extension ZIP output
-        run: test -f apps/web/public/extension/urltinier.zip
+        run: test -f apps/web/public/extension/urltinier.zip || (echo "❌ Extension ZIP verification failed" && exit 1)
 
       - name: Upload extension artifact
         uses: actions/upload-artifact@v4
         with:
           name: mobile-builds-extension
           path: apps/web/public/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
 
   # 1️⃣ Build and Push to GHCR
@@ -342,12 +420,12 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          envs: REPO_LOWER,REGISTRY
           script: |
             cd ~/URL-Shortener
-            sudo docker pull ghcr.io/${{ env.REPO_LOWER }}/backend:latest
-            sudo docker pull ghcr.io/${{ env.REPO_LOWER }}/frontend:latest
-        env:
-          REPO_LOWER: ${{ env.REPO_LOWER }}
+            echo "Pulling images: $REGISTRY/$REPO_LOWER/backend:latest and $REGISTRY/$REPO_LOWER/frontend:latest"
+            sudo docker pull $REGISTRY/$REPO_LOWER/backend:latest || { echo "❌ Failed to pull backend image"; exit 1; }
+            sudo docker pull $REGISTRY/$REPO_LOWER/frontend:latest || { echo "❌ Failed to pull frontend image"; exit 1; }
 
       - name: Stop old containers
         uses: appleboy/ssh-action@v1.0.0
@@ -367,7 +445,7 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd ~/URL-Shortener
-            sudo docker compose up -d
+            sudo docker compose up -d || { echo "❌ Failed to start containers"; exit 1; }
 
       - name: Health check
         uses: appleboy/ssh-action@v1.0.0
@@ -378,8 +456,10 @@ jobs:
           script: |
             sleep 60
             sudo docker ps
-            curl -s -f http://localhost:8000/health || echo "⚠️ Backend health check failed"
-            curl -s -f http://localhost:8000/health || echo "⚠️ Backend health check failed"
+            echo "🔍 Checking Backend Health..."
+            curl -s -f http://localhost:8000/health && echo "✅ Backend is healthy" || echo "⚠️ Backend health check failed"
+            echo "🔍 Checking Frontend Health..."
+            curl -s -f http://localhost:3000/ && echo "✅ Frontend is healthy" || echo "⚠️ Frontend health check failed"
 
       - name: Cleanup old images
         uses: appleboy/ssh-action@v1.0.0
