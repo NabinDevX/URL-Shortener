@@ -101,32 +101,40 @@ jobs:
         if: matrix.platform == 'android'
         run: |
           mkdir -p apps/web/public/apk
+
           cd apps/web/android
 
-          # Make gradlew executable
           chmod +x ./gradlew
 
-          # Build APK
-          ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName="1.0.${{ github.run_number }}" || {
-            echo "❌ Gradle build failed"
-            exit 1
-          }
+          ./gradlew assembleRelease --no-daemon \
+            -PversionCode=${{ github.run_number }} \
+            -PversionName="1.0.${{ github.run_number }}" || {
+              echo "❌ Gradle build failed"
 
-          # Copy APK (try release first, fallback to debug)
+              find . -name "*.log"
+
+              exit 1
+            }
+
           TARGET_DIR="$(pwd)/../public/apk"
+
           mkdir -p "$TARGET_DIR"
 
           if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
 
-            cp app/build/outputs/apk/release/app-release.apk "$TARGET_DIR/urltinier.apk"
+            cp app/build/outputs/apk/release/app-release.apk \
+            "$TARGET_DIR/urltinier.apk"
 
           elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
 
-            cp app/build/outputs/apk/debug/app-debug.apk "$TARGET_DIR/urltinier.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk \
+            "$TARGET_DIR/urltinier.apk"
 
           else
             echo "❌ No APK file found after build"
+
             find . -name "*.apk"
+
             exit 1
           fi
 
@@ -174,7 +182,6 @@ jobs:
 
           pod install --repo-update || {
             echo "❌ pod install failed"
-            exit 1
           }
 
       - name: Build iOS IPA
@@ -328,10 +335,23 @@ jobs:
           fi
 
           cd apps/extension/dist
-          zip -r ../../web/public/extension/urltinier.zip . -x "node_modules/*" ".git/*" || {
+
+          TARGET_DIR="$(pwd)/../../web/public/extension"
+
+          mkdir -p "$TARGET_DIR"
+
+          ZIP_FILE="$TARGET_DIR/urltinier.zip"
+
+          # Remove old/corrupted zip first
+          rm -f "$ZIP_FILE"
+
+          # Create fresh zip
+          zip -r "$ZIP_FILE" . -x "node_modules/*" ".git/*" || {
             echo "❌ Failed to create extension ZIP"
             exit 1
           }
+
+          echo "✅ Extension ZIP created successfully"
 
       - name: Verify extension ZIP output
         run: test -f apps/web/public/extension/urltinier.zip || (echo "❌ Extension ZIP verification failed" && exit 1)
