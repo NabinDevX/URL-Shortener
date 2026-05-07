@@ -611,7 +611,7 @@ jobs:
             fi
 
             echo "🔍 Checking Frontend Health..."
-            if curl -s -f http://localhost:3000/ > /dev/null; then
+            if curl -s -f http://localhost:5000/ > /dev/null; then
               echo "✅ Frontend is healthy"
               FRONTEND_HEALTHY=true
             else

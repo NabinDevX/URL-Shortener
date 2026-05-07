@@ -24,16 +24,8 @@ RUN pnpm --filter @repo/web build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
-RUN npm install -g pnpm
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY packages ./packages
-COPY apps/web/package.json ./apps/web/package.json
-COPY apps/web/next.config.js ./apps/web/next.config.js
-COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/apps/web/public ./apps/web/public
-RUN pnpm install --prod --frozen-lockfile --filter @repo/web...
+RUN npm install -g serve
+COPY --from=builder /app/apps/web/out ./out
 EXPOSE 3000
-ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-WORKDIR /app/apps/web
-CMD ["pnpm", "start"]
+CMD ["serve", "-s", "out", "-l", "3000"]
