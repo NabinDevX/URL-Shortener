@@ -541,16 +541,20 @@ jobs:
 
       - name: Login to GHCR on VM
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           envs: TOKEN_GITHUB
           script: |
-            echo "$TOKEN_GITHUB" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin || {
-              echo "❌ Docker login failed"
-              exit 1
-            }
+            echo "$TOKEN_GITHUB" | sudo docker login ghcr.io \
+              -u ${{ github.actor }} \
+              --password-stdin || {
+                echo "❌ Docker login failed"
+                exit 1
+              }
 
       - name: Pull latest images
         uses: appleboy/ssh-action@v1.0.0
