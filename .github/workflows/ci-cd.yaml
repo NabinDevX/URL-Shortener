@@ -120,23 +120,18 @@ jobs:
 
           mkdir -p "$TARGET_DIR"
 
-          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+          APK_FILE=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
 
-            cp app/build/outputs/apk/release/app-release.apk \
-            "$TARGET_DIR/urltinier.apk"
-
-          elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-
-            cp app/build/outputs/apk/debug/app-debug.apk \
-            "$TARGET_DIR/urltinier.apk"
-
-          else
-            echo "❌ No APK file found after build"
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ No APK file found"
 
             find . -name "*.apk"
 
             exit 1
           fi
+
+          cp "$APK_FILE" "$TARGET_DIR/urltinier.apk"
+          echo "✅ APK built and copied successfully"
 
       - name: Verify Android APK output
         if: matrix.platform == 'android'
