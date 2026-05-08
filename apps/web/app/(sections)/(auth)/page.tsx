@@ -65,23 +65,31 @@ const StatCard = ({
 
 const Welcome = () => {
   const router = useRouter();
-  const [platform, setPlatform] = useState<string | null>(null);
+  const [platform, setPlatform] = useState<"android" | "ios" | "web" | null>(
+    null
+  );
+  const [isNativePlatform, setIsNativePlatform] = useState(false);
 
   useEffect(() => {
     const detectPlatform = async () => {
-      if (typeof window !== "undefined" && (window as any).capacitorIsNative) {
-        try {
-          const capacitor = await import("@capacitor/core");
-          if (capacitor.Capacitor) {
-            const platformResult = capacitor.Capacitor.getPlatform();
-            if (platformResult) {
-              setPlatform(platformResult);
-              return;
-            }
+      try {
+        const capacitor = await import("@capacitor/core");
+
+        if (capacitor.Capacitor) {
+          const platformResult = capacitor.Capacitor.getPlatform();
+
+          if (platformResult) {
+            setPlatform(
+              platformResult === "android" || platformResult === "ios"
+                ? platformResult
+                : "web"
+            );
+            setIsNativePlatform(capacitor.Capacitor.isNativePlatform());
+            return;
           }
-        } catch {
-          // Continue to fallback
         }
+      } catch {
+        // Continue to fallback
       }
 
       const userAgent = navigator.userAgent.toLowerCase();
@@ -101,6 +109,7 @@ const Welcome = () => {
   const handleSignIn = () => router.push("/signin");
 
   const getDownloadButton = () => {
+    if (isNativePlatform) return null;
     if (!platform) return null;
 
     const buttonClass =

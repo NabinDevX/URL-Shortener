@@ -10,358 +10,21 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # 🔨 Build Mobile Apps (Android/iOS via Capacitor from Next.js web app)
-  build-mobile:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            platform: android
-          - os: macos-latest
-            platform: ios
+  build-android:
+    uses: ./.github/workflows/android.yaml
+    secrets: inherit
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+  build-ios:
+    uses: ./.github/workflows/ios.yaml
+    secrets: inherit
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # ========== ANDROID BUILD (Ubuntu) ==========
-      - name: Setup Java for Android
-        if: matrix.platform == 'android'
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-
-      - name: Setup Android SDK
-        if: matrix.platform == 'android'
-        run: |
-          mkdir -p $ANDROID_HOME/cmdline-tools
-
-          cd $ANDROID_HOME/cmdline-tools
-
-          wget https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip
-
-          unzip commandlinetools-linux-12266719_latest.zip
-
-          mv cmdline-tools latest
-
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
-
-      - name: Cache Gradle
-        if: matrix.platform == 'android'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.      properties') }}
-
-      - name: Build Next.js for Android
-        if: matrix.platform == 'android'
-        env:
-          NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-        run: |
-          cd apps/web
-          pnpm build || {
-            echo "❌ Next.js build failed for Android"
-            exit 1
-          }
-
-      - name: Sync Capacitor Android
-        if: matrix.platform == 'android'
-        run: |
-          cd apps/web
-          npx cap sync android || {
-            echo "❌ Capacitor Android sync failed"
-            exit 1
-          }
-
-      - name: Build Android APK
-        if: matrix.platform == 'android'
-        run: |
-          mkdir -p apps/web/public/apk
-
-          cd apps/web/android
-
-          chmod +x ./gradlew
-
-          ./gradlew assembleRelease --no-daemon \
-            -PversionCode=${{ github.run_number }} \
-            -PversionName="1.0.${{ github.run_number }}" || {
-              echo "❌ Gradle build failed"
-
-              find . -name "*.log"
-
-              exit 1
-            }
-
-          TARGET_DIR="$(pwd)/../public/apk"
-
-          mkdir -p "$TARGET_DIR"
-
-          APK_FILE=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
-
-          if [ -z "$APK_FILE" ]; then
-            echo "❌ No APK file found"
-
-            find . -name "*.apk"
-
-            exit 1
-          fi
-
-          cp "$APK_FILE" "$TARGET_DIR/urltinier.apk"
-          echo "✅ APK built and copied successfully"
-
-      - name: Verify Android APK output
-        if: matrix.platform == 'android'
-        run: test -f apps/web/public/apk/urltinier.apk || (echo "❌ APK verification failed" && exit 1)
-
-      # ========== iOS BUILD (macOS) ==========
-      - name: Setup Xcode
-        if: matrix.platform == 'ios'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-
-          xcodebuild -version
-
-      - name: Build Next.js for iOS
-        if: matrix.platform == 'ios'
-        env:
-          NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-        run: |
-          cd apps/web
-          pnpm build || {
-            echo "❌ Next.js build failed for iOS"
-            exit 1
-          }
-
-      - name: Sync Capacitor iOS
-        if: matrix.platform == 'ios'
-        run: |
-          cd apps/web
-          npx cap sync ios || {
-            echo "❌ Capacitor iOS sync failed"
-            exit 1
-          }
-
-      - name: Install CocoaPods
-        if: matrix.platform == 'ios'
-        run: |
-          cd apps/web/ios/App
-
-          sudo gem install cocoapods
-
-          pod install --repo-update || {
-            echo "❌ pod install failed"
-          }
-
-      - name: Build iOS IPA
-        if: matrix.platform == 'ios'
-        continue-on-error: true
-        run: |
-          mkdir -p apps/web/public/ipa
-
-          cd apps/web/ios/App
-
-          # Verify workspace exists
-          if [ ! -d "App.xcworkspace" ]; then
-            echo "❌ App.xcworkspace not found"
-
-            echo "Current directory:"
-            pwd
-
-            echo "Files:"
-            ls -la
-
-            echo "⚠️ Skipping iOS IPA build"
-          fi
-
-          # Build app
-          xcodebuild \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -sdk iphoneos \
-            -derivedDataPath build \
-            clean build || {
-              echo "❌ Build failed"
-
-              xcodebuild -workspace App.xcworkspace -list
-
-              echo "⚠️ Skipping iOS IPA build"
-            }
-
-          # Archive app
-          xcodebuild archive \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -archivePath build/App.xcarchive || {
-              echo "❌ Archive failed"
-              echo "⚠️ Skipping iOS IPA build"
-            }
-
-          # Create export options
-          cat > ExportOptions.plist << 'PLIST_EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>development</string>
-
-              <key>signingStyle</key>
-              <string>automatic</string>
-
-              <key>stripSwiftSymbols</key>
-              <true/>
-          </dict>
-          </plist>
-          PLIST_EOF
-
-          # Export IPA
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
-            -exportPath build/ipa || {
-              echo "❌ Export failed"
-
-              echo "Likely causes:"
-              echo "- Missing Apple Developer signing"
-              echo "- Missing Team ID"
-              echo "- Missing provisioning profile"
-
-              echo "⚠️ Skipping iOS IPA build"
-            }
-
-          # Find IPA file safely
-          IPA_FILE=$(find build/ipa -name "*.ipa" | head -n 1)
-
-          if [ -z "$IPA_FILE" ]; then
-            echo "❌ IPA file not found"
-
-            find build -name "*.ipa"
-
-            echo "⚠️ Skipping iOS IPA build"
-          fi
-
-          TARGET_DIR="$(pwd)/../../../public/ipa"
-
-          mkdir -p "$TARGET_DIR"
-
-          cp "$IPA_FILE" "$TARGET_DIR/urltinier.ipa"
-
-          echo "✅ IPA copied successfully"
-
-      - name: Verify iOS IPA output
-        if: matrix.platform == 'ios'
-        run: |
-          test -f apps/web/public/ipa/urltinier.ipa || {
-            echo "❌ iOS IPA verification failed"
-            echo "⚠️ Skipping iOS IPA build"
-          }
-
-      - name: Upload mobile build artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-builds-${{ matrix.platform }}
-          path: apps/web/public/
-          if-no-files-found: warn
-          retention-days: 7
-
-  # 🔧 Build Extension (Vite, Linux only)
   build-extension:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Extension
-        env:
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
-          VITE_API_PREFIX: ${{ secrets.VITE_API_PREFIX }}
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-        run: |
-          mkdir -p apps/web/public/extension
-          pnpm --filter @repo/extension build || {
-            echo "❌ Extension build failed"
-            exit 1
-          }
-
-          if [ ! -d "apps/extension/dist" ]; then
-            echo "❌ Extension dist directory not found"
-            exit 1
-          fi
-
-          cd apps/extension/dist
-
-          TARGET_DIR="$(pwd)/../../web/public/extension"
-
-          mkdir -p "$TARGET_DIR"
-
-          ZIP_FILE="$TARGET_DIR/urltinier.zip"
-
-          # Remove old/corrupted zip first
-          rm -f "$ZIP_FILE"
-
-          # Create fresh zip
-          zip -r "$ZIP_FILE" . -x "node_modules/*" ".git/*" || {
-            echo "❌ Failed to create extension ZIP"
-            exit 1
-          }
-
-          echo "✅ Extension ZIP created successfully"
-
-      - name: Verify extension ZIP output
-        run: test -f apps/web/public/extension/urltinier.zip || (echo "❌ Extension ZIP verification failed" && exit 1)
-
-      - name: Upload extension artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-builds-extension
-          path: apps/web/public/
-          if-no-files-found: warn
-          retention-days: 7
+    uses: ./.github/workflows/extension.yaml
+    secrets: inherit
 
   # 1️⃣ Build and Push to GHCR
   build-and-push:
-    needs: [build-mobile, build-extension]
+    needs: [build-android, build-ios, build-extension]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -371,27 +34,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      # Download all mobile build artifacts
       - name: Download Android build
         uses: actions/download-artifact@v4
         with:
-          name: mobile-builds-android
-          path: apps/web/public/
-        continue-on-error: true
+          name: android-apk
+          path: .artifacts/android
 
       - name: Download iOS build
         uses: actions/download-artifact@v4
         with:
-          name: mobile-builds-ios
-          path: apps/web/public/
-        continue-on-error: true
+          name: ios-ipa
+          path: .artifacts/ios
 
       - name: Download Extension build
         uses: actions/download-artifact@v4
         with:
-          name: mobile-builds-extension
-          path: apps/web/public/
-        continue-on-error: true
+          name: extension-zip
+          path: .artifacts/extension
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -404,26 +63,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Ensure web public artifact folders exist
+      - name: Restore downloaded artifacts into public folders
         run: |
-          mkdir -p apps/web/public/apk
-          mkdir -p apps/web/public/ipa
-          mkdir -p apps/web/public/extension
+          mkdir -p apps/web/public/apk apps/web/public/ipa apps/web/public/extension
+          mkdir -p apps/backend/public/apk apps/backend/public/ipa apps/backend/public/extension
 
-      - name: Verify required artifacts exist
-        run: |
-          echo "📦 Checking artifacts..."
-          if [ ! -f "apps/web/public/apk/urltinier.apk" ]; then
-            echo "⚠️  Android APK not found (build may have failed or been skipped)"
+          ANDROID_APK=$(find .artifacts/android -name "*.apk" | head -n 1)
+          IOS_IPA=$(find .artifacts/ios -name "*.ipa" | head -n 1)
+          EXTENSION_ZIP=$(find .artifacts/extension -name "*.zip" | head -n 1)
+
+          if [ -z "$ANDROID_APK" ] || [ -z "$IOS_IPA" ] || [ -z "$EXTENSION_ZIP" ]; then
+            echo "❌ Missing one or more build artifacts"
+            find .artifacts -maxdepth 3 -type f
           fi
-          if [ ! -f "apps/web/public/ipa/urltinier.ipa" ]; then
-            echo "⚠️  iOS IPA not found (build may have failed or been skipped)"
-          fi
-          if [ ! -f "apps/web/public/extension/urltinier.zip" ]; then
-            echo "❌ Browser extension ZIP not found - this is required!"
-            exit 1
-          fi
-          echo "✅ Artifact check complete"
+
+          cp "$ANDROID_APK" apps/web/public/apk/urltinier.apk
+          cp "$ANDROID_APK" apps/backend/public/apk/urltinier.apk
+          cp "$IOS_IPA" apps/web/public/ipa/urltinier.ipa
+          cp "$IOS_IPA" apps/backend/public/ipa/urltinier.ipa
+          cp "$EXTENSION_ZIP" apps/web/public/extension/urltinier.zip
+          cp "$EXTENSION_ZIP" apps/backend/public/extension/urltinier.zip
+
+          test -s apps/web/public/apk/urltinier.apk
+          test -s apps/web/public/ipa/urltinier.ipa
+          test -s apps/web/public/extension/urltinier.zip
+          test -s apps/backend/public/apk/urltinier.apk
+          test -s apps/backend/public/ipa/urltinier.ipa
+          test -s apps/backend/public/extension/urltinier.zip
 
       # 🧩 Convert repo name to lowercase for GHCR
       - name: Prepare lowercase image names

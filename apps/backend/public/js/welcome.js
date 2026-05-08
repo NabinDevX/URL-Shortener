@@ -24,6 +24,73 @@
     return next;
   }
 
+  function detectDownloadPlatform() {
+    const capacitor = window.Capacitor;
+
+    if (capacitor && typeof capacitor.getPlatform === "function") {
+      try {
+        const platform = capacitor.getPlatform();
+        return {
+          platform:
+            platform === "android" || platform === "ios" ? platform : "web",
+          isNative:
+            typeof capacitor.isNativePlatform === "function"
+              ? capacitor.isNativePlatform()
+              : false,
+        };
+      } catch {
+        // Fall back to browser detection below.
+      }
+    }
+
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    if (/android/.test(userAgent)) {
+      return { platform: "android", isNative: false };
+    }
+
+    if (/iphone|ipad|ipod/.test(userAgent)) {
+      return { platform: "ios", isNative: false };
+    }
+
+    return { platform: "web", isNative: false };
+  }
+
+  function getDownloadTarget(platform) {
+    switch (platform) {
+      case "android":
+        return { href: "/apk/urltinier.apk", label: "APK" };
+      case "ios":
+        return { href: "/ipa/urltinier.ipa", label: "IPA" };
+      default:
+        return { href: "/extension/urltinier.zip", label: "Extension" };
+    }
+  }
+
+  function initDownloadCta() {
+    const container = document.querySelector("[data-download-app-cta]");
+
+    if (!container) {
+      return;
+    }
+
+    const { platform, isNative } = detectDownloadPlatform();
+
+    if (isNative) {
+      container.hidden = true;
+      container.innerHTML = "";
+      return;
+    }
+
+    const target = getDownloadTarget(platform);
+    container.hidden = false;
+    container.innerHTML = `
+      <a class="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-on-surface transition hover:border-primary hover:text-primary sm:w-auto" href="${target.href}" download>
+        Download ${target.label}
+      </a>
+    `;
+  }
+
   async function ensureRazorpayScriptLoaded() {
     if (window.Razorpay) {
       return;
@@ -354,6 +421,7 @@
   async function initializeWelcome() {
     const redirected = await redirectIfAuthenticated();
     if (!redirected) {
+      initDownloadCta();
       initWelcomeNav();
     }
   }

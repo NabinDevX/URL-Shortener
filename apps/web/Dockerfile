@@ -24,8 +24,14 @@ RUN pnpm --filter @repo/web build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
-RUN npm install -g serve
-COPY --from=builder /app/apps/web/out ./out
+RUN npm install -g pnpm
+
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages ./packages
+COPY --from=builder /app/apps/web ./apps/web
+
+RUN pnpm install --frozen-lockfile --filter @repo/web... --prod
+
 EXPOSE 3000
 ENV NODE_ENV=production
-CMD ["serve", "-s", "out", "-l", "3000"]
+CMD ["pnpm", "--filter", "@repo/web", "start"]

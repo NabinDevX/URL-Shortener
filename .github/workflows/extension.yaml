@@ -1,0 +1,64 @@
+name: Extension ZIP Build
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-extension:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Extension
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_API_PREFIX: ${{ secrets.VITE_API_PREFIX }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: |
+          mkdir -p apps/web/public/extension apps/backend/public/extension
+          pnpm --filter @repo/extension build
+
+          if [ ! -d "apps/extension/dist" ]; then
+            echo "❌ Extension dist directory not found"
+            exit 1
+          fi
+
+          cd apps/extension/dist
+
+          zip -r /tmp/urltinier.zip . -x "node_modules/*" ".git/*"
+          test -s /tmp/urltinier.zip
+
+          cp /tmp/urltinier.zip ../../web/public/extension/urltinier.zip
+          cp /tmp/urltinier.zip ../../backend/public/extension/urltinier.zip
+          test -s ../../web/public/extension/urltinier.zip
+          test -s ../../backend/public/extension/urltinier.zip
+
+      - name: Verify extension ZIP output
+        run: |
+          test -s apps/web/public/extension/urltinier.zip
+          test -s apps/backend/public/extension/urltinier.zip
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-zip
+          path: apps/backend/public/extension/urltinier.zip
+          if-no-files-found: error
+          retention-days: 7

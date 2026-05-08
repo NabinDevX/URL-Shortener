@@ -1,0 +1,109 @@
+name: iOS IPA Build
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Build Next.js for iOS
+        env:
+          NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+          NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
+          NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+        run: pnpm --filter @repo/web build
+
+      - name: Sync Capacitor iOS
+        run: pnpm --filter @repo/web exec cap sync ios
+
+      - name: Install CocoaPods
+        run: |
+          cd apps/web/ios/App
+          sudo gem install cocoapods
+          pod install --repo-update
+
+      - name: Build iOS IPA
+        run: |
+          mkdir -p apps/web/public/ipa apps/backend/public/ipa
+          cd apps/web/ios/App
+
+          if [ ! -d "App.xcworkspace" ]; then
+            echo "❌ App.xcworkspace not found"
+            ls -la
+          fi
+
+          xcodebuild archive \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive
+
+          cat > ExportOptions.plist << 'PLIST_EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>development</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>stripSwiftSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          PLIST_EOF
+
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/ipa
+
+          IPA_FILE=$(find build/ipa -name "*.ipa" | head -n 1)
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ IPA file not found"
+            find build -name "*.ipa"
+          fi
+
+          cp "$IPA_FILE" ../../public/ipa/urltinier.ipa
+          cp "$IPA_FILE" ../../../backend/public/ipa/urltinier.ipa
+          test -s ../../public/ipa/urltinier.ipa
+          test -s ../../../backend/public/ipa/urltinier.ipa
+
+      - name: Verify iOS IPA output
+        run: |
+          test -s apps/web/public/ipa/urltinier.ipa
+          test -s apps/backend/public/ipa/urltinier.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: apps/backend/public/ipa/urltinier.ipa
+          if-no-files-found: error
+          retention-days: 7

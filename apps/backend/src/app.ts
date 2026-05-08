@@ -20,12 +20,59 @@ const __dirname = path.resolve();
 
 client.collectDefaultMetrics({ register: client.register });
 
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN,
+const configureCORS = () => {
+  const corsOriginEnv = process.env.CORS_ORIGIN || "http://localhost:3000";
+
+  const allowedOrigins = corsOriginEnv
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
+  const developmentOrigins = [
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "https://localhost",
+    "capacitor://localhost",
+  ];
+
+  const finalOrigins = [...new Set([...allowedOrigins, ...developmentOrigins])];
+
+  return {
+    origin: (
+      requestOrigin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void
+    ) => {
+      if (!requestOrigin) {
+        return callback(null, true);
+      }
+
+      const isAllowed = finalOrigins.some((allowedOrigin) => {
+        if (allowedOrigin === "*") {
+          return true;
+        }
+        if (allowedOrigin.startsWith("/") && allowedOrigin.endsWith("/")) {
+          const regex = new RegExp(allowedOrigin.slice(1, -1));
+          return regex.test(requestOrigin);
+        }
+        return requestOrigin === allowedOrigin;
+      });
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        logger.warn("CORS blocked request from origin", {
+          origin: requestOrigin,
+        });
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-  })
-);
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
+};
+
+app.use(cors(configureCORS()));
 
 app.get("/metrics", async (req: Request, res: Response) => {
   res.setHeader("Content-Type", client.register.contentType);
