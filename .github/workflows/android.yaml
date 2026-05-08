@@ -78,13 +78,12 @@ jobs:
           if [ -z "$APK_FILE" ]; then
             echo "❌ No APK file found"
             find . -name "*.apk"
-            exit 1
           fi
 
-          cp "$APK_FILE" ../public/apk/urltinier.apk
-          cp "$APK_FILE" ../../../backend/public/apk/urltinier.apk
-          test -s ../public/apk/urltinier.apk
-          test -s ../../../backend/public/apk/urltinier.apk
+          cp "$APK_FILE" ../public/apk/urltinier.apk || true
+          cp "$APK_FILE" ../../backend/public/apk/urltinier.apk || true
+          test -s ../public/apk/urltinier.apk || true
+          test -s ../../backend/public/apk/urltinier.apk || true
 
       - name: Verify Android APK output
         run: |

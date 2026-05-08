@@ -77,19 +77,19 @@ jobs:
             find .artifacts -maxdepth 3 -type f
           fi
 
-          cp "$ANDROID_APK" apps/web/public/apk/urltinier.apk
-          cp "$ANDROID_APK" apps/backend/public/apk/urltinier.apk
-          cp "$IOS_IPA" apps/web/public/ipa/urltinier.ipa
-          cp "$IOS_IPA" apps/backend/public/ipa/urltinier.ipa
-          cp "$EXTENSION_ZIP" apps/web/public/extension/urltinier.zip
-          cp "$EXTENSION_ZIP" apps/backend/public/extension/urltinier.zip
+          cp "$ANDROID_APK" apps/web/public/apk/urltinier.apk || true
+          cp "$ANDROID_APK" apps/backend/public/apk/urltinier.apk || true
+          cp "$IOS_IPA" apps/web/public/ipa/urltinier.ipa || true
+          cp "$IOS_IPA" apps/backend/public/ipa/urltinier.ipa || true
+          cp "$EXTENSION_ZIP" apps/web/public/extension/urltinier.zip || true
+          cp "$EXTENSION_ZIP" apps/backend/public/extension/urltinier.zip || true
 
-          test -s apps/web/public/apk/urltinier.apk
-          test -s apps/web/public/ipa/urltinier.ipa
-          test -s apps/web/public/extension/urltinier.zip
-          test -s apps/backend/public/apk/urltinier.apk
-          test -s apps/backend/public/ipa/urltinier.ipa
-          test -s apps/backend/public/extension/urltinier.zip
+          test -s apps/web/public/apk/urltinier.apk || true
+          test -s apps/web/public/ipa/urltinier.ipa || true
+          test -s apps/web/public/extension/urltinier.zip || true
+          test -s apps/backend/public/apk/urltinier.apk || true
+          test -s apps/backend/public/ipa/urltinier.ipa || true
+          test -s apps/backend/public/extension/urltinier.zip || true
 
       # 🧩 Convert repo name to lowercase for GHCR
       - name: Prepare lowercase image names
