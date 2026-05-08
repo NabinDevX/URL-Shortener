@@ -20,9 +20,22 @@ const __dirname = path.resolve();
 
 client.collectDefaultMetrics({ register: client.register });
 
-const configureCORS = () => {
-  const corsOriginEnv = process.env.CORS_ORIGIN || "http://localhost:3000";
+const allowedRequestHeaders = [
+  "Content-Type",
+  "Authorization",
+  "X-Requested-With",
+  "X-Client-Origin",
+  "X-Client-Platform",
+];
 
+const allowedMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"];
+
+const isAllowedOrigin = (requestOrigin: string | undefined): boolean => {
+  if (!requestOrigin) {
+    return true;
+  }
+
+  const corsOriginEnv = process.env.CORS_ORIGIN || "http://localhost:3000";
   const allowedOrigins = corsOriginEnv
     .split(",")
     .map((origin) => origin.trim())
@@ -38,27 +51,27 @@ const configureCORS = () => {
 
   const finalOrigins = [...new Set([...allowedOrigins, ...developmentOrigins])];
 
+  return finalOrigins.some((allowedOrigin) => {
+    if (allowedOrigin === "*") {
+      return true;
+    }
+
+    if (allowedOrigin.startsWith("/") && allowedOrigin.endsWith("/")) {
+      const regex = new RegExp(allowedOrigin.slice(1, -1));
+      return regex.test(requestOrigin);
+    }
+
+    return requestOrigin === allowedOrigin;
+  });
+};
+
+const configureCORS = () => {
   return {
     origin: (
       requestOrigin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void
     ) => {
-      if (!requestOrigin) {
-        return callback(null, true);
-      }
-
-      const isAllowed = finalOrigins.some((allowedOrigin) => {
-        if (allowedOrigin === "*") {
-          return true;
-        }
-        if (allowedOrigin.startsWith("/") && allowedOrigin.endsWith("/")) {
-          const regex = new RegExp(allowedOrigin.slice(1, -1));
-          return regex.test(requestOrigin);
-        }
-        return requestOrigin === allowedOrigin;
-      });
-
-      if (isAllowed) {
+      if (isAllowedOrigin(requestOrigin)) {
         callback(null, true);
       } else {
         logger.warn("CORS blocked request from origin", {
@@ -68,10 +81,51 @@ const configureCORS = () => {
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: allowedMethods,
+    allowedHeaders: allowedRequestHeaders,
   };
 };
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method !== "OPTIONS") {
+    next();
+    return;
+  }
+
+  const requestOrigin = req.headers.origin as string | undefined;
+
+  if (!isAllowedOrigin(requestOrigin)) {
+    logger.warn("CORS blocked preflight request from origin", {
+      origin: requestOrigin,
+      requestHeaders: req.headers["access-control-request-headers"],
+    });
+    res.status(403).end();
+    return;
+  }
+
+  const requestedHeaders =
+    (req.headers["access-control-request-headers"] as string | undefined)
+      ?.split(",")
+      .map((header) => header.trim())
+      .filter(Boolean) ?? [];
+
+  const responseHeaders = [
+    ...new Set([
+      ...allowedRequestHeaders,
+      ...requestedHeaders,
+    ]),
+  ];
+
+  if (requestOrigin) {
+    res.header("Access-Control-Allow-Origin", requestOrigin);
+  }
+
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", allowedMethods.join(","));
+  res.header("Access-Control-Allow-Headers", responseHeaders.join(","));
+  res.header("Vary", "Origin, Access-Control-Request-Headers");
+  res.sendStatus(204);
+});
 
 app.use(cors(configureCORS()));
 

@@ -217,12 +217,37 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
       onSuccess?.();
     } catch (error) {
       Toast.dismiss();
+      // Map known cancellation/reauth errors to an informational toast
+      const isCancellation = (() => {
+        try {
+          if (!error) return false;
+          // Capacitor plugin may return an object with a `code` and `message`
+          const anyErr = error as any;
+          const code = anyErr?.code || anyErr?.error?.code || "";
+          const msg = (anyErr?.message || anyErr?.error?.message || "").toString();
+
+          if (code === "USER_CANCELLED" || /cancel/i.test(code)) return true;
+          if (/cancel/i.test(msg)) return true;
+          if (/reauth failed/i.test(msg)) return true;
+          if (/GetCredentialCancellationException/i.test(msg)) return true;
+          return false;
+        } catch {
+          return false;
+        }
+      })();
+
+      if (isCancellation) {
+        Toast.info("Google sign-in cancelled by user");
+        onError?.(new Error("Google sign-in cancelled by user"));
+        return;
+      }
+
       const message =
         error instanceof AxiosError
           ? error.response?.data?.message || error.message
           : error instanceof Error
-            ? error.message
-            : "Google authentication failed";
+          ? error.message
+          : "Google authentication failed";
       Toast.error(message);
       onError?.(error as Error);
     } finally {

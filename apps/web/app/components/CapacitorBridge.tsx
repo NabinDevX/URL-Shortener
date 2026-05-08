@@ -23,10 +23,23 @@ export default function CapacitorBridge() {
             const { SocialLogin } =
               await import("@capgo/capacitor-social-login");
 
+            const googleAndroidClientId =
+              process.env.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+
+            const initGoogle: Record<string, unknown> = {
+              webClientId: googleWebClientId,
+            };
+
+            if (
+              googleAndroidClientId &&
+              googleAndroidClientId.endsWith('.apps.googleusercontent.com')
+            ) {
+              // Provide Android client id as well so native SDKs can validate
+              (initGoogle as any).androidClientId = googleAndroidClientId;
+            }
+
             const initConfig: Parameters<typeof SocialLogin.initialize>[0] = {
-              google: {
-                webClientId: googleWebClientId,
-              },
+              google: initGoogle,
             };
 
             await SocialLogin.initialize(initConfig).catch((err: unknown) =>
