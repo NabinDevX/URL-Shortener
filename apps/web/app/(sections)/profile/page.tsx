@@ -129,7 +129,7 @@ export default function Profile() {
             } catch {
               // ignore
             }
-            void router.replace("/signin");
+            void router.replace("/signin/");
           }}
           className="btn btn-danger"
         >

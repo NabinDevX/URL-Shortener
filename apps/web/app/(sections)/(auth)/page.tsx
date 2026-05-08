@@ -97,8 +97,8 @@ const Welcome = () => {
     detectPlatform();
   }, []);
 
-  const handleGetStarted = () => router.push("/signup");
-  const handleSignIn = () => router.push("/signin");
+  const handleGetStarted = () => router.push("/signup/");
+  const handleSignIn = () => router.push("/signin/");
 
   const getDownloadButton = () => {
     if (isNativePlatform) return null;

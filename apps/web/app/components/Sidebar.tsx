@@ -94,7 +94,7 @@ export default function Sidebar() {
               } catch {
                 // ignore
               }
-              void router.replace("/signin");
+              void router.replace("/signin/");
             }}
             className="sidebar-link flex items-center justify-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-rose-400 transition-all duration-200 hover:bg-rose-500/10 hover:translate-x-1 hover:text-rose-300 dark:text-rose-300 dark:hover:bg-rose-500/15 lg:justify-start"
           >

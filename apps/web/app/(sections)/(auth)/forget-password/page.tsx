@@ -425,7 +425,7 @@ const ForgetPasswordPage = () => {
 
             <div className="mt-6 text-center">
               <Link
-                href="/signin"
+                href="/signin/"
                 className="text-sm font-semibold text-primary transition-colors hover:text-primary-container"
               >
                 Back to Sign In

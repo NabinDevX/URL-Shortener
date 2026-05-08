@@ -18,10 +18,10 @@ const Footer = dynamic(() => import("@/components/Footer"), {
 
 const PUBLIC_ROUTES = new Set([
   "/",
-  "/signin",
-  "/signup",
-  "/signout",
-  "/forget-password",
+  "/signin/",
+  "/signup/",
+  "/signout/",
+  "/forget-password/",
 ]);
 
 export default function SectionsLayout({
@@ -32,6 +32,8 @@ export default function SectionsLayout({
   const { isAuthenticated, loading, userData } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const normalizedPathname =
+    pathname === "/" ? "/" : pathname.replace(/\/$/, "") + "/";
 
   useLenis({
     duration: 1.2,
@@ -39,7 +41,7 @@ export default function SectionsLayout({
     smoothWheel: true,
   });
 
-  const isPublicRoute = PUBLIC_ROUTES.has(pathname);
+  const isPublicRoute = PUBLIC_ROUTES.has(normalizedPathname);
 
   useEffect(() => {
     if (loading || isAuthenticated === null) return;
@@ -52,11 +54,13 @@ export default function SectionsLayout({
     if (
       isPublicRoute &&
       isAuthenticated &&
-      (pathname === "/" || pathname === "/signin" || pathname === "/signup")
+      (normalizedPathname === "/" ||
+        normalizedPathname === "/signin/" ||
+        normalizedPathname === "/signup/")
     ) {
       router.replace("/dashboard");
     }
-  }, [isAuthenticated, isPublicRoute, loading, pathname, router]);
+  }, [isAuthenticated, isPublicRoute, loading, normalizedPathname, router]);
 
   if (loading || isAuthenticated === null) {
     return (

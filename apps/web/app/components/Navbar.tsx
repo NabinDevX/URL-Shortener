@@ -62,7 +62,7 @@ const Navbar = ({ userData }: { userData?: any }) => {
                 } catch {
                   // ignore
                 }
-                void router.replace("/signin");
+                void router.replace("/signin/");
               }}
               className="px-3 py-2 rounded-lg text-sm font-semibold text-error hover:bg-error-container transition-colors"
             >

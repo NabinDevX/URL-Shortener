@@ -81,7 +81,7 @@ export default function UrlsPage() {
       console.error("Error fetching URLs:", error);
       const axiosError = error as AxiosError<{ message: string }> | unknown;
       if (axiosError instanceof AxiosError) {
-        if (axiosError.response?.status === 401) router.push("/signin");
+        if (axiosError.response?.status === 401) router.push("/signin/");
         if (axiosError.response?.status === 404) setUrls([]);
         else
           showMessage(
