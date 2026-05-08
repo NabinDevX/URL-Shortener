@@ -63,37 +63,58 @@ const StatCard = ({
   </div>
 );
 
+type DownloadPlatform = "android" | "web";
+
+function detectClientPlatform(): {
+  platform: DownloadPlatform | null;
+  isNativePlatform: boolean;
+} {
+  if (typeof window === "undefined") {
+    return { platform: null, isNativePlatform: false };
+  }
+
+  const capacitor = (
+    window as Window & {
+      Capacitor?: {
+        getPlatform?: () => string;
+        isNativePlatform?: () => boolean;
+      };
+    }
+  ).Capacitor;
+
+  if (capacitor) {
+    try {
+      const nativePlatform = !!capacitor.isNativePlatform?.();
+      const platform = capacitor.getPlatform?.();
+
+      return {
+        platform: platform === "android" ? "android" : "web",
+        isNativePlatform: nativePlatform,
+      };
+    } catch {
+      // Fall back to browser detection below.
+    }
+  }
+
+  const userAgent =
+    navigator.userAgent || navigator.vendor || (window as any).opera;
+
+  return {
+    platform: /android/i.test(userAgent) ? "android" : "web",
+    isNativePlatform:
+      document.documentElement.classList.contains("capacitor-native"),
+  };
+}
+
 const Welcome = () => {
   const router = useRouter();
-  const [platform, setPlatform] = useState<"android" | "web">("web");
+  const [platform, setPlatform] = useState<DownloadPlatform | null>(null);
   const [isNativePlatform, setIsNativePlatform] = useState(false);
 
   useEffect(() => {
-    const detectPlatform = async () => {
-      try {
-        const cap = await import("@capacitor/core");
-        if (cap && cap.Capacitor) {
-          const p = cap.Capacitor.getPlatform();
-          setPlatform(p === "android" ? "android" : "web");
-          setIsNativePlatform(
-            !!cap.Capacitor.isNativePlatform && cap.Capacitor.isNativePlatform()
-          );
-          return;
-        }
-      } catch (err) {
-        // Not running with Capacitor or package unavailable in the browser build
-      }
-
-      const ua =
-        navigator.userAgent || navigator.vendor || (window as any).opera;
-      if (/android/i.test(ua)) {
-        setPlatform("android");
-      } else {
-        setPlatform("web");
-      }
-    };
-
-    detectPlatform();
+    const detected = detectClientPlatform();
+    setPlatform(detected.platform);
+    setIsNativePlatform(detected.isNativePlatform);
   }, []);
 
   const handleGetStarted = () => router.push("/signup/");
@@ -101,7 +122,7 @@ const Welcome = () => {
 
   const getDownloadButton = () => {
     // Hide the download CTA when running inside the native Capacitor app
-    if (isNativePlatform) return null;
+    if (isNativePlatform || !platform) return null;
 
     const buttonClass =
       "inline-flex min-w-[5.5rem] flex-col items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold leading-tight text-slate-700 transition hover:border-slate-300 hover:text-slate-950 sm:min-w-0 sm:px-4 sm:py-2 sm:text-sm";
@@ -166,17 +187,17 @@ const Welcome = () => {
             </a>
           </nav>
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+          <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1.5 sm:gap-3">
             {getDownloadButton()}
             <button
               onClick={handleSignIn}
-              className="rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold leading-none text-slate-700 transition hover:border-slate-300 hover:text-slate-950 sm:px-4 sm:py-2 sm:text-sm"
+              className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold leading-none text-slate-700 transition hover:border-slate-300 hover:text-slate-950 sm:px-4 sm:py-2 sm:text-sm"
             >
               Sign In
             </button>
             <button
               onClick={handleGetStarted}
-              className="rounded-full bg-primary px-2.5 py-1.5 text-[11px] font-semibold leading-none text-white transition hover:bg-primary-container sm:px-4 sm:py-2 sm:text-sm"
+              className="shrink-0 rounded-full bg-primary px-2.5 py-1.5 text-[11px] font-semibold leading-none text-white transition hover:bg-primary-container sm:px-4 sm:py-2 sm:text-sm"
             >
               Sign Up
             </button>
