@@ -2,10 +2,10 @@
 <html lang="en">
 <%- include('./partials/head') %>
 
-<body class="bg-surface font-body text-on-surface">
-  <div class="min-h-screen">
+<body class="bg-surface font-body text-on-surface flex flex-col h-screen">
+  <% const currentPage = locals.currentPage || ''; %>
+  <div class="<% if (currentPage === 'welcome') { %>flex-1 flex flex-col h-full<% } else { %>min-h-screen<% } %>">
     <% const appPages = ['dashboard', 'urls', 'analytics', 'campaigns', 'api', 'settings', 'profile']; %>
-    <% const currentPage = locals.currentPage || ''; %>
     <% const showAppShell = appPages.includes(currentPage); %>
     <% const pageTitleMap = { dashboard: 'Dashboard', urls: 'Manage URLs', analytics: 'Analytics', campaigns: 'Campaigns', api: 'API Management', settings: 'Settings', profile: 'My Profile' }; %>
     <% const searchPlaceholderMap = { dashboard: 'Search links...', urls: 'Search URLs...', analytics: 'Search links...', campaigns: 'Search campaigns...', api: 'Search API docs...', settings: 'Search settings...', profile: 'Search profile...' }; %>
@@ -28,12 +28,14 @@
       <%- include('./partials/mobile-nav', { currentPage }) %>
     </div>
     <% } else { %>
-    <div data-shell="public" id="publicShell">
-      <main id="publicMain">
+    <div data-shell="public" id="publicShell" class="<% if (currentPage === 'welcome') { %>flex-1 flex flex-col h-full<% } %>">
+      <main id="publicMain" class="<% if (currentPage === 'welcome') { %>flex-1 flex flex-col<% } %>">
         <%- body %>
       </main>
 
+      <% if (currentPage !== 'welcome') { %>
       <%- include('./partials/footer') %>
+      <% } %>
     </div>
     <% } %>
   </div>

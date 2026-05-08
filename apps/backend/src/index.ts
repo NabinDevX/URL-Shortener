@@ -18,6 +18,54 @@ const getServerUrls = () => {
   return [`http://localhost:${PORT}`, `http://0.0.0.0:${PORT}`];
 };
 
+const validateEnvironmentVariables = () => {
+  const requiredVars = [
+    "MONGODB_URI",
+    "REDIS_URL",
+    "USER_SECRET_ACCESS_TOKEN",
+    "USER_SECRET_REFRESH_TOKEN",
+  ];
+
+  const googleVars = [
+    "NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID",
+    "NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID",
+    "GOOGLE_WEB_CLIENT_SECRET",
+  ];
+
+  const missing: string[] = [];
+
+  // Check required vars
+  for (const varName of requiredVars) {
+    if (!process.env[varName]) {
+      missing.push(varName);
+    }
+  }
+
+  // Check Google OAuth vars (warn if missing, but don't block startup)
+  const googleMissing: string[] = [];
+  for (const varName of googleVars) {
+    if (!process.env[varName]) {
+      googleMissing.push(varName);
+    }
+  }
+
+  if (googleMissing.length > 0) {
+    logger.warn("Google OAuth is not fully configured", {
+      missing: googleMissing,
+      message:
+        "Google Sign-In/Sign-Up will be unavailable. Set these environment variables to enable: " +
+        googleMissing.join(", "),
+    });
+  }
+
+  if (missing.length > 0) {
+    logger.error("Missing required environment variables", { missing });
+    throw new Error(
+      `Missing required environment variables: ${missing.join(", ")}`
+    );
+  }
+};
+
 const gracefulShutdown = async () => {
   logger.warn("Received shutdown signal, closing gracefully...");
 
@@ -47,6 +95,8 @@ if (isDevelopment) {
 
   const startServer = async () => {
     try {
+      validateEnvironmentVariables();
+
       await connectDB();
       logger.info("MongoDB connected");
 
@@ -79,6 +129,8 @@ if (isDevelopment) {
 
     const initializePrimary = async () => {
       try {
+        validateEnvironmentVariables();
+
         await connectDB();
         logger.info("MongoDB connected in primary process");
 

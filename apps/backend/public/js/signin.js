@@ -357,13 +357,25 @@
 
   async function initGoogleSignin() {
     try {
-      if (
-        !googleClientId ||
-        !googleClientId.endsWith(".apps.googleusercontent.com")
-      ) {
-        throw new Error(
-          "Google client ID is missing. Check backend env GOOGLE_CLIENT_ID."
+      if (!googleClientId) {
+        const errorMsg =
+          "Google Sign-In is not configured. Please check backend environment: NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID must be set to a valid Google Client ID (e.g., xxx.apps.googleusercontent.com).";
+        console.error(errorMsg);
+        showMessage(
+          "Google Sign-In is unavailable. Configuration missing.",
+          "error"
         );
+        return;
+      }
+
+      if (!googleClientId.endsWith(".apps.googleusercontent.com")) {
+        const errorMsg = `Invalid Google Client ID format: "${googleClientId}". Must end with ".apps.googleusercontent.com".`;
+        console.error(errorMsg);
+        showMessage(
+          "Google Sign-In configuration is invalid. Please contact support.",
+          "error"
+        );
+        return;
       }
 
       const googleOauth2 = await waitForGoogleOAuth();
@@ -374,6 +386,8 @@
         ux_mode: "popup",
         callback: async (response) => {
           if (!response || !response.code) {
+            const errorMsg = `Google OAuth callback failed: ${JSON.stringify(response)}`;
+            console.error(errorMsg);
             showMessage("Google sign-in failed. Please try again.", "error");
             return;
           }
@@ -407,8 +421,10 @@
         },
       });
     } catch (error) {
+      const errorMsg = `Google Sign-In initialization failed: ${error?.message || "Unknown error"}`;
+      console.error(errorMsg);
       showMessage(
-        error.message || "Google Sign-In is unavailable right now.",
+        "Google Sign-In is unavailable right now. Please try again later.",
         "error"
       );
     }

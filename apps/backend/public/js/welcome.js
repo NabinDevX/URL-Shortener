@@ -60,7 +60,7 @@
   }
 
   function initDownloadCta() {
-    const container = document.querySelector("[data-download-app-cta]");
+    const container = document.querySelector("[data-download-app-cta-nav]");
 
     if (!container) {
       return;
@@ -69,16 +69,17 @@
     const { platform, isNative } = detectDownloadPlatform();
 
     if (isNative) {
-      container.hidden = true;
+      container.classList.add("hidden");
       container.innerHTML = "";
       return;
     }
 
     const target = getDownloadTarget(platform);
-    container.hidden = false;
+    container.classList.remove("hidden");
     container.innerHTML = `
-      <a class="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-on-surface transition hover:border-primary hover:text-primary sm:w-auto" href="${target.href}" download>
-        Download ${target.label}
+      <a class="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-outline-variant/20 bg-surface-container-highest/20 text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container-highest hover:text-primary hover:border-primary" href="${target.href}" download>
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        ${target.label}
       </a>
     `;
   }
