@@ -65,29 +65,28 @@ const StatCard = ({
 
 const Welcome = () => {
   const router = useRouter();
-  const [platform, setPlatform] = useState<"android" | "web" | null>(null);
+  const [platform, setPlatform] = useState<"android" | "web">("web");
   const [isNativePlatform, setIsNativePlatform] = useState(false);
 
   useEffect(() => {
     const detectPlatform = async () => {
       try {
-        const capacitor = await import("@capacitor/core");
-
-        if (capacitor.Capacitor) {
-          const platformResult = capacitor.Capacitor.getPlatform();
-
-          if (platformResult) {
-            setPlatform(platformResult === "android" ? "android" : "web");
-            setIsNativePlatform(capacitor.Capacitor.isNativePlatform());
-            return;
-          }
+        const cap = await import("@capacitor/core");
+        if (cap && cap.Capacitor) {
+          const p = cap.Capacitor.getPlatform();
+          setPlatform(p === "android" ? "android" : "web");
+          setIsNativePlatform(
+            !!cap.Capacitor.isNativePlatform && cap.Capacitor.isNativePlatform()
+          );
+          return;
         }
-      } catch {
-        // Continue to fallback
+      } catch (err) {
+        // Not running with Capacitor or package unavailable in the browser build
       }
 
-      const userAgent = navigator.userAgent.toLowerCase();
-      if (/android/.test(userAgent)) {
+      const ua =
+        navigator.userAgent || navigator.vendor || (window as any).opera;
+      if (/android/i.test(ua)) {
         setPlatform("android");
       } else {
         setPlatform("web");
@@ -101,8 +100,8 @@ const Welcome = () => {
   const handleSignIn = () => router.push("/signin/");
 
   const getDownloadButton = () => {
+    // Hide the download CTA when running inside the native Capacitor app
     if (isNativePlatform) return null;
-    if (!platform) return null;
 
     const buttonClass =
       "inline-flex min-w-[5.5rem] flex-col items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold leading-tight text-slate-700 transition hover:border-slate-300 hover:text-slate-950 sm:min-w-0 sm:px-4 sm:py-2 sm:text-sm";
