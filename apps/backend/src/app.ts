@@ -86,6 +86,22 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  try {
+    const clientOrigin =
+      (req.headers["x-client-origin"] as string) ||
+      (req.headers.origin as string) ||
+      "";
+    const clientPlatform = (req.headers["x-client-platform"] as string) || "";
+    // attach to res.locals for controllers to consume
+    (_res as Response & { locals: any }).locals.clientOrigin = clientOrigin;
+    (_res as Response & { locals: any }).locals.clientPlatform = clientPlatform;
+  } catch (e) {
+    // ignore
+  }
+  next();
+});
+
 app.use((req: Request, res: Response, next) => {
   const reqWithStartTime = req as Request & { startTime?: number };
 

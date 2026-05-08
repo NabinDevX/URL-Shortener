@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { requestOnce } from "../utils/requestOnce";
+import { getClientOrigin } from "../utils/getClientOrigin";
 
 const ACCESS_TOKEN_STORAGE_KEYS = [
   "urlShortenerAccessToken",
@@ -315,12 +316,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const loginWithGoogleToken = useCallback(
     async (token: string) => {
+      const client = await getClientOrigin();
       const response = await axios.post(
         "/user/google/signin-token",
         { token },
         {
           headers: {
             "Content-Type": "application/json",
+            "X-Client-Platform": client.platform,
+            "X-Client-Origin": client.origin || "",
           },
           withCredentials: true,
         }
@@ -341,12 +345,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const signupWithGoogleToken = useCallback(
     async (token: string) => {
+      const client = await getClientOrigin();
       const response = await axios.post(
         "/user/google/signup-token",
         { token },
         {
           headers: {
             "Content-Type": "application/json",
+            "X-Client-Platform": client.platform,
+            "X-Client-Origin": client.origin || "",
           },
           withCredentials: true,
         }
@@ -367,12 +374,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const loginWithGoogleCode = useCallback(
     async (code: string) => {
+      const client = await getClientOrigin();
       const response = await axios.post(
         "/user/google/signin",
         { code, redirectUri: "postmessage" },
         {
           headers: {
             "Content-Type": "application/json",
+            "X-Client-Platform": client.platform,
+            "X-Client-Origin": client.origin || "",
           },
           withCredentials: true,
         }
@@ -393,12 +403,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const signupWithGoogleCode = useCallback(
     async (code: string) => {
+      const client = await getClientOrigin();
       const response = await axios.post(
         "/user/google/signup",
         { code, redirectUri: "postmessage" },
         {
           headers: {
             "Content-Type": "application/json",
+            "X-Client-Platform": client.platform,
+            "X-Client-Origin": client.origin || "",
           },
           withCredentials: true,
         }
@@ -419,12 +432,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const loginWithCapgoGoogle = useCallback(
     async (token: string) => {
+      const client = await getClientOrigin();
       const response = await axios.post(
         "/user/google/signin-token",
         { token },
         {
           headers: {
             "Content-Type": "application/json",
+            "X-Client-Platform": client.platform,
+            "X-Client-Origin": client.origin || "",
           },
           withCredentials: true,
         }
@@ -445,12 +461,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   const signupWithCapgoGoogle = useCallback(
     async (token: string) => {
+      const client = await getClientOrigin();
       const response = await axios.post(
         "/user/google/signup-token",
         { token },
         {
           headers: {
             "Content-Type": "application/json",
+            "X-Client-Platform": client.platform,
+            "X-Client-Origin": client.origin || "",
           },
           withCredentials: true,
         }

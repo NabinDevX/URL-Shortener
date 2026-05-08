@@ -102,10 +102,29 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
           scope: "email profile openid",
           ux_mode: "popup",
           callback: async (response) => {
-            if (response.error || !response.code) {
+            if (response.error) {
+              Toast.dismiss();
+              if (
+                response.error === "popup_closed_by_user" ||
+                response.error === "access_denied" ||
+                response.error === "user_cancelled" // defensive
+              ) {
+                Toast.info("Google sign-in cancelled by user");
+                reject(new Error(response.error));
+                return;
+              }
+
+              Toast.error("Google authentication failed");
+              reject(
+                new Error(response.error || "Google authentication error")
+              );
+              return;
+            }
+
+            if (!response.code) {
               Toast.dismiss();
               Toast.error("Google authentication failed");
-              reject(new Error(response.error || "Missing authorization code"));
+              reject(new Error("Missing authorization code"));
               return;
             }
 
@@ -180,7 +199,11 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
       const onlineResult = result as { idToken: string | null };
       const idToken = onlineResult.idToken;
       if (!idToken) {
-        throw new Error("Google authentication failed. Missing token.");
+        // Treat missing token from native plugin as user cancellation where possible
+        Toast.dismiss();
+        Toast.info("Google sign-in cancelled by user");
+        onError?.(new Error("Google sign-in cancelled by user"));
+        return;
       }
 
       if (isSignup) {
