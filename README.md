@@ -86,7 +86,6 @@ Backend env (apps/backend/.env) typically includes:
 - `REFRESH_TOKEN_EXPIRY`
 - `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`
 - `NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
-- `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 - `GOOGLE_WEB_CLIENT_SECRET`
 - `BREVO_API_KEY`
 - `BREVO_SENDER_EMAIL`
@@ -101,7 +100,7 @@ OTP email behavior:
 - Production: requires `BREVO_API_KEY` + `BREVO_SENDER_EMAIL`.
 - Development/test: OTP defaults to logging in backend logs. To enable real emails set `OTP_EMAIL_IN_NON_PRODUCTION=true`.
 
-Google OAuth in the backend uses the `NEXT_PUBLIC_GOOGLE_*_CLIENT_ID` values for audience validation and `GOOGLE_WEB_CLIENT_SECRET` for token exchange.
+Google OAuth in the backend uses the web and Android client IDs for audience validation and `GOOGLE_WEB_CLIENT_SECRET` for token exchange.
 
 For the Google OAuth secret file used by the backend, keep it at:
 
@@ -111,7 +110,6 @@ Web env (apps/web/.env) typically includes:
 
 - `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`
 - `NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
-- `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 - `NEXT_PUBLIC_API_BASE_URL` (backend base URL for local dev; default in repo is `http://localhost:8000/api/v1`)
 
 Extension env (apps/extension/.env) typically includes:

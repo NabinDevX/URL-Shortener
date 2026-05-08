@@ -26,20 +26,10 @@ const loadGoogleClientConfig = async (): Promise<GoogleOAuthConfig> => {
 
   const client_secret = process.env.GOOGLE_WEB_CLIENT_SECRET ?? "";
 
-  const all_client_ids: string[] = [];
-  for (const [key, value] of Object.entries(process.env)) {
-    if (
-      key.startsWith("NEXT_PUBLIC_GOOGLE_") &&
-      key.endsWith("_CLIENT_ID") &&
-      typeof value === "string" &&
-      value.trim() !== ""
-    ) {
-      all_client_ids.push(value.trim());
-    }
-  }
-
-  const client_id =
-    process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? all_client_ids[0] ?? "";
+  const client_id = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim() ?? "";
+  const android_client_id =
+    process.env.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.trim() ?? "";
+  const all_client_ids = [client_id, android_client_id].filter(Boolean);
 
   const config: GoogleOAuthConfig = {
     client_id,
@@ -50,7 +40,7 @@ const loadGoogleClientConfig = async (): Promise<GoogleOAuthConfig> => {
   if (!config?.client_id || !config?.client_secret) {
     throw new ApiError(
       500,
-      "Google OAuth is not configured correctly. Set NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID and GOOGLE_CLIENT_SECRET in environment"
+      "Google OAuth is not configured correctly. Set NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID, NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID, and GOOGLE_WEB_CLIENT_SECRET in environment"
     );
   }
 
@@ -121,7 +111,7 @@ export const exchangeCodeForGoogleProfile = async (
   } catch {
     throw new ApiError(
       401,
-      "Unable to verify Google identity (client_id mismatch or invalid token). Ensure your web UI Google Client ID matches backend GOOGLE_CLIENT_ID"
+      "Unable to verify Google identity (client_id mismatch or invalid token). Ensure your web UI Google Client IDs match the backend configuration"
     );
   }
 

@@ -121,5 +121,5 @@ Important note: this repo already exposes `/metrics`, but it does not currently 
 ## 11) Env naming and runtime/build boundaries
 
 - `NEXT_PUBLIC_*` values are build-time inputs for the web app, but the backend also consumes the Google client IDs at runtime to validate OAuth audiences.
-- The backend Google OAuth flow currently expects `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`, and `GOOGLE_WEB_CLIENT_SECRET`.
+- The backend Google OAuth flow currently expects `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`, and `GOOGLE_WEB_CLIENT_SECRET`.
 - `API_KEY_RATE_LIMIT_REQUESTS`, `RATE_LIMIT_WINDOW_MS`, and `RATE_LIMIT_MAX_REQUESTS` are present in deployment config, but the current backend rate-limit middleware still uses hardcoded constants, so those env vars do not change behavior yet.

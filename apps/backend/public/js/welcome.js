@@ -31,8 +31,7 @@
       try {
         const platform = capacitor.getPlatform();
         return {
-          platform:
-            platform === "android" || platform === "ios" ? platform : "web",
+          platform: platform === "android" ? "android" : "web",
           isNative:
             typeof capacitor.isNativePlatform === "function"
               ? capacitor.isNativePlatform()
@@ -49,22 +48,15 @@
       return { platform: "android", isNative: false };
     }
 
-    if (/iphone|ipad|ipod/.test(userAgent)) {
-      return { platform: "ios", isNative: false };
-    }
-
     return { platform: "web", isNative: false };
   }
 
   function getDownloadTarget(platform) {
-    switch (platform) {
-      case "android":
-        return { href: "/apk/urltinier.apk", label: "APK" };
-      case "ios":
-        return { href: "/ipa/urltinier.ipa", label: "IPA" };
-      default:
-        return { href: "/extension/urltinier.zip", label: "Extension" };
+    if (platform === "android") {
+      return { href: "/apk/urltinier.apk", label: "APK" };
     }
+
+    return { href: "/extension/urltinier.zip", label: "Extension" };
   }
 
   function initDownloadCta() {

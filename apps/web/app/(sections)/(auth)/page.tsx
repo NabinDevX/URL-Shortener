@@ -65,9 +65,7 @@ const StatCard = ({
 
 const Welcome = () => {
   const router = useRouter();
-  const [platform, setPlatform] = useState<"android" | "ios" | "web" | null>(
-    null
-  );
+  const [platform, setPlatform] = useState<"android" | "web" | null>(null);
   const [isNativePlatform, setIsNativePlatform] = useState(false);
 
   useEffect(() => {
@@ -79,11 +77,7 @@ const Welcome = () => {
           const platformResult = capacitor.Capacitor.getPlatform();
 
           if (platformResult) {
-            setPlatform(
-              platformResult === "android" || platformResult === "ios"
-                ? platformResult
-                : "web"
-            );
+            setPlatform(platformResult === "android" ? "android" : "web");
             setIsNativePlatform(capacitor.Capacitor.isNativePlatform());
             return;
           }
@@ -95,8 +89,6 @@ const Welcome = () => {
       const userAgent = navigator.userAgent.toLowerCase();
       if (/android/.test(userAgent)) {
         setPlatform("android");
-      } else if (/iphone|ipad|ipod/.test(userAgent)) {
-        setPlatform("ios");
       } else {
         setPlatform("web");
       }
@@ -114,29 +106,18 @@ const Welcome = () => {
 
     const buttonClass =
       "inline-flex min-w-[5.5rem] flex-col items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold leading-tight text-slate-700 transition hover:border-slate-300 hover:text-slate-950 sm:min-w-0 sm:px-4 sm:py-2 sm:text-sm";
+    const isAndroid = platform === "android";
 
-    if (platform === "android") {
-      return (
-        <a href="/apk/urltinier.apk" download className={buttonClass}>
-          <span>Download</span>
-          <span>APK</span>
-        </a>
-      );
-    } else if (platform === "ios") {
-      return (
-        <a href="/ipa/urltinier.ipa" download className={buttonClass}>
-          <span>Download</span>
-          <span>IPA</span>
-        </a>
-      );
-    } else {
-      return (
-        <a href="/extension/urltinier.zip" download className={buttonClass}>
-          <span>Download</span>
-          <span>Extension</span>
-        </a>
-      );
-    }
+    return (
+      <a
+        href={isAndroid ? "/apk/urltinier.apk" : "/extension/urltinier.zip"}
+        download
+        className={buttonClass}
+      >
+        <span>Download</span>
+        <span>{isAndroid ? "APK" : "Extension"}</span>
+      </a>
+    );
   };
 
   return (

@@ -14,17 +14,13 @@ jobs:
     uses: ./.github/workflows/android.yaml
     secrets: inherit
 
-  build-ios:
-    uses: ./.github/workflows/ios.yaml
-    secrets: inherit
-
   build-extension:
     uses: ./.github/workflows/extension.yaml
     secrets: inherit
 
   # 1️⃣ Build and Push to GHCR
   build-and-push:
-    needs: [build-android, build-ios, build-extension]
+    needs: [build-android, build-extension]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,12 +35,6 @@ jobs:
         with:
           name: android-apk
           path: .artifacts/android
-
-      - name: Download iOS build
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-ipa
-          path: .artifacts/ios
 
       - name: Download Extension build
         uses: actions/download-artifact@v4
@@ -65,30 +55,25 @@ jobs:
 
       - name: Restore downloaded artifacts into public folders
         run: |
-          mkdir -p apps/web/public/apk apps/web/public/ipa apps/web/public/extension
-          mkdir -p apps/backend/public/apk apps/backend/public/ipa apps/backend/public/extension
+          mkdir -p apps/web/public/apk apps/web/public/extension
+          mkdir -p apps/backend/public/apk apps/backend/public/extension
 
           ANDROID_APK=$(find .artifacts/android -name "*.apk" | head -n 1)
-          IOS_IPA=$(find .artifacts/ios -name "*.ipa" | head -n 1)
           EXTENSION_ZIP=$(find .artifacts/extension -name "*.zip" | head -n 1)
 
-          if [ -z "$ANDROID_APK" ] || [ -z "$IOS_IPA" ] || [ -z "$EXTENSION_ZIP" ]; then
+          if [ -z "$ANDROID_APK" ] || [ -z "$EXTENSION_ZIP" ]; then
             echo "❌ Missing one or more build artifacts"
             find .artifacts -maxdepth 3 -type f
           fi
 
           cp "$ANDROID_APK" apps/web/public/apk/urltinier.apk || true
           cp "$ANDROID_APK" apps/backend/public/apk/urltinier.apk || true
-          cp "$IOS_IPA" apps/web/public/ipa/urltinier.ipa || true
-          cp "$IOS_IPA" apps/backend/public/ipa/urltinier.ipa || true
           cp "$EXTENSION_ZIP" apps/web/public/extension/urltinier.zip || true
           cp "$EXTENSION_ZIP" apps/backend/public/extension/urltinier.zip || true
 
           test -s apps/web/public/apk/urltinier.apk || true
-          test -s apps/web/public/ipa/urltinier.ipa || true
           test -s apps/web/public/extension/urltinier.zip || true
           test -s apps/backend/public/apk/urltinier.apk || true
-          test -s apps/backend/public/ipa/urltinier.ipa || true
           test -s apps/backend/public/extension/urltinier.zip || true
 
       # 🧩 Convert repo name to lowercase for GHCR
@@ -128,7 +113,6 @@ jobs:
           build-args: |
             NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
             NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-            NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
             NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
 
   # 2️⃣ Deploy on VM (Pull Images and Run Containers)
@@ -160,7 +144,6 @@ jobs:
           REFRESH_TOKEN_EXPIRY=${{ secrets.REFRESH_TOKEN_EXPIRY }}
           NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
           NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
           GOOGLE_WEB_CLIENT_SECRET=${{ secrets.GOOGLE_WEB_CLIENT_SECRET }}
           BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}

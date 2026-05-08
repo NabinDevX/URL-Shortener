@@ -14,8 +14,6 @@ export default function CapacitorBridge() {
         if (platform !== "web") {
           const googleWebClientId =
             process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-          const googleIosClientId =
-            process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID;
           const hasValidGoogleId =
             googleWebClientId &&
             googleWebClientId !== "your_google_client_id_here" &&
@@ -28,9 +26,6 @@ export default function CapacitorBridge() {
             const initConfig: Parameters<typeof SocialLogin.initialize>[0] = {
               google: {
                 webClientId: googleWebClientId,
-                ...(googleIosClientId && platform === "ios"
-                  ? { iOSClientId: googleIosClientId }
-                  : {}),
               },
             };
 
