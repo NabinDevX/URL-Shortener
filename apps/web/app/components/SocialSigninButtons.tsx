@@ -63,7 +63,19 @@ function loadGsiScript(): Promise<void> {
 async function checkIsNative(): Promise<boolean> {
   try {
     const { Capacitor } = await import("@capacitor/core");
-    return Capacitor.isNativePlatform();
+    const globalCapacitor = (window as any).Capacitor;
+    const platform =
+      typeof globalCapacitor?.getPlatform === "function"
+        ? globalCapacitor.getPlatform()
+        : typeof Capacitor?.getPlatform === "function"
+          ? Capacitor.getPlatform()
+          : (Capacitor as any).platform || "web";
+
+    return (
+      platform !== "web" ||
+      globalCapacitor?.isNativePlatform?.() === true ||
+      window.location.protocol === "capacitor:"
+    );
   } catch {
     return false;
   }
@@ -83,6 +95,7 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
     signupWithCapgoGoogle,
   } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [nativeLoginDebug, setNativeLoginDebug] = useState<string | null>(null);
 
   const handleWebGoogleLogin = useCallback(async () => {
     setLoading(true);
@@ -107,10 +120,60 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
               if (
                 response.error === "popup_closed_by_user" ||
                 response.error === "access_denied" ||
-                response.error === "user_cancelled" // defensive
+                response.error === "user_cancelled"
               ) {
-                Toast.info("Google sign-in cancelled by user");
-                reject(new Error(response.error));
+                try {
+                  const { SocialLogin } =
+                    await import("@capgo/capacitor-social-login");
+
+                  const nativeResult = await SocialLogin.login({
+                    provider: "google",
+                    options: { responseType: "id_token" } as any,
+                  } as any);
+
+                  const nativePayload: any = nativeResult?.result ?? {};
+                  const nativeId =
+                    nativePayload.idToken ?? nativePayload.id_token ?? null;
+                  if (nativeId) {
+                    if (isSignup) {
+                      await signupWithCapgoGoogle(nativeId);
+                    } else {
+                      await loginWithCapgoGoogle(nativeId);
+                    }
+                    Toast.dismiss();
+                    Toast.success(
+                      isSignup ? "Sign up successful!" : "Sign in successful!"
+                    );
+                    onSuccess?.();
+                    resolve();
+                    return;
+                  }
+
+                  const nativeCode =
+                    nativePayload.serverAuthCode ??
+                    nativePayload.authorizationCode ??
+                    nativePayload.code ??
+                    null;
+                  if (nativeCode) {
+                    if (isSignup) {
+                      await signupWithGoogleCode(nativeCode);
+                    } else {
+                      await loginWithGoogleCode(nativeCode);
+                    }
+                    Toast.dismiss();
+                    Toast.success(
+                      isSignup ? "Sign up successful!" : "Sign in successful!"
+                    );
+                    onSuccess?.();
+                    resolve();
+                    return;
+                  }
+                } catch (err) {
+                  void err;
+                }
+
+                await handleNativeGoogleLogin();
+                resolve();
                 return;
               }
 
@@ -183,48 +246,77 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
 
       const loginResult = await SocialLogin.login({
         provider: "google",
-        options: {},
-      });
+        // Request an ID token (online flow) where possible. Some plugin/platform
+        // combinations will return a server auth code instead — handle both.
+        options: { responseType: "id_token" } as any,
+      } as any);
+
+      // eslint-disable-next-line no-console
+      console.debug("[SocialLogin] native login result:", loginResult);
+
+      try {
+        const debugFlag =
+          typeof window !== "undefined" &&
+          (window.location.search.includes("debugNative=1") ||
+            window.localStorage.getItem("showNativeLoginDebug") === "1");
+        if (debugFlag) {
+          setNativeLoginDebug(JSON.stringify(loginResult, null, 2));
+        }
+      } catch {
+        // ignore
+      }
 
       if (loginResult.provider !== "google") {
         throw new Error("Unexpected provider response");
       }
 
-      const result = loginResult.result;
+      const result: any = loginResult.result;
 
-      if ("responseType" in result && result.responseType === "offline") {
-        throw new Error("Google offline mode is not supported.");
-      }
+      const idToken = result.idToken ?? result.id_token ?? null;
 
-      const onlineResult = result as { idToken: string | null };
-      const idToken = onlineResult.idToken;
-      if (!idToken) {
-        // Treat missing token from native plugin as user cancellation where possible
+      if (idToken) {
+        if (isSignup) {
+          await signupWithCapgoGoogle(idToken);
+        } else {
+          await loginWithCapgoGoogle(idToken);
+        }
         Toast.dismiss();
-        Toast.info("Google sign-in cancelled by user");
-        onError?.(new Error("Google sign-in cancelled by user"));
+        Toast.success(isSignup ? "Sign up successful!" : "Sign in successful!");
+        onSuccess?.();
         return;
       }
 
-      if (isSignup) {
-        await signupWithCapgoGoogle(idToken);
-      } else {
-        await loginWithCapgoGoogle(idToken);
+      const serverCode =
+        result.serverAuthCode ??
+        result.authorizationCode ??
+        result.code ??
+        null;
+
+      if (serverCode) {
+        if (isSignup) {
+          await signupWithGoogleCode(serverCode);
+        } else {
+          await loginWithGoogleCode(serverCode);
+        }
+        Toast.dismiss();
+        Toast.success(isSignup ? "Sign up successful!" : "Sign in successful!");
+        onSuccess?.();
+        return;
       }
 
-      Toast.dismiss();
-      Toast.success(isSignup ? "Sign up successful!" : "Sign in successful!");
-      onSuccess?.();
+      await handleWebGoogleLogin();
+      return;
     } catch (error) {
-      Toast.dismiss();
-      // Map known cancellation/reauth errors to an informational toast
       const isCancellation = (() => {
         try {
           if (!error) return false;
-          // Capacitor plugin may return an object with a `code` and `message`
           const anyErr = error as any;
           const code = anyErr?.code || anyErr?.error?.code || "";
-          const msg = (anyErr?.message || anyErr?.error?.message || "").toString();
+          const msg = (
+            anyErr?.message ||
+            anyErr?.error?.message ||
+            ""
+          ).toString();
 
           if (code === "USER_CANCELLED" || /cancel/i.test(code)) return true;
           if (/cancel/i.test(msg)) return true;
@@ -246,8 +338,8 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
         error instanceof AxiosError
           ? error.response?.data?.message || error.message
           : error instanceof Error
-          ? error.message
-          : "Google authentication failed";
+            ? error.message
+            : "Google authentication failed";
       Toast.error(message);
       onError?.(error as Error);
     } finally {
@@ -271,14 +363,58 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
   };
 
   return (
-    <button
-      type="button"
-      disabled={disabled || loading}
-      onClick={handleClick}
-      className={`w-full py-3 px-4 border border-gray-200 rounded-lg font-semibold transition-all hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
-    >
-      {loading ? "Authenticating..." : "Continue with Google"}
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={disabled || loading}
+        onClick={handleClick}
+        className={`w-full py-3 px-4 border border-gray-200 rounded-lg font-semibold transition-all hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
+      >
+        {loading ? "Authenticating..." : "Continue with Google"}
+      </button>
+      {nativeLoginDebug && (
+        <div
+          style={{
+            position: "fixed",
+            right: 12,
+            bottom: 12,
+            width: 360,
+            maxHeight: "50vh",
+            overflow: "auto",
+            background: "rgba(0,0,0,0.8)",
+            color: "#fff",
+            padding: 12,
+            borderRadius: 8,
+            zIndex: 9999,
+            fontSize: 12,
+          }}
+        >
+          <div
+            style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
+          >
+            <strong>Native login debug</strong>
+            <button
+              onClick={() => {
+                try {
+                  window.localStorage.setItem("showNativeLoginDebug", "0");
+                } catch {}
+                setNativeLoginDebug(null);
+              }}
+              style={{
+                background: "transparent",
+                color: "#fff",
+                border: "none",
+              }}
+            >
+              Close
+            </button>
+          </div>
+          <pre style={{ whiteSpace: "pre-wrap", marginTop: 8 }}>
+            {nativeLoginDebug}
+          </pre>
+        </div>
+      )}
+    </>
   );
 };
 

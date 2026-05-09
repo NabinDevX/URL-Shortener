@@ -32,11 +32,12 @@ export default function CapacitorBridge() {
 
             if (
               googleAndroidClientId &&
-              googleAndroidClientId.endsWith('.apps.googleusercontent.com')
+              googleAndroidClientId.endsWith(".apps.googleusercontent.com")
             ) {
-              // Provide Android client id as well so native SDKs can validate
               (initGoogle as any).androidClientId = googleAndroidClientId;
             }
+
+            (initGoogle as any).mode = "online";
 
             const initConfig: Parameters<typeof SocialLogin.initialize>[0] = {
               google: initGoogle,

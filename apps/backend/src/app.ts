@@ -110,10 +110,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
       .filter(Boolean) ?? [];
 
   const responseHeaders = [
-    ...new Set([
-      ...allowedRequestHeaders,
-      ...requestedHeaders,
-    ]),
+    ...new Set([...allowedRequestHeaders, ...requestedHeaders]),
   ];
 
   if (requestOrigin) {
