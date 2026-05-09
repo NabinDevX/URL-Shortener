@@ -14,7 +14,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages ./packages
 COPY apps/web ./apps/web
 
-RUN pnpm install --frozen-lockfile --filter @repo/web... --allow-scripts
+RUN pnpm install --frozen-lockfile --filter @repo/web...
 
 COPY . .
 
@@ -28,7 +28,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages ./packages
 COPY --from=builder /app/apps/web ./apps/web
 
-RUN pnpm install --frozen-lockfile --filter @repo/web... --prod --allow-scripts
+RUN pnpm install --frozen-lockfile --filter @repo/web... --prod
 
 EXPOSE 3000
 ENV NODE_ENV=production

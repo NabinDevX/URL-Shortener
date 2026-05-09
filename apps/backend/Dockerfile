@@ -7,7 +7,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages ./packages
 COPY apps/backend ./apps/backend
 
-RUN pnpm install --frozen-lockfile --filter @repo/backend... --allow-scripts
+RUN pnpm install --frozen-lockfile --filter @repo/backend...
 
 COPY . .
 
@@ -24,7 +24,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages ./packages
 COPY apps/backend/package.json ./apps/backend/package.json
 
-RUN pnpm install --prod --frozen-lockfile --filter @repo/backend... --allow-scripts
+RUN pnpm install --prod --frozen-lockfile --filter @repo/backend...
 
 WORKDIR /app/apps/backend
 
