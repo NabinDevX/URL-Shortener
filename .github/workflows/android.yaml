@@ -71,7 +71,11 @@ jobs:
           mkdir -p apps/web/public/apk apps/backend/public/apk
 
           cd apps/web/android
+          echo "Listing android/app directory:"
+          ls -la app || true
+          echo "Keystore present?" && [ -f app/urltinier.keystore ] && echo "keystore found" || echo "keystore missing"
           chmod +x ./gradlew
+          ./gradlew signingReport --no-daemon || true
           ./gradlew assembleRelease --no-daemon \
             -PversionCode=${{ github.run_number }} \
             -PversionName="1.0.${{ github.run_number }}"
@@ -91,6 +95,15 @@ jobs:
         run: |
           test -s apps/web/public/apk/urltinier.apk
           test -s apps/backend/public/apk/urltinier.apk
+
+      - name: Print APK certificate info
+        run: |
+          echo "APK path: apps/web/public/apk/urltinier.apk"
+          if [ -f apps/web/public/apk/urltinier.apk ]; then
+            $ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs apps/web/public/apk/urltinier.apk || true
+          else
+            echo "APK not found to inspect"
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7.0.1

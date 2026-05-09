@@ -329,7 +329,19 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
       })();
 
       if (isCancellation) {
-        Toast.info("Google sign-in cancelled by user");
+        try {
+          await handleWebGoogleLogin();
+          return;
+        } catch (webFallbackError) {
+          const fallbackMessage =
+            webFallbackError instanceof AxiosError
+              ? webFallbackError.response?.data?.message ||
+                webFallbackError.message
+              : webFallbackError instanceof Error
+                ? webFallbackError.message
+                : "Google sign-in cancelled by user";
+          Toast.error(fallbackMessage);
+        }
         onError?.(new Error("Google sign-in cancelled by user"));
         return;
       }

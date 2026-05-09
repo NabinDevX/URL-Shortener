@@ -24,6 +24,31 @@ allprojects {
     }
 }
 
+// Ensure subprojects that expose an Android `android` extension use the
+// project keystore for debug builds so local dev and CI share the same key.
+subprojects {
+    afterEvaluate { proj ->
+        if (proj.hasProperty('android')) {
+            try {
+                def keystoreFile = rootProject.file('app/urltinier.keystore')
+                if (keystoreFile.exists()) {
+                    proj.android.signingConfigs {
+                        debug {
+                            storeFile keystoreFile
+                            storePassword 'urltinier123'
+                            keyAlias 'urltinier'
+                            keyPassword 'urltinier123'
+                        }
+                    }
+                    proj.android.buildTypes.debug.signingConfig = proj.android.signingConfigs.debug
+                }
+            } catch(Exception e) {
+                // ignore projects that don't support signingConfigs
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

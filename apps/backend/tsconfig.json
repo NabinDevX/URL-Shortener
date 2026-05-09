@@ -2,6 +2,8 @@
   "extends": "@repo/typescript-config/node.json",
   "compilerOptions": {
     "ignoreDeprecations": "5.0",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
       "@/*": ["./src/*"],
       "@repo/*": ["../../packages/*/src"]
