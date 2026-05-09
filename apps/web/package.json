@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.1",
+    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.16",
     "@types/node": "^22.15.3",

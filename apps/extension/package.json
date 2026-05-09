@@ -11,20 +11,21 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.12.1",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@react-oauth/google": "^0.12.1",
     "axios": "^1.12.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4"
   },
   "devDependencies": {
+    "@crxjs/vite-plugin": "^2.3.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@crxjs/vite-plugin": "^2.3.0",
     "@swc/helpers": "^0.5.17",
     "@tailwindcss/vite": "^4.1.16",
+    "@types/node": "22.15.3",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.0",

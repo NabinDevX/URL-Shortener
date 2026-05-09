@@ -1,8 +1,10 @@
+import type { NextConfig } from "next";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 console.log("NEXT_PUBLIC_API_BASE_URL =", API_BASE_URL);
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
   reactStrictMode: true,

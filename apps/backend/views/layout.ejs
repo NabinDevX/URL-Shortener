@@ -39,6 +39,73 @@
     </div>
     <% } %>
   </div>
+
+  <% if (process.env.NODE_ENV !== 'development') { %>
+  <script>
+    const originalTitle = document.title;
+
+    const messages = [
+      "👀 Hey, where are you?",
+      "⬅️ Come back!",
+      "🥺 Don’t leave this tab!",
+      "✨ This tab needs you!"
+    ];
+
+    let index = 0;
+    let loopInterval = null;
+
+    function startLoop() {
+      if (loopInterval) return;
+      loopInterval = setInterval(() => {
+        document.title = messages[index];
+        index = (index + 1) % messages.length;
+      }, 1000);
+    }
+
+    function stopLoop() {
+      clearInterval(loopInterval);
+      loopInterval = null;
+      document.title = originalTitle;
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) startLoop();
+      else stopLoop();
+    });
+  </script>
+
+  <script>
+    const isLocalhost =
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    if (!isLocalhost) {
+
+      document.addEventListener("contextmenu", e => e.preventDefault());
+
+      document.addEventListener("keydown", function(e) {
+        if (
+          e.key === "F12" ||
+          (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+          (e.ctrlKey && e.key === "U")
+        ) {
+          e.preventDefault();
+        }
+      });
+
+      setInterval(function() {
+        if (
+          window.outerWidth - window.innerWidth > 160 ||
+          window.outerHeight - window.innerHeight > 160
+        ) {
+          console.clear();
+          document.body.innerHTML = "";
+        }
+      }, 1000);
+    }
+  </script>
+  <% } %>
+
 </body>
 
 </html>

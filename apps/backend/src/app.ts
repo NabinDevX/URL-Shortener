@@ -145,9 +145,14 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
       "";
     const clientPlatform = (req.headers["x-client-platform"] as string) || "";
     // attach to res.locals for controllers to consume
-    (_res as Response & { locals: any }).locals.clientOrigin = clientOrigin;
-    (_res as Response & { locals: any }).locals.clientPlatform = clientPlatform;
-  } catch (e) {
+    interface ResLocals {
+      clientOrigin: string;
+      clientPlatform: string;
+    }
+    const res = _res as Response & { locals: ResLocals };
+    res.locals.clientOrigin = clientOrigin;
+    res.locals.clientPlatform = clientPlatform;
+  } catch {
     // ignore
   }
   next();

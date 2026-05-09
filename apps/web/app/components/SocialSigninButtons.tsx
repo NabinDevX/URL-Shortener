@@ -172,8 +172,7 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
                   void err;
                 }
 
-                await handleNativeGoogleLogin();
-                resolve();
+                reject(new Error("Google sign-in cancelled by user"));
                 return;
               }
 
@@ -235,7 +234,15 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [isSignup, loginWithGoogleCode, signupWithGoogleCode, onSuccess, onError]);
+  }, [
+    isSignup,
+    loginWithGoogleCode,
+    signupWithGoogleCode,
+    loginWithCapgoGoogle,
+    signupWithCapgoGoogle,
+    onSuccess,
+    onError,
+  ]);
 
   const handleNativeGoogleLogin = useCallback(async () => {
     setLoading(true);
@@ -246,12 +253,9 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
 
       const loginResult = await SocialLogin.login({
         provider: "google",
-        // Request an ID token (online flow) where possible. Some plugin/platform
-        // combinations will return a server auth code instead — handle both.
         options: { responseType: "id_token" } as any,
       } as any);
 
-      // eslint-disable-next-line no-console
       console.debug("[SocialLogin] native login result:", loginResult);
 
       try {
@@ -361,6 +365,9 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
     isSignup,
     loginWithCapgoGoogle,
     signupWithCapgoGoogle,
+    loginWithGoogleCode,
+    signupWithGoogleCode,
+    handleWebGoogleLogin,
     onSuccess,
     onError,
   ]);
@@ -409,7 +416,9 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
               onClick={() => {
                 try {
                   window.localStorage.setItem("showNativeLoginDebug", "0");
-                } catch {}
+                } catch {
+                  return;
+                }
                 setNativeLoginDebug(null);
               }}
               style={{

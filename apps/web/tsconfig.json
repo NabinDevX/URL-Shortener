@@ -3,6 +3,8 @@
   "compilerOptions": {
     "ignoreDeprecations": "5.0",
     "strictNullChecks": true,
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "*": ["./*"],
       "@/*": ["./app/*"],
@@ -13,7 +15,7 @@
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
-    "next.config.js",
+    "next.config.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]

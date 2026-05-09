@@ -1,7 +1,12 @@
-export interface ClientOriginInfo {
+﻿export interface ClientOriginInfo {
   platform: string;
   origin: string;
 }
+
+type CapacitorLike = {
+  getPlatform?: () => string;
+  isNativePlatform?: () => boolean;
+};
 
 export const getClientOrigin = async (): Promise<ClientOriginInfo> => {
   if (typeof window === "undefined") {
@@ -9,21 +14,22 @@ export const getClientOrigin = async (): Promise<ClientOriginInfo> => {
   }
 
   const origin = window.location?.origin ?? "";
+  const capacitor = (
+    globalThis as typeof globalThis & { Capacitor?: CapacitorLike }
+  ).Capacitor;
 
-  try {
-    const { Capacitor } = await import("@capacitor/core");
+  if (capacitor) {
     const platform =
-      typeof Capacitor?.getPlatform === "function"
-        ? (Capacitor.getPlatform() as string)
-        : typeof Capacitor?.isNativePlatform === "function" &&
-            Capacitor.isNativePlatform()
+      typeof capacitor.getPlatform === "function"
+        ? capacitor.getPlatform()
+        : typeof capacitor.isNativePlatform === "function" &&
+            capacitor.isNativePlatform()
           ? "native"
           : "web";
 
     return { platform: platform || "web", origin };
-  } catch (err) {
-    // Capacitor not available in web build — infer from origin
-    const inferredPlatform = origin.includes("capacitor") ? "native" : "web";
-    return { platform: inferredPlatform, origin };
   }
+
+  const inferredPlatform = origin.includes("capacitor") ? "native" : "web";
+  return { platform: inferredPlatform, origin };
 };

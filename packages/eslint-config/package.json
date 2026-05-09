@@ -5,10 +5,16 @@
   "private": true,
   "exports": {
     "./base": "./base.js",
+    "./base.js": "./base.js",
     "./node": "./node.js",
+    "./node.js": "./node.js",
     "./next-js": "./next.js",
+    "./next": "./next.js",
+    "./next.js": "./next.js",
     "./react-internal": "./react-internal.js",
-    "./vite": "./vite.js"
+    "./react-internal.js": "./react-internal.js",
+    "./vite": "./vite.js",
+    "./vite.js": "./vite.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -18,9 +24,9 @@
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-turbo": "^2.7.1",
-    "globals": "^16.5.0",
+    "eslint-plugin-turbo": "^2.9.12",
+    "globals": "^15.12.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.50.0"
+    "typescript-eslint": "^7.18.0"
   }
 }

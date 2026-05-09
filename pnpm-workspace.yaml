@@ -2,8 +2,12 @@ packages:
   - "apps/*"
   - "packages/*"
 
-onlyBuiltDependencies:
-  - bcrypt
-  - esbuild
-  - mongodb-memory-server
-  - unrs-resolver
+allowBuilds:
+  "@parcel/watcher": true
+  "@swc/core": true
+  bcrypt: true
+  esbuild: true
+  mongodb-memory-server: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
