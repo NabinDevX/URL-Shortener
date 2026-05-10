@@ -1,6 +1,7 @@
 export default {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
+  cache: false,
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
@@ -16,6 +17,7 @@ export default {
   },
   testMatch: ["**/*.spec.ts"],
   testPathIgnorePatterns: ["/node_modules/", "/__helpers__/"],
+  setupFiles: [],
   setupFilesAfterEnv: [],
   testTimeout: 60000,
   verbose: true,

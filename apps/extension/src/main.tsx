@@ -11,7 +11,7 @@ if (apiBaseUrl) {
   axios.defaults.baseURL = apiBaseUrl;
 }
 
-const googleClientIdRaw = import.meta.env.VITE_GOOGLE_CLIENT_ID as
+const googleClientIdRaw = import.meta.env.VITE_GOOGLE_EXTENSION_CLIENT_ID as
   | string
   | undefined;
 const googleClientId =

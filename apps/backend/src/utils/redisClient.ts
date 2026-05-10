@@ -6,8 +6,7 @@ type RedisClientInstance = ReturnType<typeof createClient>;
 let redisClient: RedisClientInstance | null = null;
 let connectionPromise: Promise<RedisClientInstance> | null = null;
 let lastErrorLog = 0;
-const isTestEnv = process.env.NODE_ENV === "test";
-const defaultRedisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+const defaultRedisUrl = process.env.REDIS_URL!;
 const redisConnectTimeoutMs = 5000;
 const transientRedisErrorPatterns = [
   /ECONNRESET/i,
@@ -21,14 +20,19 @@ const transientRedisErrorPatterns = [
 const isTransientRedisError = (message: string): boolean =>
   transientRedisErrorPatterns.some((pattern) => pattern.test(message));
 
+const isTestEnv = (): boolean =>
+  typeof process.env.JEST_WORKER_ID !== "undefined";
+
+const shouldBypassRedisInTests = (): boolean => isTestEnv();
+
 const logInfo = (...args: unknown[]) => {
-  if (!isTestEnv) {
+  if (!isTestEnv()) {
     console.log(...args);
   }
 };
 
 const logError = (...args: unknown[]) => {
-  if (!isTestEnv) {
+  if (!isTestEnv()) {
     console.error(...args);
   }
 };
@@ -121,6 +125,10 @@ const initializeRedis = async (): Promise<RedisClientInstance> => {
 };
 
 const getRedisClient = async (): Promise<RedisClientInstance | null> => {
+  if (shouldBypassRedisInTests()) {
+    return null;
+  }
+
   if (redisClient?.isReady) {
     return redisClient;
   }

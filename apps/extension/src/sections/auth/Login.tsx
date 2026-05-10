@@ -51,7 +51,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const googleClientIdRaw = import.meta.env.VITE_GOOGLE_CLIENT_ID as
+  const googleClientIdRaw = import.meta.env.VITE_GOOGLE_EXTENSION_CLIENT_ID as
     | string
     | undefined;
   const googleClientId =
