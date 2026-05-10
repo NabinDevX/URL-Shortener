@@ -1,6 +1,3 @@
-# Build Script for URL Shortener APK
-# This script builds the Next.js web app and creates a signed APK for distribution
-
 param(
     [switch]$SkipWeb = $false
 )
