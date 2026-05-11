@@ -5,9 +5,9 @@
     "strictNullChecks": true,
     "declaration": false,
     "declarationMap": false,
+    "baseUrl": ".",
     "paths": {
-      "*": ["./*"],
-      "@/*": ["./app/*"],
+      "@/*": ["./src/*"],
       "@repo/*": ["../../packages/*/src"]
     }
   },

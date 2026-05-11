@@ -4,7 +4,7 @@ import { AuthProvider, ThemeProvider, Toaster } from "@repo/ui";
 import axios from "axios";
 import dynamic from "next/dynamic";
 
-const CapacitorBridge = dynamic(() => import("./components/CapacitorBridge"), {
+const CapacitorBridge = dynamic(() => import("@/components/CapacitorBridge"), {
   ssr: false,
 });
 

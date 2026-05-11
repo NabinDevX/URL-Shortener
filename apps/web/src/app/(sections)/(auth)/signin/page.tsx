@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, Toast } from "@repo/ui";
 import { AxiosError } from "axios";
-import { SocialSigninButtons } from "../../../components/SocialSigninButtons";
+import { SocialSigninButtons } from "@/components/SocialSigninButtons";
 
 const Login = () => {
   const router = useRouter();
