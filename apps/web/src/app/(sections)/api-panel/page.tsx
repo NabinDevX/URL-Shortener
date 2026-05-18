@@ -6,18 +6,22 @@ import Link from "next/link";
 
 type ApiKeyResponse = {
   apiKey?: string;
-  isApiEnabled?: boolean;
-  apiRateLimit?: {
-    usageCount?: number;
-    limit?: number;
-    resetAt?: string;
-  };
+  apiKeyExpiresAt?: string;
   createdAt?: string;
   updatedAt?: string;
 };
 
+type ApiRateLimitResponse = {
+  remaining?: number;
+  used?: number;
+  maxRequests?: number;
+  resetIn?: number;
+  windowInSeconds?: number;
+};
+
 export default function ApiPanel() {
   const [apiData, setApiData] = useState<ApiKeyResponse>({});
+  const [rateLimit, setRateLimit] = useState<ApiRateLimitResponse>({});
   const [message, setMessage] = useState("");
 
   const showMessage = (text: string) => {
@@ -27,10 +31,13 @@ export default function ApiPanel() {
 
   const loadApiData = useCallback(async () => {
     try {
-      const response = await axios.get("/user/api-key", {
-        withCredentials: true,
-      });
-      setApiData(response.data?.data || {});
+      const [apiKeyResponse, rateLimitResponse] = await Promise.all([
+        axios.get("/user/api-key", { withCredentials: true }),
+        axios.get("/user/api-rate-limit", { withCredentials: true }),
+      ]);
+
+      setApiData(apiKeyResponse.data?.data || {});
+      setRateLimit(rateLimitResponse.data?.data || {});
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
       showMessage(
@@ -125,11 +132,7 @@ export default function ApiPanel() {
                 Key Status
               </p>
               <p className="mt-1 text-sm font-bold text-on-surface">
-                {apiData.isApiEnabled !== undefined
-                  ? apiData.isApiEnabled
-                    ? "Active"
-                    : "Disabled"
-                  : "Loading..."}
+                {apiData.apiKey ? "Active" : "Loading..."}
               </p>
             </div>
             <div className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-3">
@@ -137,8 +140,8 @@ export default function ApiPanel() {
                 Rate Limit Usage
               </p>
               <p className="mt-1 text-sm font-bold text-on-surface">
-                {apiData.apiRateLimit
-                  ? `${apiData.apiRateLimit.usageCount ?? 0} / ${apiData.apiRateLimit.limit ?? 0}`
+                {rateLimit.maxRequests !== undefined
+                  ? `${rateLimit.used ?? 0} / ${rateLimit.maxRequests ?? 0}`
                   : "Loading..."}
               </p>
             </div>
@@ -195,7 +198,7 @@ export default function ApiPanel() {
                 Generate Short URL
               </p>
               <pre className="overflow-x-auto rounded-xl bg-black/90 p-4 text-xs text-white">
-                <code>{`curl -X POST "/url/shorten" \\
+                <code>{`curl -X POST "/api/v1/url" \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{"url":"https://example.com"}'`}</code>
@@ -207,7 +210,7 @@ export default function ApiPanel() {
                 Fetch My URLs
               </p>
               <pre className="overflow-x-auto rounded-xl bg-black/90 p-4 text-xs text-white">
-                <code>{`curl -X GET "/url/my-urls?page=1&limit=10" \\
+                <code>{`curl -X GET "/api/v1/url/user/all?page=1&limit=10" \\
   -H "x-api-key: YOUR_API_KEY"`}</code>
               </pre>
             </div>
@@ -217,7 +220,7 @@ export default function ApiPanel() {
                 Get Rate Limit Snapshot
               </p>
               <pre className="overflow-x-auto rounded-xl bg-black/90 p-4 text-xs text-white">
-                <code>{`curl -X GET "/user/api-rate-limit" \\
+                <code>{`curl -X GET "/api/v1/user/api-rate-limit" \\
   -H "x-api-key: YOUR_API_KEY"`}</code>
               </pre>
             </div>

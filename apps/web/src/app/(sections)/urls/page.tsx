@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
-import { ShortUrlQRCode, requestOnce } from "@repo/ui";
+import {
+  DownloadQR,
+  requestOnce,
+  Skeleton,
+  SkeletonCard,
+  SkeletonTableRow,
+  SkeletonText,
+} from "@repo/ui";
 
 export default function UrlsPage() {
   const router = useRouter();
@@ -104,6 +111,8 @@ export default function UrlsPage() {
 
   const handleDownloadSuccess = () =>
     showMessage("QR Code downloaded! 📥", "success");
+
+  const handleQrSaved = () => showMessage("QR generated and saved.", "success");
 
   const handleCreateUrl = async (
     e: React.FormEvent<HTMLFormElement>
@@ -230,12 +239,25 @@ export default function UrlsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mx-auto mb-4" />
-          <p className="text-on-surface-variant text-lg font-semibold">
-            Loading URLs...
-          </p>
+      <div className="mx-auto max-w-7xl space-y-8 p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 lg:col-span-8 glass-card rounded-4xl p-8 shadow-sm border border-white/40">
+            <SkeletonText lines={2} className="mb-6" />
+            <SkeletonCard hasImage={false} />
+          </div>
+          <div className="col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-4xl p-8 shadow-sm">
+            <SkeletonCard hasImage={true} />
+          </div>
+        </div>
+        <div className="bg-surface-container-lowest rounded-4xl overflow-hidden shadow-sm">
+          <div className="px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+            <Skeleton variant="text" height="20px" width="30%" />
+          </div>
+          <div className="divide-y divide-surface-container space-y-4 p-4 sm:p-6 lg:px-8">
+            {[...Array(3)].map((_, i) => (
+              <SkeletonTableRow key={i} columns={3} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -517,10 +539,16 @@ export default function UrlsPage() {
                   {openQrFor === url.shortId && (
                     <div className="mt-4 flex justify-center animate-scale-in">
                       <div className="bg-surface-container-low rounded-2xl p-6 border border-outline-variant/20">
-                        <ShortUrlQRCode
+                        <DownloadQR
                           shortId={url.shortId}
                           size={150}
+                          initiallySaved={Boolean(
+                            url.qrGenerated || url.qrCode
+                          )}
+                          persistToApi={true}
                           onDownloadSuccess={handleDownloadSuccess}
+                          onSaveSuccess={handleQrSaved}
+                          onError={(msg) => showMessage(msg, "error")}
                         />
                       </div>
                     </div>

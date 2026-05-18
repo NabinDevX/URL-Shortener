@@ -59,8 +59,8 @@ const Navbar = ({ userData }: { userData?: any }) => {
               onClick={async () => {
                 try {
                   await logout();
-                } catch {
-                  // ignore
+                } catch (e) {
+                  void e;
                 }
                 void router.replace("/signin/");
               }}

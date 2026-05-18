@@ -31,7 +31,8 @@
     "NEXT_PUBLIC_GOOGLE_ANDROID_CLIENT_ID",
     "VITE_API_PREFIX",
     "VITE_API_BASE_URL",
-    "VITE_GOOGLE_CLIENT_ID"
+    "VITE_GOOGLE_CLIENT_ID",
+    "JEST_WORKER_ID"
   ],
   "tasks": {
     "build": {

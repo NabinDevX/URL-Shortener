@@ -32,8 +32,8 @@ const safeGetLocalStorageItem = (keys: readonly string[]): string => {
         return value;
       }
     }
-  } catch {
-    // ignore
+  } catch (e) {
+    void e;
   }
   return "";
 };
@@ -44,8 +44,8 @@ const safeSetLocalStorageItem = (key: string, value: string): void => {
   }
   try {
     window.localStorage.setItem(key, value);
-  } catch {
-    // ignore
+  } catch (e) {
+    void e;
   }
 };
 
@@ -55,8 +55,8 @@ const safeRemoveLocalStorageItems = (keys: readonly string[]): void => {
   }
   try {
     keys.forEach((key) => window.localStorage.removeItem(key));
-  } catch {
-    // ignore
+  } catch (e) {
+    void e;
   }
 };
 
@@ -131,7 +131,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           REFRESH_TOKEN_STORAGE_KEYS
         );
 
-        // Step 1: Try to fetch current user with existing token
         if (storedAccessToken) {
           const storedAccessTokenKey = storedAccessToken.slice(-12);
           applyAxiosAccessToken(storedAccessToken);
@@ -152,12 +151,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             setUserData(user);
             setIsAuthenticated(true);
             return;
-          } catch {
-            // Token might be expired, try refresh
+          } catch (e) {
+            void e;
           }
         }
 
-        // Step 2: If current-user failed, try refresh-token
         if (storedRefreshToken) {
           try {
             const storedRefreshTokenKey = storedRefreshToken.slice(-12);
@@ -199,7 +197,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               );
             }
 
-            // Step 3: Retry current-user with new token
             try {
               const nextAccessTokenKey = nextAccessToken
                 ? nextAccessToken.slice(-12)
@@ -219,7 +216,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               setUserData(user);
               setIsAuthenticated(true);
             } catch {
-              // Retry failed, user is not authenticated
               setIsAuthenticated(false);
               setUserData(null);
               setAccessToken("");
@@ -230,7 +226,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               ]);
             }
           } catch {
-            // Refresh token failed, clear auth and stay on welcome page
             setIsAuthenticated(false);
             setUserData(null);
             setAccessToken("");
@@ -241,7 +236,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
             ]);
           }
         } else {
-          // No tokens available, user is not authenticated
           setIsAuthenticated(false);
           setUserData(null);
           applyAxiosAccessToken("");
@@ -554,8 +548,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
           ),
         2500
       );
-    } catch {
-      // Error handling on logout
+    } catch (e) {
+      void e;
     }
 
     setUserData(null);
@@ -572,10 +566,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     await checkAuth(false);
   }, [checkAuth]);
 
-  // Run auth check only once on mount
   useEffect(() => {
     if (authCheckDone) {
-      return; // Already checked, don't run again
+      return;
     }
     void performAuthCheck(true);
   }, [authCheckDone, performAuthCheck]);

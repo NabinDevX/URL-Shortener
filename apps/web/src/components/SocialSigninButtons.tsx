@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAuth, Toast } from "@repo/ui";
+import { GoogleButton, useAuth, Toast } from "@repo/ui";
 import { AxiosError } from "axios";
 
 declare global {
@@ -95,9 +95,11 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
     signupWithCapgoGoogle,
   } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [nativeLoginDebug, setNativeLoginDebug] = useState<string | null>(null);
+  const [nativeSigninDebug, setNativeSigninDebug] = useState<string | null>(
+    null
+  );
 
-  const handleWebGoogleLogin = useCallback(async () => {
+  const handleWebGoogleSignin = useCallback(async () => {
     setLoading(true);
     try {
       Toast.loading("Authenticating with Google...");
@@ -244,37 +246,37 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
     onError,
   ]);
 
-  const handleNativeGoogleLogin = useCallback(async () => {
+  const handleNativeGoogleSignin = useCallback(async () => {
     setLoading(true);
     try {
       Toast.loading("Authenticating with Google...");
 
       const { SocialLogin } = await import("@capgo/capacitor-social-login");
 
-      const loginResult = await SocialLogin.login({
+      const signinResult = await SocialLogin.login({
         provider: "google",
         options: { responseType: "id_token" } as any,
       } as any);
 
-      console.debug("[SocialLogin] native login result:", loginResult);
+      console.debug("[SocialLogin] native signin result:", signinResult);
 
       try {
         const debugFlag =
           typeof window !== "undefined" &&
           (window.location.search.includes("debugNative=1") ||
-            window.localStorage.getItem("showNativeLoginDebug") === "1");
+            window.localStorage.getItem("showNativeSigninDebug") === "1");
         if (debugFlag) {
-          setNativeLoginDebug(JSON.stringify(loginResult, null, 2));
+          setNativeSigninDebug(JSON.stringify(signinResult, null, 2));
         }
-      } catch {
-        // ignore
+      } catch (e) {
+        void e;
       }
 
-      if (loginResult.provider !== "google") {
+      if (signinResult.provider !== "google") {
         throw new Error("Unexpected provider response");
       }
 
-      const result: any = loginResult.result;
+      const result: any = signinResult.result;
 
       const idToken = result.idToken ?? result.id_token ?? null;
 
@@ -308,7 +310,7 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
         return;
       }
 
-      await handleWebGoogleLogin();
+      await handleWebGoogleSignin();
       return;
     } catch (error) {
       const isCancellation = (() => {
@@ -334,7 +336,7 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
 
       if (isCancellation) {
         try {
-          await handleWebGoogleLogin();
+          await handleWebGoogleSignin();
           return;
         } catch (webFallbackError) {
           const fallbackMessage =
@@ -367,7 +369,7 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
     signupWithCapgoGoogle,
     loginWithGoogleCode,
     signupWithGoogleCode,
-    handleWebGoogleLogin,
+    handleWebGoogleSignin,
     onSuccess,
     onError,
   ]);
@@ -375,23 +377,21 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
   const handleClick = async () => {
     const isNative = await checkIsNative();
     if (isNative) {
-      await handleNativeGoogleLogin();
+      await handleNativeGoogleSignin();
     } else {
-      await handleWebGoogleLogin();
+      await handleWebGoogleSignin();
     }
   };
 
   return (
     <>
-      <button
-        type="button"
-        disabled={disabled || loading}
+      <GoogleButton
         onClick={handleClick}
-        className={`w-full py-3 px-4 border border-gray-200 rounded-lg font-semibold transition-all hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
-      >
-        {loading ? "Authenticating..." : "Continue with Google"}
-      </button>
-      {nativeLoginDebug && (
+        disabled={disabled}
+        loading={loading}
+        className={className}
+      />
+      {nativeSigninDebug && (
         <div
           style={{
             position: "fixed",
@@ -411,15 +411,15 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
           <div
             style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
           >
-            <strong>Native login debug</strong>
+            <strong>Native signin debug</strong>
             <button
               onClick={() => {
                 try {
-                  window.localStorage.setItem("showNativeLoginDebug", "0");
+                  window.localStorage.setItem("showNativeSigninDebug", "0");
                 } catch {
                   return;
                 }
-                setNativeLoginDebug(null);
+                setNativeSigninDebug(null);
               }}
               style={{
                 background: "transparent",
@@ -431,7 +431,7 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
             </button>
           </div>
           <pre style={{ whiteSpace: "pre-wrap", marginTop: 8 }}>
-            {nativeLoginDebug}
+            {nativeSigninDebug}
           </pre>
         </div>
       )}
@@ -439,23 +439,4 @@ export const GoogleSignInButton: React.FC<SocialLoginButtonProps> = ({
   );
 };
 
-export const SocialSigninButtons: React.FC<SocialLoginButtonProps> = ({
-  onSuccess,
-  onError,
-  isSignup = false,
-  disabled = false,
-  className = "",
-}) => {
-  return (
-    <div className={`space-y-3 ${className}`}>
-      <GoogleSignInButton
-        onSuccess={onSuccess}
-        onError={onError}
-        isSignup={isSignup}
-        disabled={disabled}
-      />
-    </div>
-  );
-};
-
-export default SocialSigninButtons;
+export default GoogleSignInButton;

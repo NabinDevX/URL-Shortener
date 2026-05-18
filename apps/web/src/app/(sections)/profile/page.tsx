@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@repo/ui";
+import { useAuth, Skeleton, SkeletonAvatar, SkeletonCard } from "@repo/ui";
 
 export default function Profile() {
   const [userData, setUserData] = useState({
@@ -33,13 +33,17 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-20">
+      <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mx-auto mb-4" />
-          <p className="text-on-surface-variant text-lg font-semibold">
-            Loading Profile...
-          </p>
+          <SkeletonAvatar size={100} className="mx-auto" />
+          <Skeleton
+            variant="text"
+            width="40%"
+            height="20px"
+            className="mx-auto mt-4"
+          />
         </div>
+        <SkeletonCard hasImage={false} />
       </div>
     );
   }
@@ -126,8 +130,8 @@ export default function Profile() {
           onClick={async () => {
             try {
               await logout();
-            } catch {
-              // ignore
+            } catch (e) {
+              void e;
             }
             void router.replace("/signin/");
           }}

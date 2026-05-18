@@ -279,7 +279,6 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
     void fetchUrls(token);
   }, [token]);
 
-  // React to float-mode changes pushed through chrome.storage.
   useEffect(() => {
     if (!chromeOnChanged) {
       return;
@@ -311,8 +310,6 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
     };
   }, [embedded]);
 
-  // Fallback resync for the page widget so it still appears even if the
-  // storage change event is missed while the popup is open/closing.
   useEffect(() => {
     if (embedded) {
       return;
@@ -349,7 +346,6 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
     };
   }, [embedded]);
 
-  // Persist position to chrome.storage whenever it changes (debounced).
   useEffect(() => {
     if (embedded || !isFloatMode || !position) {
       return;
@@ -550,9 +546,6 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
     };
   }, [embedded, isFloatMode, isMinimized]);
 
-  // Minimize floating widget when user clicks outside its bounding rect.
-  // Using a bounding-rect check (instead of composedPath) is reliable across
-  // Shadow DOM isolation boundaries in Chrome extensions.
   useEffect(() => {
     if (embedded || !isFloatMode || isMinimized) {
       return;
@@ -677,13 +670,13 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
       const data = body?.data || {};
 
       if (!data.accessToken) {
-        throw new Error("Login succeeded but access token is missing");
+        throw new Error("Sign-in succeeded but access token is missing");
       }
 
       setToken(data.accessToken);
       setUser(data.user || null);
       setPassword("");
-      setMessage("Logged in successfully");
+      setMessage("Signed in successfully");
 
       await saveToStorage({
         [tokenKey]: data.accessToken,
@@ -692,7 +685,7 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
 
       await fetchUrls(data.accessToken);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Login failed");
+      setMessage(error instanceof Error ? error.message : "Sign-in failed");
     } finally {
       setLoggingIn(false);
     }
@@ -807,7 +800,6 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
     }
   };
 
-  // Popup shows a minimal "float is active" screen when floating mode is on.
   if (embedded && storageLoaded && isFloatMode) {
     return (
       <div
@@ -902,7 +894,7 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
             {!token ? (
               <>
                 <form className="url-shortener-form" onSubmit={handleLogin}>
-                  <h4>Login</h4>
+                  <h4>Sign in</h4>
                   <input
                     type="email"
                     placeholder="Email"
@@ -918,7 +910,7 @@ export default function ContentPage({ embedded = false }: ContentPageProps) {
                     required
                   />
                   <button type="submit" disabled={loggingIn}>
-                    {loggingIn ? "Logging in..." : "Login"}
+                    {loggingIn ? "Signing in..." : "Sign in"}
                   </button>
                 </form>
 

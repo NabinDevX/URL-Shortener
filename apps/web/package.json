@@ -7,7 +7,7 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "http-server out -p 3000 -c-1",
-    "lint": "eslint --max-warnings 0 . --ignore-pattern android/** --ignore-pattern ios/** --ignore-pattern .next/** --ignore-pattern out/**",
+    "lint": "eslint --max-warnings 0 . --ignore-pattern android/** --ignore-pattern .next/** --ignore-pattern out/**",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {

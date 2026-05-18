@@ -44,7 +44,7 @@ export default function CapacitorBridge() {
             };
 
             await SocialLogin.initialize(initConfig).catch((err: unknown) =>
-              console.warn("Social login initialization skipped:", err)
+              console.warn("Social signin initialization skipped:", err)
             );
           }
 

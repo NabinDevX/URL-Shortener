@@ -11,14 +11,7 @@ export interface ToastOptions {
     | "bottom-right";
 }
 
-/**
- * Toast notification system using react-hot-toast
- * Provides success, error, loading, and custom toasts
- */
 export const Toast = {
-  /**
-   * Show success message
-   */
   success: (message: string, options?: ToastOptions) => {
     return toast.success(message, {
       duration: options?.duration ?? 4000,
@@ -26,9 +19,6 @@ export const Toast = {
     });
   },
 
-  /**
-   * Show error message
-   */
   error: (message: string, options?: ToastOptions) => {
     return toast.error(message, {
       duration: options?.duration ?? 5000,
@@ -36,9 +26,6 @@ export const Toast = {
     });
   },
 
-  /**
-   * Show warning message
-   */
   warning: (message: string, options?: ToastOptions) => {
     return toast(
       () => (
@@ -54,9 +41,6 @@ export const Toast = {
     );
   },
 
-  /**
-   * Show info message
-   */
   info: (message: string, options?: ToastOptions) => {
     return toast(
       () => (
@@ -72,26 +56,17 @@ export const Toast = {
     );
   },
 
-  /**
-   * Show loading toast (returns toast ID for later dismissal)
-   */
   loading: (message: string, options?: ToastOptions) => {
     return toast.loading(message, {
       position: options?.position ?? "bottom-right",
     });
   },
 
-  /**
-   * Update existing toast
-   */
   update: (toastId: string, _options?: unknown) => {
     void _options;
     toast.remove(toastId);
   },
 
-  /**
-   * Dismiss specific toast or all toasts
-   */
   dismiss: (toastId?: string) => {
     if (toastId) {
       toast.dismiss(toastId);
@@ -100,9 +75,6 @@ export const Toast = {
     }
   },
 
-  /**
-   * Promise-based toast (auto-updates based on promise state)
-   */
   promise: <T,>(
     promise: Promise<T>,
     {
@@ -130,9 +102,6 @@ export const Toast = {
     );
   },
 
-  /**
-   * Custom toast
-   */
   custom: (
     render: Parameters<typeof toast.custom>[0],
     options?: ToastOptions
@@ -144,10 +113,6 @@ export const Toast = {
   },
 };
 
-/**
- * Toaster component - place once in your app layout
- * Example: <Toaster />
- */
 export const Toaster = () => (
   <ReactHotToaster
     position="bottom-right"

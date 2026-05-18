@@ -1,8 +1,11 @@
 export { ShowQR } from "./ShowQR";
 export type { ShowQRProps } from "./ShowQR";
 
-export { ShortUrlQRCode } from "./ShortUrlQRCode";
-export type { ShortUrlQRCodeProps } from "./ShortUrlQRCode";
+export { DownloadQR } from "./DownloadQR";
+export type { DownloadQRProps } from "./DownloadQR";
+
+export { Button, GoogleButton } from "./button";
+export type { GoogleButtonProps } from "./button";
 
 // Context exports
 export { AuthProvider, useAuth, ThemeProvider, useTheme } from "./context";
@@ -23,10 +26,3 @@ export {
   SkeletonAvatar,
 } from "./utils/Skeleton";
 export type { SkeletonProps } from "./utils/Skeleton";
-export {
-  LenisScroll,
-  useLenisScroll,
-  scrollToElement,
-  scrollToPosition,
-} from "./utils/LenisScroll";
-export type { LenisOptions } from "./utils/LenisScroll";

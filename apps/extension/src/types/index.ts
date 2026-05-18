@@ -33,6 +33,7 @@ export interface UrlItem {
   isDeleted?: boolean;
   visitHistory?: VisitHistory[];
   qrCode?: string;
+  qrGenerated?: boolean;
   userId?: string;
 }
 

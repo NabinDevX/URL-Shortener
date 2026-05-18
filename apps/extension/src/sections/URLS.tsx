@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ShortUrlQRCode, requestOnce } from "@repo/ui";
+import {
+  DownloadQR,
+  requestOnce,
+  SkeletonCard,
+  SkeletonTableRow,
+} from "@repo/ui";
 import type {
   UrlItem,
   NewUrlForm,
@@ -108,6 +113,10 @@ const URLS = () => {
   const handleDownloadSuccess = (): void => {
     showMessage("QR Code downloaded! 📥", "success");
   };
+
+  const handleQrSaved = (): void => {
+    showMessage("QR generated and saved.", "success");
+  };
   const handleCreateUrl = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -193,7 +202,7 @@ const URLS = () => {
 
         setNewUrl({ url: "", customShortId: "", idLength: 8 });
         setShowCreateForm(false);
-        fetchAllUrls(); // Refresh the list
+        fetchAllUrls();
       }
     } catch (err) {
       const error = err as AxiosErrorResponse;
@@ -239,10 +248,14 @@ const URLS = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">Loading URLs...</p>
+      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] py-12 px-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <SkeletonCard hasImage={false} />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <SkeletonTableRow key={i} columns={3} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -616,10 +629,18 @@ const URLS = () => {
                           </button>
 
                           {openQrFor === url.shortId ? (
-                            <ShortUrlQRCode
+                            <DownloadQR
                               shortId={url.shortId}
                               size={120}
+                              baseUrl="https://urltinier.app"
+                              apiPrefix="/api/v1"
+                              initiallySaved={Boolean(
+                                url.qrGenerated || url.qrCode
+                              )}
+                              persistToApi={true}
                               onDownloadSuccess={handleDownloadSuccess}
+                              onSaveSuccess={handleQrSaved}
+                              onError={(msg) => showMessage(msg, "error")}
                             />
                           ) : null}
                         </div>

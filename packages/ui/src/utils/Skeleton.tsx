@@ -8,10 +8,6 @@ export interface SkeletonProps {
   animation?: "pulse" | "wave" | "none";
 }
 
-/**
- * Skeleton loader component for displaying loading states
- * Replaces old loading patterns with smooth animations
- */
 export const Skeleton: React.FC<SkeletonProps> = ({
   className = "",
   variant = "rectangular",
@@ -48,9 +44,6 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   );
 };
 
-/**
- * Skeleton text component - multiple lines of skeleton
- */
 export const SkeletonText: React.FC<{
   lines?: number;
   className?: string;
@@ -69,9 +62,6 @@ export const SkeletonText: React.FC<{
   );
 };
 
-/**
- * Skeleton card component - common loading pattern
- */
 export const SkeletonCard: React.FC<{
   hasImage?: boolean;
   className?: string;
@@ -87,9 +77,6 @@ export const SkeletonCard: React.FC<{
   );
 };
 
-/**
- * Skeleton table row component
- */
 export const SkeletonTableRow: React.FC<{
   columns?: number;
   className?: string;
@@ -105,9 +92,6 @@ export const SkeletonTableRow: React.FC<{
   );
 };
 
-/**
- * Skeleton avatar component
- */
 export const SkeletonAvatar: React.FC<{
   size?: number;
   className?: string;

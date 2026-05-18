@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "@repo/ui";
+import { GoogleButton, useAuth } from "@repo/ui";
 import { useGoogleLogin } from "@react-oauth/google";
 import type {
   SignupFormData,
@@ -399,16 +399,11 @@ const Signup = () => {
                           : undefined
                       }
                     >
-                      <button
-                        type="button"
+                      <GoogleButton
                         onClick={() => googleSignup()}
                         disabled={googleLoading}
-                        className={`w-full py-3 px-4 border border-gray-200 rounded-lg font-semibold transition-all hover:bg-gray-50 ${
-                          googleLoading ? "opacity-60 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        Continue with Google
-                      </button>
+                        loading={googleLoading}
+                      />
                     </div>
 
                     <div className="flex items-center gap-3 my-5">
@@ -714,16 +709,6 @@ const Signup = () => {
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-4 text-sm text-gray-500">or</span>
               <div className="flex-1 border-t border-gray-300"></div>
-            </div>
-
-            <div className="mt-6 text-center">
-              <Link
-                to="/welcome"
-                className="inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors text-sm font-medium"
-              >
-                <span>←</span>
-                Back to Home
-              </Link>
             </div>
           </div>
         </div>

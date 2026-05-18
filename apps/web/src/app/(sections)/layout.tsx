@@ -1,11 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth, useLenis } from "@repo/ui";
 
-const Sidebar = dynamic(() => import("@/components/Sidebar"), { ssr: false });
+import Sidebar from "@/components/Sidebar";
+
+import dynamic from "next/dynamic";
+
 const MobileBottomNav = dynamic(() => import("@/components/MobileBottomNav"), {
   ssr: false,
 });
@@ -62,25 +64,6 @@ export default function SectionsLayout({
     }
   }, [isAuthenticated, isPublicRoute, loading, normalizedPathname, router]);
 
-  if (loading || isAuthenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-surface">
-        <div className="text-center space-y-4">
-          <div className="relative inline-block">
-            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-primary"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-bold text-primary">URL</span>
-            </div>
-          </div>
-          <div>
-            <p className="text-on-surface text-2xl font-bold">URLTinier</p>
-            <p className="text-on-surface-variant text-lg mt-2">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (isPublicRoute) {
     return <>{children}</>;
   }
@@ -90,11 +73,11 @@ export default function SectionsLayout({
   }
 
   return (
-    <div className="min-h-screen lg:flex" data-shell="app" id="appShell">
+    <div className="min-h-screen" data-shell="app" id="appShell">
       <Sidebar />
 
       <div
-        className="flex min-h-screen min-w-0 flex-1 flex-col"
+        className="flex min-h-screen min-w-0 flex-1 flex-col lg:pl-64"
         id="appShellMain"
       >
         <Header userData={userData} />

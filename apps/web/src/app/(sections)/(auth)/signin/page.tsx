@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, Toast } from "@repo/ui";
 import { AxiosError } from "axios";
-import { SocialSigninButtons } from "@/components/SocialSigninButtons";
+import { GoogleSignInButton } from "@/components/SocialSigninButtons";
 
-const Login = () => {
+const SigninInner = () => {
   const router = useRouter();
   const { login: authLogin } = useAuth();
   const searchParams = useSearchParams();
@@ -75,7 +75,7 @@ const Login = () => {
 
       if (axiosError instanceof AxiosError) {
         const errorMessage =
-          axiosError.response?.data?.message || "Login failed";
+          axiosError.response?.data?.message || "Sign in failed";
 
         if (axiosError.response?.status === 401) {
           Toast.error("Invalid email or password");
@@ -244,7 +244,7 @@ const Login = () => {
                 <span className="text-gray-500 text-sm">OR</span>
                 <div className="h-px bg-gray-200 flex-1" />
               </div>
-              <SocialSigninButtons
+              <GoogleSignInButton
                 onSuccess={() => router.replace("/dashboard")}
                 isSignup={false}
               />
@@ -285,4 +285,10 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default function SigninPage() {
+  return (
+    <Suspense fallback={null}>
+      <SigninInner />
+    </Suspense>
+  );
+}

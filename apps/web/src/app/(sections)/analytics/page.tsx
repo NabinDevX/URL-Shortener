@@ -3,10 +3,53 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { requestOnce } from "@repo/ui";
+import Chart from "chart.js/auto";
+
+type VisitHistory = {
+  timestamp: string;
+  ipAddress?: string;
+  device?: string;
+  country?: string;
+  isReturnVisitor?: boolean;
+};
+
+type UrlRow = {
+  shortId: string;
+  redirectUrl: string;
+  isDeleted?: boolean;
+  totalClicks?: number;
+  visitHistory?: VisitHistory[];
+  createdAt?: string;
+};
+
+type AnalyticsData = {
+  totalClicks: number;
+  activeLinks: number;
+  totalUrls: number;
+  last30DaysClicks: { labels: string[]; values: number[] };
+  radar: { labels: string[]; values: number[] };
+  topUrls: Array<{ shortId: string; redirectUrl: string; clicks: number }>;
+  recentActivity: Array<{
+    shortId: string;
+    redirectUrl: string;
+    totalClicks: number;
+    ipAddress: string;
+    device: string;
+    location: string;
+  }>;
+};
+
+const formatDayLabel = (date: Date): string =>
+  new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
+    date
+  );
+
+const getDeviceLabel = (device?: string): string =>
+  device && device !== "unknown" ? device : "unknown";
 
 export default function Analytics() {
   const [chartMode, setChartMode] = useState<"bar" | "radar">("bar");
-  const [analyticsData, setAnalyticsData] = useState<any>({
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalClicks: 0,
     activeLinks: 0,
     totalUrls: 0,
@@ -18,9 +61,146 @@ export default function Analytics() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<any>(null);
 
+  const buildAnalytics = (urls: UrlRow[]): AnalyticsData => {
+    const normalizedUrls = urls.map((url) => ({
+      ...url,
+      visitHistory: Array.isArray(url.visitHistory) ? url.visitHistory : [],
+    }));
+
+    const allVisits = normalizedUrls.flatMap((url) =>
+      url.visitHistory.map((visit) => ({ ...visit, shortId: url.shortId }))
+    );
+
+    const totalClicks = allVisits.length;
+    const activeLinks = normalizedUrls.filter((url) => !url.isDeleted).length;
+    const totalUrls = normalizedUrls.length;
+
+    const start = new Date();
+    start.setDate(start.getDate() - 29);
+    start.setHours(0, 0, 0, 0);
+
+    const dayKeys: string[] = [];
+    const clickCounts = new Map<string, number>();
+
+    for (let index = 0; index < 30; index += 1) {
+      const day = new Date(start);
+      day.setDate(start.getDate() + index);
+      const key = day.toISOString().slice(0, 10);
+      dayKeys.push(key);
+      clickCounts.set(key, 0);
+    }
+
+    for (const visit of allVisits) {
+      const dayKey = new Date(visit.timestamp).toISOString().slice(0, 10);
+      if (clickCounts.has(dayKey)) {
+        clickCounts.set(dayKey, (clickCounts.get(dayKey) || 0) + 1);
+      }
+    }
+
+    const topUrls = normalizedUrls
+      .map((url) => ({
+        shortId: url.shortId,
+        redirectUrl: url.redirectUrl,
+        clicks: url.visitHistory.length,
+      }))
+      .sort((left, right) => right.clicks - left.clicks)
+      .slice(0, 5);
+
+    const recentActivity = normalizedUrls
+      .map((url) => {
+        const latestVisit =
+          url.visitHistory.length > 0
+            ? url.visitHistory[url.visitHistory.length - 1]
+            : undefined;
+
+        return {
+          shortId: url.shortId,
+          redirectUrl: url.redirectUrl,
+          totalClicks: url.visitHistory.length,
+          ipAddress: latestVisit?.ipAddress || "—",
+          device: getDeviceLabel(latestVisit?.device),
+          location: latestVisit?.country || "Unknown",
+          lastActivityAt: latestVisit?.timestamp
+            ? new Date(latestVisit.timestamp).getTime()
+            : 0,
+        };
+      })
+      .sort((left, right) => {
+        if (right.lastActivityAt !== left.lastActivityAt) {
+          return right.lastActivityAt - left.lastActivityAt;
+        }
+
+        if (right.totalClicks !== left.totalClicks) {
+          return right.totalClicks - left.totalClicks;
+        }
+
+        return left.shortId.localeCompare(right.shortId);
+      })
+      .slice(0, 24)
+      .map((row) => {
+        const cleaned = { ...row } as Record<string, unknown>;
+        delete cleaned.lastActivityAt;
+        return cleaned as AnalyticsData["recentActivity"][number];
+      });
+
+    const uniqueIps = new Set(
+      allVisits.map((visit) => visit.ipAddress).filter(Boolean)
+    ).size;
+    const countries = new Set(
+      allVisits.map((visit) => visit.country).filter(Boolean)
+    ).size;
+    const deviceSet = new Set(
+      allVisits
+        .map((visit) => getDeviceLabel(visit.device))
+        .filter((device) => device !== "unknown")
+    );
+    const returnVisitorCount = allVisits.filter(
+      (visit) => visit.isReturnVisitor
+    ).length;
+    const avgHour = allVisits.length
+      ? allVisits.reduce(
+          (sum, visit) => sum + new Date(visit.timestamp).getHours(),
+          0
+        ) / allVisits.length
+      : 0;
+
+    return {
+      totalClicks,
+      activeLinks,
+      totalUrls,
+      last30DaysClicks: {
+        labels: dayKeys.map((key) =>
+          formatDayLabel(new Date(`${key}T00:00:00`))
+        ),
+        values: dayKeys.map((key) => clickCounts.get(key) || 0),
+      },
+      radar: {
+        labels: [
+          "Total clicks",
+          "Unique IPs",
+          "Country diversity",
+          "Device diversity",
+          "Avg. time",
+          "Return visitors %",
+        ],
+        values: [
+          Math.min(100, Math.round((totalClicks / 1000) * 100)),
+          Math.min(100, uniqueIps * 12),
+          Math.min(100, countries * 20),
+          Math.min(100, deviceSet.size * 33),
+          Math.min(100, Math.round((avgHour / 23) * 100)),
+          totalClicks > 0
+            ? Math.round((returnVisitorCount / totalClicks) * 100)
+            : 0,
+        ],
+      },
+      topUrls,
+      recentActivity,
+    };
+  };
+
   const fetchAnalytics = useCallback(async () => {
     try {
-      // Get all URLs first to calculate analytics
       const urlsResponse = await requestOnce(
         "analytics:urls",
         () =>
@@ -30,46 +210,10 @@ export default function Analytics() {
         2500
       );
 
-      if (!urlsResponse.data?.data?.urls) {
-        return;
-      }
-
-      const urls = urlsResponse.data.data.urls;
-
-      // Calculate analytics from URLs
-      const totalUrls = urls.length;
-      const activeLinks = urls.filter((url: any) => !url.isDeleted).length;
-      const totalClicks = urls.reduce(
-        (sum: number, url: any) => sum + (url.totalClicks || 0),
-        0
-      );
-
-      // Fetch individual analytics for each URL
-      const analyticsPromises = urls
-        .slice(0, 5)
-        .map((url: any) =>
-          axios
-            .get(`/url/analytics/${url.shortId}`, { withCredentials: true })
-            .catch(() => ({ data: { data: { totalClicks: 0 } } }))
-        );
-
-      const analyticsResults = await Promise.all(analyticsPromises);
-      const topUrls = urls.slice(0, 5).map((url: any, index: number) => ({
-        shortId: url.shortId,
-        totalClicks: analyticsResults[index]?.data?.data?.totalClicks || 0,
-      }));
-
-      setAnalyticsData({
-        totalClicks,
-        activeLinks,
-        totalUrls,
-        last30DaysClicks: { labels: [], values: [] },
-        radar: { labels: [], values: [] },
-        topUrls,
-        recentActivity: [],
-      });
-    } catch {
-      // silently fail – page will show defaults
+      const urls: UrlRow[] = urlsResponse.data?.data?.urls || [];
+      setAnalyticsData(buildAnalytics(urls));
+    } catch (e) {
+      void e;
     }
   }, []);
 
@@ -77,11 +221,8 @@ export default function Analytics() {
     void fetchAnalytics();
   }, [fetchAnalytics]);
 
-  // Chart.js rendering
   useEffect(() => {
     if (!canvasRef.current) return;
-    const Chart = (window as any).Chart;
-    if (!Chart) return;
 
     if (chartRef.current) {
       chartRef.current.destroy();
@@ -91,14 +232,8 @@ export default function Analytics() {
     if (!ctx) return;
 
     if (chartMode === "bar") {
-      const labels =
-        analyticsData.last30DaysClicks?.labels?.length > 0
-          ? analyticsData.last30DaysClicks.labels
-          : Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
-      const values =
-        analyticsData.last30DaysClicks?.values?.length > 0
-          ? analyticsData.last30DaysClicks.values
-          : Array.from({ length: 30 }, () => Math.floor(Math.random() * 50));
+      const labels = analyticsData.last30DaysClicks.labels;
+      const values = analyticsData.last30DaysClicks.values;
 
       chartRef.current = new Chart(ctx, {
         type: "bar",
@@ -124,14 +259,8 @@ export default function Analytics() {
         },
       });
     } else {
-      const labels =
-        analyticsData.radar?.labels?.length > 0
-          ? analyticsData.radar.labels
-          : ["Desktop", "Mobile", "Tablet", "Bot", "Other"];
-      const values =
-        analyticsData.radar?.values?.length > 0
-          ? analyticsData.radar.values
-          : [40, 30, 15, 10, 5];
+      const labels = analyticsData.radar.labels;
+      const values = analyticsData.radar.values;
 
       chartRef.current = new Chart(ctx, {
         type: "radar",
@@ -173,7 +302,6 @@ export default function Analytics() {
 
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 intro-reveal">
-      {/* Header Controls */}
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -230,9 +358,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Bento Grid Layout */}
       <div className="grid grid-cols-12 gap-6 mb-8">
-        {/* Main Chart Area */}
         <div className="relative col-span-12 overflow-hidden rounded-[2.5rem] bg-surface-container-low p-6 sm:p-8 lg:p-10">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -272,9 +398,7 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* Sub panels */}
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {/* Radar Metrics */}
             <div className="rounded-4xl border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm">
               <h4 className="mb-4 text-lg font-bold font-headline text-on-surface">
                 Radar Metrics
@@ -303,7 +427,6 @@ export default function Analytics() {
               </div>
             </div>
 
-            {/* Top URLs */}
             <div className="rounded-4xl border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm">
               <h4 className="mb-4 text-lg font-bold font-headline text-on-surface">
                 Top URLs
@@ -339,12 +462,10 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* Decorative blurs */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-tertiary/5 rounded-full blur-[80px] pointer-events-none" />
         </div>
 
-        {/* Recent Activity Table */}
         <div className="col-span-12 overflow-hidden rounded-4xl bg-surface-container-lowest shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-surface-container px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
             <h3 className="font-bold text-lg font-headline">

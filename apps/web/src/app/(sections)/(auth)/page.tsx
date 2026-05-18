@@ -91,8 +91,8 @@ function detectClientPlatform(): {
         platform: platform === "android" ? "android" : "web",
         isNativePlatform: nativePlatform,
       };
-    } catch {
-      // Fall back to browser detection below.
+    } catch (e) {
+      void e;
     }
   }
 
@@ -121,7 +121,6 @@ const Welcome = () => {
   const handleSignIn = () => router.push("/signin/");
 
   const getDownloadButton = () => {
-    // Hide the download CTA when running inside the native Capacitor app
     if (isNativePlatform || !platform) return null;
 
     const buttonClass =

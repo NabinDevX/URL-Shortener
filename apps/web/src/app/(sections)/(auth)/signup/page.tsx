@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@repo/ui";
 import axios, { AxiosError } from "axios";
-import { SocialSigninButtons } from "@/components/SocialSigninButtons";
+import { GoogleSignInButton } from "@/components/SocialSigninButtons";
 
 const Signup = () => {
   const router = useRouter();
@@ -539,7 +539,7 @@ const Signup = () => {
                       <div className="h-px bg-gray-200 flex-1" />
                     </div>
 
-                    <SocialSigninButtons
+                    <GoogleSignInButton
                       onSuccess={() => router.replace("/dashboard")}
                       isSignup={true}
                     />

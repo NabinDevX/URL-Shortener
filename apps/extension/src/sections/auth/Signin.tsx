@@ -1,47 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@repo/ui";
+import { GoogleButton, useAuth } from "@repo/ui";
 import { useGoogleLogin } from "@react-oauth/google";
 import type { AxiosErrorResponse } from "@/types";
 
-const GoogleCodeLoginButton = ({
-  disabled,
-  onCode,
-  onError,
-}: {
-  disabled: boolean;
-  onCode: (code: string) => void;
-  onError: () => void;
-}) => {
-  const googleLogin = useGoogleLogin({
-    flow: "auth-code",
-    onSuccess: (codeResponse) => {
-      if (codeResponse.code) {
-        onCode(codeResponse.code);
-      } else {
-        onError();
-      }
-    },
-    onError,
-  });
-
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => googleLogin()}
-      className={`w-full py-2.5 px-4 border border-gray-200 rounded-lg font-semibold transition-all hover:bg-gray-50 text-sm ${
-        disabled ? "opacity-60 cursor-not-allowed" : ""
-      }`}
-    >
-      Continue with Google
-    </button>
-  );
-};
-
-const Login = () => {
+const Signin = () => {
   const navigate = useNavigate();
-  const { login: authLogin, loginWithGoogleCode } = useAuth();
+  const { login: authSignin, loginWithGoogleCode } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -50,6 +15,33 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  const googleSignin = useGoogleLogin({
+    flow: "auth-code",
+    onSuccess: async (codeResponse) => {
+      if (!codeResponse.code) {
+        setErrors({ general: "Google authentication failed" });
+        return;
+      }
+
+      setGoogleLoading(true);
+      setErrors({});
+      try {
+        await loginWithGoogleCode(codeResponse.code);
+        navigate("/dashboard", { replace: true });
+      } catch (err: unknown) {
+        const message =
+          (err as AxiosErrorResponse)?.response?.data?.message ||
+          "Google sign in failed";
+        setErrors({ general: message });
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setErrors({ general: "Google sign in failed" });
+    },
+  });
 
   const googleClientIdRaw = import.meta.env.VITE_GOOGLE_EXTENSION_CLIENT_ID as
     | string
@@ -105,14 +97,14 @@ const Login = () => {
     setErrors({});
 
     try {
-      await authLogin(formData.email, formData.password);
+      await authSignin(formData.email, formData.password);
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
-      console.error("❌ Login error:", err);
+      console.error("❌ Sign-in error:", err);
       const error = err as AxiosErrorResponse;
 
       if (error.response) {
-        const errorMessage = error.response.data?.message || "Login failed";
+        const errorMessage = error.response.data?.message || "Sign-in failed";
 
         if (error.response.status === 401) {
           setErrors({
@@ -141,30 +133,6 @@ const Login = () => {
     }
   };
 
-  const handleGoogleCode = async (code: string) => {
-    if (!code) {
-      setErrors({ general: "Google sign-in failed. Missing code." });
-      return;
-    }
-
-    setGoogleLoading(true);
-    setErrors({});
-
-    try {
-      await loginWithGoogleCode(code);
-      navigate("/dashboard", { replace: true });
-    } catch (err: unknown) {
-      console.error("❌ Google login error:", err);
-      const error = err as AxiosErrorResponse;
-
-      const errorMessage =
-        error.response?.data?.message || error.message || "Google login failed";
-      setErrors({ general: errorMessage });
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   const openWebApp = () => {
     window.open("https://urltinier.app/signup", "_blank");
   };
@@ -173,7 +141,6 @@ const Login = () => {
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-4 overflow-y-auto">
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {}
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-3xl">🔗</span>
@@ -184,7 +151,6 @@ const Login = () => {
             </p>
           </div>
 
-          {}
           <div className="px-6 py-6">
             {errors.general && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -286,7 +252,7 @@ const Login = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    Signing In...
+                    Signing in...
                   </span>
                 ) : (
                   "Sign In"
@@ -306,18 +272,15 @@ const Login = () => {
                     googleLoading ? "opacity-60 pointer-events-none" : ""
                   }
                 >
-                  <GoogleCodeLoginButton
+                  <GoogleButton
+                    onClick={() => googleSignin()}
                     disabled={googleLoading}
-                    onCode={handleGoogleCode}
-                    onError={() =>
-                      setErrors({ general: "Google sign-in failed" })
-                    }
+                    loading={googleLoading}
                   />
                 </div>
               </div>
             ) : null}
 
-            {}
             <div className="mt-4 text-center">
               <p className="text-gray-600 text-xs">
                 Don't have an account?{" "}
@@ -332,7 +295,6 @@ const Login = () => {
           </div>
         </div>
 
-        {}
         <div className="mt-4 flex items-center justify-center gap-2 text-white text-xs">
           <span className="text-green-300">🔒</span>
           <span>Secure SSL Connection</span>
@@ -342,4 +304,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signin;

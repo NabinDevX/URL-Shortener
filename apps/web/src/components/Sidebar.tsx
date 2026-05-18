@@ -23,9 +23,8 @@ export default function Sidebar() {
   return (
     <aside
       id="appSidebar"
-      className="group hidden flex-col gap-2 overflow-y-auto border-r border-slate-200 bg-slate-50 p-3 dark:border-outline-variant dark:bg-surface-container-low lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:p-4"
+      className="group hidden flex-col gap-2 overflow-y-auto border-r border-slate-200 bg-slate-50 p-3 dark:border-outline-variant dark:bg-surface-container-low lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:h-screen lg:w-64 lg:p-4"
     >
-      {/* Brand */}
       <div className="mb-6 px-1 lg:mb-8 lg:px-2">
         <div className="sidebar-header-row flex items-center justify-between gap-2">
           <div className="sidebar-brand-wrap flex min-w-0 items-center gap-3">
@@ -42,7 +41,6 @@ export default function Sidebar() {
         </p>
       </div>
 
-      {/* Nav Links */}
       <nav className="flex-1 space-y-1">
         {navLinks.map((item) => (
           <Link
@@ -60,9 +58,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Bottom Section */}
       <div className="mt-auto space-y-4 border-t border-slate-200 pt-4 pl-1 pr-2 dark:border-outline-variant">
-        {/* Plan Card */}
         <div className="sidebar-label hidden rounded-xl bg-indigo-600 p-4 text-white dark:bg-primary hover-float lg:block">
           <p className="mb-1 text-xs font-bold opacity-80">CURRENT PLAN</p>
           <p className="font-headline text-lg font-bold">Pro Plan</p>
@@ -91,8 +87,8 @@ export default function Sidebar() {
             onClick={async () => {
               try {
                 await logout();
-              } catch {
-                // ignore
+              } catch (e) {
+                void e;
               }
               void router.replace("/signin/");
             }}

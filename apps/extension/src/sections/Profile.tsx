@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "@repo/ui";
+import { useAuth, Skeleton, SkeletonCard, SkeletonAvatar } from "@repo/ui";
 import type {
   Message,
   MessageType,
@@ -233,12 +233,18 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl p-12 shadow-2xl">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#667eea] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">
-            Loading Profile...
-          </p>
+      <div className="min-h-screen bg-linear-to-br from-[#667eea] to-[#764ba2] py-12 px-4">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="text-center">
+            <SkeletonAvatar size={100} className="mx-auto" />
+            <Skeleton
+              variant="text"
+              width="40%"
+              height="20px"
+              className="mx-auto mt-4"
+            />
+          </div>
+          <SkeletonCard hasImage={false} />
         </div>
       </div>
     );

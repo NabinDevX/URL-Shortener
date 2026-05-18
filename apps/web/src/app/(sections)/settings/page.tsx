@@ -1,29 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 
 export default function Settings() {
   const [message, setMessage] = useState("");
-  const [account, setAccount] = useState({ name: "", email: "" });
+  const [account, setAccount] = useState({ name: "", email: "", otp: "" });
   const [password, setPassword] = useState({
     oldPassword: "",
     newPassword: "",
     confirmNewPassword: "",
   });
   const [theme, setTheme] = useState<"dark" | "system" | "light">("system");
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const showMessage = (text: string) => {
     setMessage(text);
     setTimeout(() => setMessage(""), 4000);
   };
 
+  useEffect(() => {
+    let cancelled = false;
+    const loadUser = async () => {
+      try {
+        const res = await axios.get("/user/current-user", {
+          withCredentials: true,
+        });
+        const user = res?.data?.data?.user;
+        if (!cancelled && user) {
+          setAccount((prev) => ({
+            ...prev,
+            name: user.name ?? "",
+            email: user.email ?? "",
+          }));
+        }
+      } catch (e) {
+        void e;
+      } finally {
+        if (!cancelled) setLoadingUser(false);
+      }
+    };
+
+    void loadUser();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleAccountUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await axios.patch(
         "/user/update-account",
-        { name: account.name, email: account.email, otp: "000000" },
+        {
+          name: account.name,
+          email: account.email,
+          otp: account.otp.trim() ? account.otp.trim() : undefined,
+        },
         { withCredentials: true }
       );
       showMessage("Account update request submitted.");
@@ -113,6 +146,7 @@ export default function Settings() {
                   }
                   placeholder="Your name"
                   type="text"
+                  disabled={loadingUser}
                 />
               </div>
               <div>
@@ -131,11 +165,33 @@ export default function Settings() {
                   }
                   placeholder="you@example.com"
                   type="email"
+                  disabled={loadingUser}
+                />
+              </div>
+              <div>
+                <label
+                  className="text-xs font-bold uppercase tracking-wider text-on-surface-variant"
+                  htmlFor="accountOtp"
+                >
+                  OTP (only if required)
+                </label>
+                <input
+                  className="mt-2 w-full rounded-xl border border-outline-variant/40 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  id="accountOtp"
+                  value={account.otp}
+                  onChange={(e) =>
+                    setAccount((prev) => ({ ...prev, otp: e.target.value }))
+                  }
+                  placeholder="6-digit code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  disabled={loadingUser}
                 />
               </div>
               <button
                 className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold hover:bg-primary-container transition-colors"
                 type="submit"
+                disabled={loadingUser}
               >
                 Save Account Changes
               </button>
